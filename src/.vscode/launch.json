@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             //"program": "${fileDirname}/bin/${fileBasenameNoExtension}",
-            "program": "${fileDirname}/bin/prime17",
+            "program": "${fileDirname}/../bin/prime17",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

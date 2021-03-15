@@ -2,7 +2,6 @@
 #define PRIMESRANGE_HPP
 
 #include <iostream>
-// #include <bits/stdint-uintn.h>
 
 const std::string StorageDir = "PrimesStorage"; 
 

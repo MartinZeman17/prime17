@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 
-
 long double BitRange::BitRange2BitCond(const int BitCond1, const int BitCond2, const int BitEnd, const NoPrimesIntFuncT funct)
 {
   long double ret = 0;

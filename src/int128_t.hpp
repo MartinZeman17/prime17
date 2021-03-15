@@ -4,8 +4,7 @@
 ///
 /// Copyright (C) 2018 Kim Walisch, <kim.walisch@gmail.com>
 ///
-/// This file is distributed under the BSD License. See the COPYING
-/// file in the top level directory.
+/// This file is distributed under the BSD License.
 ///
 
 #ifndef INT128_T_HPP

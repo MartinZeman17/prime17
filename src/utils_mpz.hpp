@@ -64,7 +64,7 @@ namespace utils_mpz {
         mpz_export( &ret, &WordsReturned, 1, sizeof(T), 0, 0, op);
         if (WordsReturned!=1) {
             const std::string C_Msg("Fatal error in mpz_get: number to read does not fit in. Mission aborted!");
-            cout << C_Msg << endl;
+            std::cout << C_Msg << std::endl;
             throw(C_Msg);   
         }
         return ret;   

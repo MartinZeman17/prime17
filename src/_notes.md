@@ -38,6 +38,7 @@ Tests:
 Issues:
 - libcurl global_init není thread safe
 - statický linking gmp a chyba v gcc
+- Libcurl: curl https://prime17.000webhostapp.com/completed.php -v -o internet_test.txt
 
 Links:
 https://prime17.000webhostapp.com/

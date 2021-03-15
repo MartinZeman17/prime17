@@ -34,6 +34,9 @@ Certificates
 Adding execute right under Linux:
 - chmod a+rx my-script.sh
 
+Counting number of lines:
+- cat */*.c */*.cpp */*.hpp */*.sql */*php */*.txt | wc -l
+
 Links:
 - Readme in GoogleDocs https://docs.google.com/document/d/1zrb4HBXrz3D-NUTpIV1X1VHL79Y44St39ds0p36apJ4/edit
 

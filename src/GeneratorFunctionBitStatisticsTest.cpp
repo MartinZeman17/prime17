@@ -2,8 +2,10 @@
 #include "SieveGenerator.hpp"
 
 #include <iostream>
-// #include <fstream>B
-
+#include <string>
+#include <cstring>
+#include <chrono>
+#include <thread>
 
 #ifdef __MINGW64__
 #include <json/json.h>
@@ -11,15 +13,6 @@
 #include <jsoncpp/json/json.h>
 #endif
 
-
-#include <string>
-#include <cstring>
-
-#include <chrono>
-#include <thread>
-// #include <curl/curl.h>
-
-// #include "WebService.hpp"
 
 using std::endl;
 using std::cout;

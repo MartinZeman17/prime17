@@ -4,10 +4,6 @@
 #include <iostream>
 #include <string>
 
-using std::endl;
-using std::cout;
-
-
 class WebService {
     private:
     const std::string C_NoInternet{"Internet connection is not available, however my creator wishes me to be be resilient and versatile. If I'm bothering you, just kill me. Ouch :-("};

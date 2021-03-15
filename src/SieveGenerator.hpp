@@ -4,11 +4,12 @@
     Sieve stops when generator function returns non zero
 */
 
-#ifndef __SIEVEGENERATOR_HPP
-#define __SIEVEGENERATOR_HPP
+#ifndef SIEVEGENERATOR_HPP
+#define SIEVEGENERATOR_HPP
 
 #include "int128_t.hpp"
 #include "GeneratorFunction.hpp"
+#include "Log.hpp"
 
 using namespace primecount;
 
@@ -38,15 +39,23 @@ class SieveGenerator {
     static uint32_t p_Primorial;  //
     static std::mutex p_TestArray_mutex;
     void Constructor(unsigned int MaxPrime);
+    void PrintProgress(const unsigned int &PId, const long double &Percent, const long double &MinTillEnd) const;
     T WorkMT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract> & GF, const std::string PId);
 
     T _kp;
     std::mutex _kp_mutex;
-    double _Percent;
+    
+    long double _Percent;
     std::mutex _Percent_mutex;
+    
     std::mutex _cout_mutex;
 
+    std::chrono::time_point<std::chrono::high_resolution_clock> _StartTime;
+    // std::mutex _StartTime_mutex;
+
     unsigned int _Threads;
+    unsigned int _ncursesY;
+    unsigned int _ncursesX;
 
     public:
     //ToDo can be static??? Class must be initialized first and work function must be ready for reentrancy. I will let it be for the time being

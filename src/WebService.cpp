@@ -1,4 +1,7 @@
 #include "WebService.hpp"
+#include "Log.hpp"
+
+
 #include <iostream>
 // #include <fstream>B
 
@@ -10,8 +13,6 @@
 #include <curl/curl.h>
 // #include <stdbool.h>
 
-using std::endl;
-using std::cout;
 
 size_t WebService::WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -38,20 +39,29 @@ size_t WebService::WriteCallback(void *contents, size_t size, size_t nmemb, void
 //         res = curl_easy_perform(curl);
 //         curl_easy_cleanup(curl);
 //         fclose(fp);
-//         std::cout << res << std::endl;
+//         std::Log::out() << res << std::"\n";
 //     }
 // }
 
 
 std::string WebService::WebPost(const char url[], std::string &PostString){
     CURLcode res;
+    // endwin();
     std::string readBuffer("");
     do{
         CURL *curl;
         curl_global_init(CURL_GLOBAL_ALL);
         curl = curl_easy_init();
+
+        // curl_version_info_data *d = curl_version_info(CURLVERSION_NOW);
+        // std::cout << d->version << "\n"; //Ubuntu 20 7.68.0
+        
         if (curl){
+            // https://prime17.000webhostapp.com/index.html
             curl_easy_setopt(curl, CURLOPT_URL, url);
+            // curl_easy_setopt(curl, CURLOPT_URL, "https://cuni.cz/UK-1.html");
+
+            // curl_easy_setopt(curl, CURsLOPT_VERBOSE, 1L);
 
             if (_SpecialCommunication==HTTP_SpecialCommunication::UseNativeCA) {
                 #ifdef __MINGW64__
@@ -89,8 +99,8 @@ std::string WebService::WebPost(const char url[], std::string &PostString){
                 readBuffer = "";
                 
                 if (res != CURLE_SSL_CACERT_BADFILE || _SpecialCommunication==HTTP_SpecialCommunication::TurnOffSSL) {
-                    cout << "libcurl: " << res << ": " << errbuf << endl;            
-                    cout << C_NoInternet << endl;
+                    Log::out() << "libcurl: " << res << ": " << errbuf << "\n";            
+                    Log::out() << C_NoInternet << "\n";
                 }
                 if (res != CURLE_SSL_CACERT_BADFILE) std::this_thread::sleep_for(std::chrono::milliseconds(5000));
             }
@@ -117,7 +127,7 @@ WebService::WebService(){
         _SpecialCommunication = HTTP_SpecialCommunication::UseNativeCA;
         WebInput = WebPost(url, GetWorkPostString);
         if (!WebInput.empty()) {
-            cout << "libcurl using the operating system's native CA store for certificate verification. Works only on Windows when built to use OpenSSL. This option is experimental and behavior is subject to change";
+            Log::out() << "libcurl using the operating system's native CA store for certificate verification. Works only on Windows when built to use OpenSSL. This option is experimental and behavior is subject to change";
             _Initialized=true;
             return;
         }
@@ -125,7 +135,7 @@ WebService::WebService(){
         _SpecialCommunication = HTTP_SpecialCommunication::UseLocalCertificate;
         WebInput = WebPost(url, GetWorkPostString);
         if (!WebInput.empty()) {
-            cout << "libcurl using local certificate";
+            Log::out() << "libcurl using local certificate";
             _Initialized=true;
             return;
         }
@@ -133,12 +143,12 @@ WebService::WebService(){
         _SpecialCommunication = HTTP_SpecialCommunication::TurnOffSSL;
         WebInput = WebPost(url, GetWorkPostString);
         if (!WebInput.empty()) {
-            cout << "No certificate available. I feel depply sorry for turnig off SSL..." << endl;
+            Log::out() << "No certificate available. I feel depply sorry for turnig off SSL..." << "\n";
             _Initialized=true;
             return;
         }
         _SpecialCommunication = HTTP_SpecialCommunication::Failure;
-        cout << C_NoInternet << endl;
+        Log::out() << C_NoInternet << "\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     } while (_SpecialCommunication == HTTP_SpecialCommunication::Failure);
 }
@@ -165,8 +175,8 @@ WebService::WebService(){
 //         }
 
 //         curl_easy_cleanup(curl);
-//         // std::cout << res << std::endl;
-//         std::cout << readBuffer << std::endl;
+//         // std::Log::out() << res << std::"\n";
+//         std::Log::out() << readBuffer << std::"\n";
 //     }
 //     return readBuffer;
 // }

@@ -16,9 +16,6 @@
 #include <string>
 
 
-using std::endl;
-using std::cout;
-
 
 std::string WebWork::PrepareWebPostString(WebGetWork &GetWork, GeneratorFunctionBitStatistics & BS){
     std::string post ("work=");
@@ -56,8 +53,8 @@ WebGetWork WebWork::ParseJsonNewWork(const std::string &JSON){
         ret.ParsedOK = true;
     }  catch (const std::exception& e){
         ret.ParsedOK = false;
-        cout << "Error parsing JSON: ";
-        cout << JSON << endl;
+        Log::out() << "Error parsing JSON: ";
+        Log::out() << JSON << "\n";
         return ret;
     }
     return ret;
@@ -78,12 +75,12 @@ WebGetWork WebWork::GetWebWork(WorkerStruct &w){
         } while (WebInput.empty());  
         std::string WebOutput = web.HTMLFindOutput(WebInput);
         if (WebOutput.empty()) {
-        cout <<  "WebOutput is missing: " << WebInput << endl;
+        Log::out() <<  "WebOutput is missing: " << WebInput << "\n";
         } else {
             try {
                 GetWork = ParseJsonNewWork(WebOutput);
             } catch (const std::exception& e){
-                cout << "Error parsing JSON" << endl;
+                Log::out() << "Error parsing JSON" << "\n";
             }
         }
         if (!GetWork.ParsedOK) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
@@ -93,7 +90,7 @@ WebGetWork WebWork::GetWebWork(WorkerStruct &w){
 
 void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
 
-    cout << "Bit statistics for power: " << GetWork.c_power2 << " Offset Begin: " << GetWork.new_begin << " Offset End: " << GetWork.new_end << endl;
+    Log::out() << "Bit statistics for power: " << GetWork.c_power2 << " Offset Begin: " << GetWork.new_begin << " Offset End: " << GetWork.new_end << "\n";
     if (GetWork.c_power2 <= 63) {
         GeneratorFunctionBitStatistics BSMT(GetWork.c_power2);
         SieveGenerator<unsigned long long> Sieve(C_SieveGeneratorDefaultMaxPrime);
@@ -108,20 +105,20 @@ void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
         // GetWebNewWorkHTMLPage();
         const char url[] = "https://prime17.000webhostapp.com/post_work.php";
         std::string PostString = PrepareWebPostString(GetWork, BSMT);
-        cout << PostString << endl;
+        Log::out() << PostString << "\n";
         std::string WebResponse = web.WebPost(url, PostString);
-        // cout << WebResponse << endl;
-        cout << web.HTMLFindOutput(WebResponse) << endl;
+        // Log::out() << WebResponse << "\n";
+        Log::out() << web.HTMLFindOutput(WebResponse) << "\n";
 
     } else {
-        cout << "128 bit integers not ready yet, but it should be quite an easy task ..." << endl;
+        Log::out() << "128 bit integers not ready yet, but it should be quite an easy task ..." << "\n";
         // GeneratorFunctionBitStatistics BSMT(GetWork.c_power2);
         // SieveGenerator<uint128_t> Sieve(C_SieveGeneratorDefaultMaxPrime);
     }
 }
 
 void WebWork::WebBitStatisticsWork(WorkerStruct &w) {
-    cout << endl;
+    Log::out() << "\n";
     WebGetWork GetWork = GetWebWork(w);
     ProcessWebWork(GetWork, w);
     w.LoadThreads();

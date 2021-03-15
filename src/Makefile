@@ -8,10 +8,10 @@ BIN := $(BINDIR)prime17
 # BIN := $(BINDIR)prime17
 
 # relase version
-CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3
+# CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3
 
 # debug version
-# CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations
+CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations
 # -fsanitize=address
 
 
@@ -82,7 +82,7 @@ CXXFLAGS := -std=c++17
 # C/C++ flags
 
 # linker libs
-LDLIBS := -lgmp -lstdc++fs -lpthread -lcurl -ljsoncpp
+LDLIBS := -lgmp -lstdc++fs -lpthread -lcurl -ljsoncpp -lncurses
 
 # linker flags
 # static linking improves performance of Miller-Rabin test by ~2%
