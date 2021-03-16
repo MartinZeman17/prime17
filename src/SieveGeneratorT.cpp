@@ -253,8 +253,8 @@ void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double
     row = 0 + PId;
 
     std::stringstream RowMsg;
-    RowMsg << PId << ": " ;
-    int C_ProgressBarCnt = cols -20;
+    RowMsg << PId << ":" ;
+    int C_ProgressBarCnt = cols - 20;
     unsigned int Chars = (unsigned int) ((Percent * C_ProgressBarCnt) / 100.0);
     for(unsigned int i = 0; i< Chars; i++){
         RowMsg << "#";
@@ -262,8 +262,26 @@ void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double
     for(unsigned int i = 0; i< C_ProgressBarCnt - Chars; i++){
         RowMsg << "_";
     }
+
+    std::stringstream Aux;
+    Aux.precision(1);
+    // Aux << std::fixed;
+    Aux << fixed;
+    Aux << Percent;
+
+    if (Aux.tellp() == 3){
+        RowMsg << " ";    
+    }
+    Aux << Percent;
+    // Aux >> RowMsg;
+    // RowMsg << Aux;
+    RowMsg << Aux.str();
+    Log::out() << Aux.str();
+
+
     RowMsg.precision(1);
-    RowMsg << " " << fixed << Percent << "% " << MinTillEnd << " m";
+    RowMsg << " " << fixed;
+    RowMsg <<  "%% " << MinTillEnd << " m ";
 
     {
         // const std::lock_guard<std::mutex> lock(_cout_mutex);

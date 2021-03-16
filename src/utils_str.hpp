@@ -3,6 +3,11 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>  
+
+#include <fstream>
+
+
 
 using std::string;
 
@@ -37,6 +42,16 @@ namespace utils_str{
     while (next != Container::value_type::npos);
     return result;
   }
+
+  // string FormatNumber(double Input, unsigned int StrLen, unsigned int Precision){
+
+  //   std::stringstream Aux;
+  //   Aux.precision(Precision);
+  //   Aux << std::fixed;
+  //   Aux << Input;
+
+
+  // }
 
 
   string string_replace(string src, string const& target, string const& repl);

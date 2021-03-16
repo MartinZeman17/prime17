@@ -1,19 +1,18 @@
 #https://gist.github.com/maxtruxa/4b3929e118914ccef057f8a05c614b0f
 #linking was not working due to bad order of parameters for g++
 
+# relase version
+CPPFL-AGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3
+
+# debug version
+# CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations
+# -fsanitize=address
+
 # output binary dir
 BINDIR := ../bin/
 # output binary 
 BIN := $(BINDIR)prime17
 # BIN := $(BINDIR)prime17
-
-# relase version
-# CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3
-
-# debug version
-CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations
-# -fsanitize=address
-
 
 # source files
 SRCS := \

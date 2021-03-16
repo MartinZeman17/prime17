@@ -89,11 +89,12 @@ class Log final: public Singleton<Log> {
         refresh();
         win_left = newwin(LINES, width_left, 0, 0);
         // box(win_left, 0 , 0);		/* 0, 0 gives default characters for the vertical and horizontal  lines			*/
-	    wborder(win_left, ' ', '|', ' ',' ', ' ', ' ', ' ', ' ');
+	    // wborder(win_left, ' ', '|', ' ',' ', ' ', ' ', ' ', ' ');
         wrefresh(win_left);
 
         win_right = newwin(LINES, COLS - width_left + 1, 0, width_left);
-        box(win_right, 0 , 0);
+        // box(win_right, 0 , 0);
+        wborder(win_right, '|', ' ', ' ',' ', '|', ' ', '|', ' ');
         wrefresh(win_right);
 
     }
