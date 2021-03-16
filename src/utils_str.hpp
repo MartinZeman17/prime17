@@ -43,16 +43,22 @@ namespace utils_str{
     return result;
   }
 
-  // string FormatNumber(double Input, unsigned int StrLen, unsigned int Precision){
+  // std::string FormatNumber(T Input, unsigned int StrLen, unsigned int Precision)
+  
+  template <typename T>
+  std::string FormatNumber(T Input, unsigned int StrLen, unsigned int Precision){
+    std::stringstream Aux;
+    Aux.precision(Precision);
+    Aux << std::fixed;
+    Aux << Input;
 
-  //   std::stringstream Aux;
-  //   Aux.precision(Precision);
-  //   Aux << std::fixed;
-  //   Aux << Input;
-
-
-  // }
-
+    long long filler = StrLen-Aux.tellp();
+    if (filler<0) filler = 0;
+    std::string res(" ", filler);
+    res.append(Aux.str());
+    return res;
+  }
+  
 
   string string_replace(string src, string const& target, string const& repl);
   

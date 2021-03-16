@@ -29,3 +29,17 @@ std::string utils_str::string_replace(string src, string const& target, string c
     }
     return src;
 }
+
+// template <typename T>
+// std::string  utils_str::FormatNumber(T Input, unsigned int StrLen, unsigned int Precision){
+//     std::stringstream Aux;
+//     Aux.precision(Precision);
+//     Aux << std::fixed;
+//     Aux << Input;
+
+//     long long filler = StrLen-Aux.tellp();
+//     if (filler<0) filler = 0;
+//     std::string res(" ", filler);
+//     res.append(Aux.str());
+//     return res;
+//   }

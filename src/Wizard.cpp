@@ -16,8 +16,6 @@
 
 
 namespace fs = std::filesystem;
-using std::endl;
-using std::cout;
 using std::string;
 using std::to_string;
 using std::vector;
@@ -33,46 +31,49 @@ namespace Wizard {
         std::string WebResponse = web.WebPost(url, PostString);
         if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
-        // cout <<WebResponse << endl;
+        // Log::out() <<WebResponse << "\n";
         WebResponse=web.HTMLFindOutput(WebResponse);
-        // cout << WebResponse <<endl;
+        // Log::out() << WebResponse <<"\n";
         Json::Value root = utils::parseJsonStr(WebResponse);
         std::vector<WorkerStruct> workers;
         WorkerStruct::JsonWorkersToArr(root, workers);
         
         std::string UserName("");
         if (workers.size()==0){
-            constexpr std::string_view C_InputUserName = "Wow, a new contributor! Nice to meet you. I know it is a pure charity so thank you very much. What is your name?";  
-            cout << C_InputUserName << endl;
-            getline(std::cin, UserName);
+            constexpr std::string_view C_InputUserName = "\nWow, a new contributor! Nice to meet you.\nI know it is a pure charity so thank you very much.\nWhat is your name?";  
+            Log::out() << C_InputUserName << "\n";
+            // getline(std::cin, UserName);
+            UserName = Log::out().getlineLeft();
             utils_str::string_replace(UserName, ",", "");
         }
 
         if (workers.size()>0){
             UserName = workers[0].u_name;
             constexpr std::string_view C_InputSelectWorker = "Are you reinstalling one of the following computers(s)?\n"
-                "If so, please enter the computer name or its id. Or if this is a new machine that I do not know yet, tell me its name please.";  
-            cout << C_InputSelectWorker << endl;
-            cout << "id" << "\t" << "computer" << "\t" << "YYYY-MM-DD HH:MM:SS" << endl;
+                "If so, please enter the computer name or its id.\nOr if this is a new machine that I do not know yet, please tell me its name.\n";  
+            Log::out() << C_InputSelectWorker << "\n";
+            Log::out() << "id" << "\t" << "computer" << "\t" << "YYYY-MM-DD HH:MM:SS" << "\n";
             for (auto &w : workers){
-                cout << w.worker_id << "\t" << w.w_name << "\t" << w.w_registered << endl;
+                Log::out() << w.worker_id << "\t" << w.w_name << "\t" << w.w_registered << "\n";
             }
         } else {
-            constexpr std::string_view C_InputNewWorker = "Let us measure the performance of different computers (workers). \n"
-                "If you plan to have just one worker (which is perfectly fine) you may leave it blank, I will use your id/mail instead. \n"
+            constexpr std::string_view C_InputNewWorker = "\nLet us measure the performance of different computers (workers). \n"
+                "If you plan to have just one worker (which is perfectly fine) you may leave it blank, \nI will use your id/mail instead. \n"
                 "So how do you call this computer?";        
-            cout << C_InputNewWorker << endl;
+            Log::out() << C_InputNewWorker << "\n";
         }
         std::string SelectedWorkerInput;
-        getline(std::cin, SelectedWorkerInput);
+        // getline(std::cin, SelectedWorkerInput);
+        SelectedWorkerInput = Log::out().getlineLeft();
         if (SelectedWorkerInput.empty()) SelectedWorkerInput = email;
-        utils_str::string_replace(SelectedWorkerInput, ",", "");
+        utils_str::string_replace(SelectedWorkerInput, ",", "");  // remove split char just for safety reasons
 
         WorkerStruct SelectedWorker;
         SelectedWorker.worker_id="";
         for (auto &w : workers){
             if (w.worker_id == SelectedWorkerInput || w.w_name == SelectedWorkerInput) {
                 SelectedWorker = w;
+                SelectedWorker.SaveToConfig();
                 return SelectedWorker;
             }
         }
@@ -83,9 +84,9 @@ namespace Wizard {
         PostString = "email_worker_name=" + email + "," + SelectedWorkerInput + "," + UserName;
         WebResponse = web.WebPost(url_register_worker, PostString);
         if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        // cout <<WebResponse << endl;
+        // Log::out() <<WebResponse << "\n";
         WebResponse=web.HTMLFindOutput(WebResponse);
-        // cout << WebResponse <<endl;
+        // Log::out() << WebResponse <<"\n";
 
         Json::Value root2 = utils::parseJsonStr(WebResponse);
         std::vector<WorkerStruct> registered_worker;
@@ -96,18 +97,20 @@ namespace Wizard {
     }
 
     void ThreadSettings(WorkerStruct& worker){
-        constexpr std::string_view C_CPU_01 = "How much of your CPU power are you willig to dedicate to Prime17? ";
-        cout << C_CPU_01 << std::endl;
+        constexpr std::string_view C_CPU_01 = "\nHow much of your CPU power are you willing to dedicate to Prime17?\n";
+        Log::out() << C_CPU_01 << "\n";
         const auto processor_count = std::thread::hardware_concurrency();
         std::string C_CPU_02 = "I have detected " + to_string(processor_count) + " logical CPU cores.";
-        cout << C_CPU_02 << std::endl;
-        constexpr std::string_view C_CPU_03 = " If you enter 100 (as in 100%) I will use all of them and your other tasks will be rather slow. "
-            "If you enter 50 I will utilise approximately half of your CPU power and the rest will remain available for you work."
-            "Enter a percentage in range 0-100";
-        cout << C_CPU_03 << std::endl;
+        if (processor_count > 8) C_CPU_02.append(" Yummy!");
+        Log::out() << C_CPU_02 << "\n";
+        constexpr std::string_view C_CPU_03 = "If you enter 100 (as in 100%) I will use all of them and your other tasks will be rather slow.\n"
+            "If you enter 50 I will utilise approximately half of your CPU power and the rest will remain available for you work.\n"
+            "Enter a percentage in range 0-100:\n";
+        Log::out() << C_CPU_03;
         
         std::string ThreadsPercent;
-        getline(std::cin, ThreadsPercent); 
+        // getline(std::cin, ThreadsPercent); 
+        ThreadsPercent = Log::out().getlineLeft();
 
         long double ThreadsPct=100;
         try {
@@ -123,13 +126,31 @@ namespace Wizard {
         
     }
     
+
+    bool CheckWorker(WorkerStruct &w){
+        WebService web;
+
+        const char url[] = "https://prime17.000webhostapp.com/check_worker.php";
+        std::string PostString (w.PrepareCheckWorkerPost());
+        std::string WebResponse = web.WebPost(url, PostString);
+        if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        WebResponse=web.HTMLFindOutput(WebResponse);
+        // Log::out() << WebResponse <<"\n";
+        if (WebResponse=="[{\"status\":\"OK\"}]") return true;
+        Log::out().logRight("There is something wrong with the worker. I wonder who was toying with the configuration file?\n");
+        Log::out().logRight(WebResponse);
+        Log::out().logRight("\n");
+        return false;       
+    }
+
     WorkerStruct NewWorker(){
         constexpr std::string_view C_InputEmail = "Hi, I am Prime17. I wonder, have we already met? \nI would like to use your e-mail as an unique id in order to monitor your specific progress. "
                 "If you enter an invalid email, I will still be satisfied, alas! if necessary, we will not be able to contact you in the future.\n"
                 "Please enter your mail/ID: ";
-        cout << C_InputEmail << std::endl;
+        Log::out() << C_InputEmail << "\n";
         std::string email;
-        getline(std::cin, email); 
+        // getline(std::cin, email);
+        email = Log::out().getlineLeft(); 
         // email= "martin.zeman17@gmail.com";
         utils_str::string_replace(email, ",", "");
         WorkerStruct worker = RegisterUserDB(email);

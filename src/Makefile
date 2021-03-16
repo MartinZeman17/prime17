@@ -81,7 +81,7 @@ CXXFLAGS := -std=c++17
 # C/C++ flags
 
 # linker libs
-LDLIBS := -lgmp -lstdc++fs -lpthread -lcurl -ljsoncpp -lncurses
+LDLIBS := -lgmp -lstdc++fs -lpthread -lcurl -ljsoncpp -lform -lncurses 
 
 # linker flags
 # static linking improves performance of Miller-Rabin test by ~2%

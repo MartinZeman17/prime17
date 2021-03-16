@@ -1,6 +1,7 @@
 // #include "SieveGenerator.hpp"
 #include "utils_mpz.hpp"
 #include "Log.hpp"
+#include "utils_str.hpp"
 
 #include <iostream>
 #include <math.h>
@@ -248,7 +249,7 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
 template <class T>
 void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double &Percent, const long double &MinTillEnd) const{
     unsigned int rows, cols;				/* to store the number of rows and the number of colums of the screen */
-    getmaxyx(Log::out().GetRight(), rows, cols);	    	/* get the number of rows and columns */
+    getmaxyx(Log::out().win_right, rows, cols);	    	/* get the number of rows and columns */
     unsigned int row = rows - (_Threads - PId);
     row = 0 + PId;
 
@@ -263,30 +264,15 @@ void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double
         RowMsg << "_";
     }
 
-    std::stringstream Aux;
-    Aux.precision(1);
-    // Aux << std::fixed;
-    Aux << fixed;
-    Aux << Percent;
-
-    if (Aux.tellp() == 3){
-        RowMsg << " ";    
-    }
-    Aux << Percent;
-    // Aux >> RowMsg;
-    // RowMsg << Aux;
-    RowMsg << Aux.str();
-    Log::out() << Aux.str();
-
-
-    RowMsg.precision(1);
-    RowMsg << " " << fixed;
-    RowMsg <<  "%% " << MinTillEnd << " m ";
+    RowMsg << utils_str::FormatNumber(Percent, 4, 1);
+    RowMsg << "%% ";
+    RowMsg << utils_str::FormatNumber(MinTillEnd, 4, 1);
+    RowMsg << "m ";
 
     {
         // const std::lock_guard<std::mutex> lock(_cout_mutex);
-        mvwprintw(Log::out().GetRight(), row, 1, RowMsg.str().c_str());
-        wrefresh(Log::out().GetRight());
+        mvwprintw(Log::out().win_right, row, 1, RowMsg.str().c_str());
+        wrefresh(Log::out().win_right);
     }
     // endwin();
 }

@@ -79,15 +79,30 @@ class Log final: public Singleton<Log> {
         wrefresh(win_left); 
     }
 
+
+    template <typename T>
+    void logRight(const T& Input) {
+        std::stringstream Msg;
+        Msg << Input;
+        int y,x;
+        getyx(win_right, y, x);
+        if (x==0) x=1; // to supress an annoing warning
+        // wprintw(win_right, Msg.str().c_str());
+        mvwprintw(win_right, y, x, Msg.str().c_str());
+        wrefresh(win_right); 
+    }
+
+
     void init() {
         //std::cout << "Logger Init" << std::endl;
         initscr();
-        cbreak();			/* Line buffering disabled, Pass on everything to me 		*/
+        // cbreak();			/* Line buffering disabled, Pass on everything to me 		*/
         // keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
 
         int width_left = (int) ( COLS * (2.0/3.0));
         refresh();
         win_left = newwin(LINES, width_left, 0, 0);
+        scrollok(win_left, TRUE);
         // box(win_left, 0 , 0);		/* 0, 0 gives default characters for the vertical and horizontal  lines			*/
 	    // wborder(win_left, ' ', '|', ' ',' ', ' ', ' ', ' ', ' ');
         wrefresh(win_left);
@@ -99,9 +114,16 @@ class Log final: public Singleton<Log> {
 
     }
 
-    WINDOW * GetRight(){
-        return win_right;
+    std::string getlineLeft(){
+        char str[200];
+        wgetstr(win_left, str);
+        return std::string(str);
     }
+        
+
+    // WINDOW * GetRight(){
+    //     return win_right;
+    // }
 
 };
 

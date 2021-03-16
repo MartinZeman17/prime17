@@ -1,6 +1,6 @@
 
 ToDo Gmp:
-- vlastní překlad gmp s becnhmarkem 
+- vlastní překlad gmp s bechmarkem 
 - optimalizace pro miller rabina a násobky d -- jiný průchod prostorem???
 - zkusit volat millera rabin a selfridge z mpz knihovny a zmerit cas. jak je mozne, ze nepocitaji jacobiho?
 - zapnout v mpz optimalizaci, ze bpsw je spolehliva do 2na64
@@ -19,6 +19,10 @@ ToDo Cpp:
 - versioning
 - PrimeStorage  - použít config dir
 - prejít na c++20? a nové threads se zastavováním
+- utils str - formatovani cisel na pocet mist
+- use cpp wrapper for ncurses? 
+- see https://stackoverflow.com/questions/53857540/using-native-c-wrappers-for-ncurses-how-can-i-create-a-menu-submenu-system
+- libcurl se nesmi zabit, jinak nefunguje spojeni?? Cistit resources??
 
 ToDo Web:
 - progress tables and page
@@ -30,6 +34,9 @@ ToDo DB:
 - konfigurace chunks
 - vstup jako Json?
 - výpočet spojených slices
+
+
+
 
 Tests:
 - reentrantnost aprcl? statické proměnné? ověřit APRCL na více vláknech

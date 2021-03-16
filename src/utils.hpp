@@ -97,12 +97,21 @@ namespace utils {
         writer -> write(JS, &outputFileStream);
     }
 
-    Json::Value static LoadJsonFile(const std::string &ConfigFile){
+    Json::Value static LoadJsonFile(const std::string &ConfigFile) try {
         Json::Value root;
         std::ifstream rawJson(ConfigFile);
+        if (!rawJson.good()) {
+            const std::string C_Msg("Json file issue. It probably does not exist.\n");
+            Log::out().logRight(C_Msg);
+            throw(C_Msg);   
+        }
         rawJson >> root;
         // cout << root;
         return root;
+    } catch(...) {
+        const std::string C_Msg("Load Json parsing error.\n");
+        Log::out().logRight(C_Msg);
+        throw(C_Msg);   
     }
     
     Json::Value static parseJsonStr(const std::string & rawJson){

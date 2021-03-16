@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <thread>
 #include <fstream>  
+#include <string>
 
 #include "utils.hpp"
    
@@ -151,6 +152,12 @@ class WorkerStruct{
             if (it->isMember("u_registered")) w.u_registered = (*it)["u_registered"].asString();
             workers.push_back(w);
         }
+    }
+
+
+    std::string PrepareCheckWorkerPost(){
+        std::string ret = "worker=" + worker_id  + "," + w_seed + "," + w_name + "," + u_name;
+        return ret;
     }
 };
 

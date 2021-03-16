@@ -29,6 +29,7 @@
 
 #include "Wizard.cpp"
 #include "Log.hpp"
+// #include "Log2.hpp"
 
 // C code must be used from C++ code using extern in order to disable messing with functions names needed for overloading (allowed only in C++, not in C)
 // Otherwise linking would fail
@@ -44,21 +45,37 @@ using namespace std::chrono;
 
 void check(){
     #ifdef NDEBUG
-    Log::out() << "Version: Release ";
+    Log::out().logRight("Version: Release \n");
     #else
-    Log::out() << "Version: Debug ";
+    Log::out().logRight("Version: Debug \n");
     #endif 
-    Log::out() << "__SIZEOF_LONG__: " << __SIZEOF_LONG__ << " ";
+    Log::out().logRight("__SIZEOF_LONG__: ");
+    Log::out().logRight( __SIZEOF_LONG__ );
+    Log::out().logRight("\n");
 
-    Log::out() << "GMP version: " << __gmp_version << " ";
-    Log::out() << "GMP_LIMB_BITS: " << GMP_LIMB_BITS << " ";
+
+    Log::out().logRight("GMP version: ");
+    Log::out().logRight(__gmp_version);
+    Log::out().logRight(" GMP_LIMB_BITS: ");
+    Log::out().logRight(GMP_LIMB_BITS);
+    Log::out().logRight("\n");
    
     #ifdef __MINGW64__
-    Log::out() << "Compiler: MinGW64 "  << __MINGW32_MAJOR_VERSION << "." << __MINGW32_MINOR_VERSION << "\n";
+    Log::out().logRight("Compiler: MinGW64 ");
+    Log::out().logRight(__MINGW32_MAJOR_VERSION);
+    Log::out().logRight(".");
+    Log::out().logRight(__MINGW32_MINOR_VERSION);
+    Log::out().logRight("\n");
     #endif
     
     #ifdef __GNUC__
-    Log::out() << "Compiler: GNUC "  << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__ << "\n";
+    Log::out().logRight("Compiler: GNUC ");
+    Log::out().logRight( __GNUC__);
+    Log::out().logRight(".");
+    Log::out().logRight( __GNUC_MINOR__);
+    Log::out().logRight(".");
+    Log::out().logRight( __GNUC_PATCHLEVEL__);
+    Log::out().logRight("\n");
     #endif
 
 
@@ -130,7 +147,9 @@ void checkWeb(){
         curl_global_init(CURL_GLOBAL_ALL);
         curl = curl_easy_init();
         curl_version_info_data * curlinfo = curl_version_info(CURLVERSION_NOW);
-        Log::out() << "curl version: " << curlinfo->version << "\n"; //Ubuntu 20 7.68.0
+        Log::out().logRight("curl version: ");
+        Log::out().logRight(curlinfo->version);
+        Log::out().logRight("\n"); //Ubuntu 20 7.68.0
         curl_easy_cleanup(curl);
         curl_global_cleanup();
         if (curl == nullptr) {
@@ -147,8 +166,23 @@ void checkWeb(){
 int main(int argc, char* argv[])
 {   
     Log::out().init();
+    // constexpr std::string_view C_InputSelectWorker = "Are you reinstalling one of the following computers(s)?\n"
+    //                 "If so, please enter the computer name or its id.\nOr if this is a new machine that I do not know yet, please tell me its name.\n";  
 
-//    initscr();
+    // constexpr std::string_view C_Input2 = "cdwhefb akjsdnkjf jn cwdnfern\n";
+    // constexpr std::string_view C_Input3 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
+
+    // Log::out() << C_InputSelectWorker;
+    // Log::out() << C_InputSelectWorker;
+    // Log::out() << C_InputSelectWorker;
+    // Log::out() << C_InputSelectWorker;
+    // Log::out() << C_InputSelectWorker;
+
+    // Log::out() << C_Input2;
+    // Log::out() << C_Input2;
+    // Log::out() << C_Input3;
+                
+
     check();
     checkWeb();
 
@@ -205,7 +239,10 @@ int main(int argc, char* argv[])
             if (w.ThreadsPct()<=0){
                 Wizard::ThreadSettings(w);
             }
-        } else {
+        }
+        
+        //check worker and in case of suspicious troubles run wizard
+        if (!Wizard::CheckWorker(w)) {
             w = Wizard::NewWorker();
         }
 

@@ -105,10 +105,9 @@ void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
         // GetWebNewWorkHTMLPage();
         const char url[] = "https://prime17.000webhostapp.com/post_work.php";
         std::string PostString = PrepareWebPostString(GetWork, BSMT);
-        Log::out() << PostString << "\n";
+        // Log::out() << PostString << "\n";
         std::string WebResponse = web.WebPost(url, PostString);
-        // Log::out() << WebResponse << "\n";
-        Log::out() << web.HTMLFindOutput(WebResponse) << "\n";
+//        Log::out() << web.HTMLFindOutput(WebResponse) << "\n";
 
     } else {
         Log::out() << "128 bit integers not ready yet, but it should be quite an easy task ..." << "\n";
