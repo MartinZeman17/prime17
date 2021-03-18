@@ -9,6 +9,7 @@ void WebBitStatistics(WorkerStruct &w){
     // todo break ??
     
     while(w.ThreadsPct()>0) {
+        Log::out().init();
         WW.WebBitStatisticsWork(w);   
     } 
 }

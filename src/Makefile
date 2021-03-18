@@ -1,8 +1,8 @@
 #https://gist.github.com/maxtruxa/4b3929e118914ccef057f8a05c614b0f
 #linking was not working due to bad order of parameters for g++
 
-# relase version
-CPPFL-AGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3
+# release version
+CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3
 
 # debug version
 # CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations
@@ -81,7 +81,7 @@ CXXFLAGS := -std=c++17
 # C/C++ flags
 
 # linker libs
-LDLIBS := -lgmp -lstdc++fs -lpthread -lcurl -ljsoncpp -lform -lncurses 
+LDLIBS := -lgmp -lstdc++fs -lpthread -lcurl -ljsoncpp -lncurses 
 
 # linker flags
 # static linking improves performance of Miller-Rabin test by ~2%

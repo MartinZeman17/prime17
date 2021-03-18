@@ -165,30 +165,6 @@ void checkWeb(){
 
 int main(int argc, char* argv[])
 {   
-    Log::out().init();
-    // constexpr std::string_view C_InputSelectWorker = "Are you reinstalling one of the following computers(s)?\n"
-    //                 "If so, please enter the computer name or its id.\nOr if this is a new machine that I do not know yet, please tell me its name.\n";  
-
-    // constexpr std::string_view C_Input2 = "cdwhefb akjsdnkjf jn cwdnfern\n";
-    // constexpr std::string_view C_Input3 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
-
-    // Log::out() << C_InputSelectWorker;
-    // Log::out() << C_InputSelectWorker;
-    // Log::out() << C_InputSelectWorker;
-    // Log::out() << C_InputSelectWorker;
-    // Log::out() << C_InputSelectWorker;
-
-    // Log::out() << C_Input2;
-    // Log::out() << C_Input2;
-    // Log::out() << C_Input3;
-                
-
-    check();
-    checkWeb();
-
-    // TestNCurses();
-    // return 0;
-
     bool bHelp = false;
     bool bWizard = false;
     bool bThread = false;
@@ -202,6 +178,11 @@ int main(int argc, char* argv[])
         else if (Arg=="-thread_tmp" || Arg=="-threads_tmp" || Arg=="-t_tmp" || Arg=="-CPU_tmp" || Arg=="-cpu_tmp") bThreadTmp = true;
         else bHelp = true;
     }
+
+    Log::out().init(!(bHelp || bWizard || bThread || bThreadTmp));
+    check();
+    checkWeb();
+
 
     // bHelp =true;
     if (bHelp) {
@@ -248,7 +229,7 @@ int main(int argc, char* argv[])
 
         WebBitStatistics(w);
     }
-    endwin();
+    Log::out().Free();
 
 
     // downloadFile("https://drive.google.com/drive/u/0/folders/1zkuCWyipKIXkHrs62nKsnf834TxRhOFM", "aaa.txt");

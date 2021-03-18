@@ -5,7 +5,7 @@ Welcome to prime mystery of the primes!
 
 <?php
 echo "<table style='border: solid 1px black;'>";
-echo "<table><tr> <th>Interval</th> <th>Completed</th> <th>Completed Max</th>  <th>Taken</th> <th>Completed %</th> <th>%Completed Max %</th>  <th>%Taken %</th> </tr>";
+echo "<table><tr> <th>Email</th> <th>Name</th> <th>Registered Max</th>  <th>Worker</th> <th>Worker registered</th> <th>Merit</th> </tr>";
 
 class TableRows extends RecursiveIteratorIterator {
     function __construct($it) {
@@ -33,7 +33,7 @@ $dbname = "id16232074_prime17";
 try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $stmt = $conn->prepare("CALL completed_report;");
+    $stmt = $conn->prepare("CALL worker_merit;");
     $stmt->execute();
 
     // set the resulting array to associative

@@ -1,4 +1,7 @@
 #include "WebWork.hpp"
+#include "utils.hpp"
+
+
 #include <curl/curl.h>
 
 #ifdef __MINGW64__
@@ -107,7 +110,7 @@ void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
         std::string PostString = PrepareWebPostString(GetWork, BSMT);
         // Log::out() << PostString << "\n";
         std::string WebResponse = web.WebPost(url, PostString);
-//        Log::out() << web.HTMLFindOutput(WebResponse) << "\n";
+       Log::out() << web.HTMLFindOutput(WebResponse) << "\n";
 
     } else {
         Log::out() << "128 bit integers not ready yet, but it should be quite an easy task ..." << "\n";

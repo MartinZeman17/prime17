@@ -45,6 +45,9 @@ namespace Wizard {
             // getline(std::cin, UserName);
             UserName = Log::out().getlineLeft();
             utils_str::string_replace(UserName, ",", "");
+            utils_str::string_replace(UserName, "\t", "");
+
+            Log::out() << "Great, your name is: " << UserName << "\n\n";
         }
 
         if (workers.size()>0){
@@ -67,6 +70,7 @@ namespace Wizard {
         SelectedWorkerInput = Log::out().getlineLeft();
         if (SelectedWorkerInput.empty()) SelectedWorkerInput = email;
         utils_str::string_replace(SelectedWorkerInput, ",", "");  // remove split char just for safety reasons
+        utils_str::string_replace(SelectedWorkerInput, "\t", "");
 
         WorkerStruct SelectedWorker;
         SelectedWorker.worker_id="";
@@ -74,6 +78,7 @@ namespace Wizard {
             if (w.worker_id == SelectedWorkerInput || w.w_name == SelectedWorkerInput) {
                 SelectedWorker = w;
                 SelectedWorker.SaveToConfig();
+                Log::out() << "Welcome back! Registering an old worker: " << w.worker_id << " " << w.u_name << "\n";
                 return SelectedWorker;
             }
         }
@@ -92,13 +97,14 @@ namespace Wizard {
         std::vector<WorkerStruct> registered_worker;
         WorkerStruct::JsonWorkersToArr(root2, registered_worker);
         SelectedWorker=registered_worker[0];
+        Log::out() << "What a nice day, a new worker has been registered: " << SelectedWorker.w_name << "\n";
         SelectedWorker.SaveToConfig();
         return SelectedWorker;
     }
 
     void ThreadSettings(WorkerStruct& worker){
         constexpr std::string_view C_CPU_01 = "\nHow much of your CPU power are you willing to dedicate to Prime17?\n";
-        Log::out() << C_CPU_01 << "\n";
+        Log::out() << C_CPU_01;
         const auto processor_count = std::thread::hardware_concurrency();
         std::string C_CPU_02 = "I have detected " + to_string(processor_count) + " logical CPU cores.";
         if (processor_count > 8) C_CPU_02.append(" Yummy!");
@@ -146,6 +152,7 @@ namespace Wizard {
     WorkerStruct NewWorker(){
         constexpr std::string_view C_InputEmail = "Hi, I am Prime17. I wonder, have we already met? \nI would like to use your e-mail as an unique id in order to monitor your specific progress. "
                 "If you enter an invalid email, I will still be satisfied, alas! if necessary, we will not be able to contact you in the future.\n"
+                "I will treat you mail with care and when neccessary I will replace some letters with an asterix sign *.\n"
                 "Please enter your mail/ID: ";
         Log::out() << C_InputEmail << "\n";
         std::string email;
@@ -153,6 +160,10 @@ namespace Wizard {
         email = Log::out().getlineLeft(); 
         // email= "martin.zeman17@gmail.com";
         utils_str::string_replace(email, ",", "");
+        utils_str::string_replace(email, "\t", "");
+        utils_str::string_replace(email, " ", "");
+
+        Log::out() << "Thank you, your mail/ID is: " << email << "\n\n";
         WorkerStruct worker = RegisterUserDB(email);
         ThreadSettings(worker);
         return worker;

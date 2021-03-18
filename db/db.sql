@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Mar 11, 2021 at 07:36 PM
+-- Generation Time: Mar 18, 2021 at 03:45 PM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.23
 
@@ -27,6 +27,39 @@ from work_results A
 join work_results01 B on A.task_id = B.task_id and A.wr_power2 = B.wr_power2 and A.wr_inner_bits = B.wr_inner_bits
 
 where A.wr_value <> B.wr_value$$
+
+CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `check_diff02` ()  READS SQL DATA
+select 
+*
+from work_results A 
+join work_results02 B on A.task_id = B.task_id and A.wr_power2 = B.wr_power2 and A.wr_inner_bits = B.wr_inner_bits
+
+where A.wr_value <> B.wr_value$$
+
+CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `check_worker` (IN `post_input` VARCHAR(20000))  READS SQL DATA
+BEGIN
+set @post = post_input;
+
+
+
+set @worker_id = SUBSTRING_INDEX(@post, ',', 1);
+set @w_seed =  SUBSTRING_INDEX(SUBSTRING_INDEX(@post, ',', 2), ',', -1);
+set @w_name = SUBSTRING_INDEX(SUBSTRING_INDEX(@post, ',', 3), ',', -1);
+set @u_name = SUBSTRING_INDEX(SUBSTRING_INDEX(@post, ',', 4), ',', -1);
+
+select 
+w.worker_id into @res
+from worker w
+join user u on u.user_id = w.user_id
+where w.worker_id = @worker_id and w.w_seed = @w_seed;
+
+if @res is null THEN
+	select @post as status;
+ELSE
+	select "OK" as status;
+end if;
+
+END$$
 
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `completed_report` ()  READS SQL DATA
     COMMENT 'table of continually and partialy completed range'
@@ -102,172 +135,33 @@ select
 from p4
 order by power2 DESC$$
 
-CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `get_new_work` (IN `asking_worker_id` INT UNSIGNED)  MODIFIES SQL DATA
-BEGIN
-    START TRANSACTION;
-
-create or replace temporary table curr as (	    
- with t as (
-    SELECT `task_id` FROM `tasks` WHERE t_current = 1
-    
-), p2 as (
-	SELECT t.task_id, coalesce(max(c.c_power2),1) as c_power2 
-    from completed as c 
-    right join t on t.task_id = c.task_id
-    
-), c as (
-	SELECT p2.task_id, p2.c_power2, c.c_end
-    FROM completed as c
-    right JOIN p2 on p2.c_power2 = c.c_power2 and p2.task_id = c.task_id 
-    
-), cend as (
-	SELECT task_id, c_power2, coalesce(max(c_end),0) as c_end
-    from c
-    group by task_id, c_power2
-    
-), cend2 as (
-    SELECT task_id, c_power2, c_end, p.p2_end_max_offset
-    from cend
-    join power2 p on p.power2_id = cend.c_power2
-    
-), wrk as (
-    SELECT 
-    w.*
-    , ps.ps_description
-    from work as w 
-    right join progress_status as ps on ps.progress_status_id = w.progress_status_id
-    where ps.ps_description not in ('done')
-    
-), wrk2 as (
-	select 
-      cend2.task_id, cend2.c_power2, cend2.c_end, cend2.p2_end_max_offset
-    , w.w_begin, w.w_end, w.w_creation 
-    , TIMESTAMPDIFF(MINUTE, w.w_creation, CURRENT_TIMESTAMP) creation_min_diff
-    , w.progress_status_id, w.ps_description
-    , w.worker_id, w.work_id
-    from wrk as w
-    right join cend2 on cend2.task_id = w.task_id and cend2.c_power2 = w.w_power2  
-    
-) , wrk3 as (
-	select 
-    
-    	  task_id, c_power2, c_end, p2_end_max_offset, w_begin, w_end
-    	, w_creation, creation_min_diff
-    	, CASE WHEN creation_min_diff > 500000 THEN 1 ELSE 0 end as expired
-    	, progress_status_id, ps_description, worker_id, work_id  
-    from wrk2
-)
-select 
-    task_id, c_power2, c_end, p2_end_max_offset, w_begin, w_end, w_creation, creation_min_diff, expired, progress_status_id, ps_description, worker_id, work_id 
-from wrk3
-);
-
-
-select task_id into @expired_task_id 
-from curr 
-where expired = 1
-order by creation_min_diff DESC, w_begin asc
-limit 1;
-
-IF @expired_task_id IS not NULL THEN
-	update work set worker_id = 1 where task_id = @expired_work_id; 
-    
-    SELECT
-          task_id
-        , asking_worker_id   
-        , w_begin
-        , w_end
-        , c_power2
- 		, @expired_work_id as new_work_id
-    from curr 
-    where work_id = @expired_work_id; 
-    
-ELSE
-    create or replace temporary table new_work_record as (	    
-    with nw as (
-        select
-        task_id, c_power2, c_end, p2_end_max_offset, max(w_end) as w_end
-        from curr 
-        group by task_id, c_power2, c_end, p2_end_max_offset
-
-    ) , nw2 as (
-        select
-        task_id, c_power2, c_end, p2_end_max_offset
-        , case
-            when isnull(w_end) THEN 0
-            when w_end < p2_end_max_offset THEN  w_end + 1
-            else null
-            end as new_begin
-        from nw
-
-    ), nw3 as ( 
-        select 
-          task_id 
-        , case when isnull(new_begin) then c_power2+1 else c_power2 end as c_power2
-        , case when isnull(new_begin) then 0 else c_end end as c_end
-        , case when isnull(new_begin) then p2_end_max_offset + 1 + p2_end_max_offset else p2_end_max_offset end as p2_end_max_offset
-        , case when isnull(new_begin) then 0 else new_begin end as new_begin
-        from nw2
-
-    ), nw4 as (
-        select
-          task_id 
-        , c_power2
-        , c_end, p2_end_max_offset
-        , new_begin
-        , LEAST(new_begin + 5000000, p2_end_max_offset) as new_end
-        from nw3
-    )   
-    select
-          task_id
-        , asking_worker_id  as asking_worker_id
-        ,  1 as progress_status_id
-        , new_begin
-        , new_end
-        , c_power2 
-    from nw4
-    );
-    
-        
-    INSERT INTO `work`(`task_id`, `worker_id`, `progress_status_id`, `w_begin`, `w_end`, `w_power2`)  	
-    select 
-          task_id
-        , asking_worker_id
-        , progress_status_id
-        , new_begin
-        , new_end
-        , c_power2
-    from new_work_record;
-        
-        
-	select
-          task_id
-        , asking_worker_id   
-        , new_begin
-        , new_end
-        , c_power2
-        , last_insert_id() as new_work_id
-    from new_work_record;
-        
-    drop table new_work_record;    
-      
-END IF;
-
-
-drop table curr;
-
-commit;
-    
-END$$
-
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `get_work` (IN `asking_worker_id` INT UNSIGNED)  MODIFIES SQL DATA
 BEGIN
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+    #GET CURRENT DIAGNOSTICS CONDITION 1 errno = MYSQL_ERRNO;
+    #SELECT errno AS MYSQL_ERROR;
+    ROLLBACK;
+    RESIGNAL;
+    END;
+
+
+
+
     START TRANSACTION;
+    set @timeout_minutes = 180;
+    set @chunk = 10000000000;
+    # debug values
+    set @timeout_minutes = 18;
+    set @chunk = 1000000000;
+
+    
 
 with exp1 as (
 select 
       w.*
-    , case when TIMESTAMPDIFF(MINUTE, w.w_creation, CURRENT_TIMESTAMP)  > 60 then  1 else 0 end expired
+    , case when TIMESTAMPDIFF(MINUTE, w.w_creation, CURRENT_TIMESTAMP)  > @timeout_minutes then  1 else 0 end expired
 
     from work as w
     where w.progress_status_id<>0
@@ -387,7 +281,7 @@ ELSE
                 , power2
                 #, p2_end_max_offset
                 , new_begin
-                , LEAST(new_begin + 1000000000, p2_end_max_offset) as new_end
+                , LEAST(new_begin + @chunk, p2_end_max_offset) as new_end
                 from nw3
         ) 
         select 
@@ -430,234 +324,6 @@ commit;
     
 END$$
 
-CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `get_work02` (IN `asking_worker_id` INT UNSIGNED)  MODIFIES SQL DATA
-BEGIN
-    start transaction;
-	
-   with t as (
-    SELECT `task_id` FROM `tasks` WHERE t_current = 1
-), p2 as (
-	SELECT t.task_id, coalesce(max(c.c_power2),1) as c_power2 
-    from completed as c 
-    right join t on t.task_id = c.task_id
-), c as (
-	SELECT p2.task_id, p2.c_power2, c.c_end
-    FROM completed as c
-    right JOIN p2 on p2.c_power2 = c.c_power2 and p2.task_id = c.task_id 
-), cend as (
-	SELECT task_id, c_power2, coalesce(max(c_end),0) as c_end
-    from c
-    group by task_id, c_power2
-), cend2 as (
-    SELECT task_id, c_power2, c_end, p.p2_end_max_offset
-    from cend
-    join power2 p on p.power2_id = cend.c_power2
-), wrk as (
-	select cend2.task_id, cend2.c_power2, cend2.c_end, cend2.p2_end_max_offset, w.w_begin, w.w_end, w.w_creation, w.progress_status_id, w.worker_id, w.work_id
-    from work as w
-    right join cend2 on cend2.task_id = w.task_id and cend2.c_power2 = w.w_power2 and w.w_begin > cend2.c_end 
-)
-select 
-    task_id, c_power2, c_end, p2_end_max_offset, w_begin, w_end, w_creation, progress_status_id, worker_id, work_id 
-from wrk;
-
-	commit;
-    
-END$$
-
-CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `get_work2` (IN `asking_worker_id` INT UNSIGNED)  MODIFIES SQL DATA
-BEGIN
-    START TRANSACTION;
-
-with exp1 as (
-select 
-      w.*
-    , case when TIMESTAMPDIFF(MINUTE, w.w_creation, CURRENT_TIMESTAMP)  > 60 then  1 else 0 end expired
-
-    from work as w
-    where w.progress_status_id<>0
-    )         
-select work_id into @expired_work_id
-from exp1
-where expired = 1
-order by w_creation ASC
-limit 1;
-
-#select @expired_work_id;
-
-IF @expired_work_id IS not NULL THEN
-	update work set worker_id = asking_worker_id where work_id = @expired_work_id; 
-    
-    SELECT
-          task_id
-        , asking_worker_id   
-        , w_begin as new_begin
-        , w_end as new_end
-        , w_power2 as power2
- 		, @expired_work_id as new_work_id
-    from work 
-    where work_id = @expired_work_id; 
-    
-ELSE
-    create or replace temporary table new_work_record as (
-        with
-        t as (
-            SELECT task_id FROM tasks WHERE t_current = 1
-
-        ), w as (    
-            select 
-              w.w_power2
-            , max(w.w_end) as w_end
-            , t.task_id
-            from work w
-            join t on t.task_id = w.task_id 
-            group by t.task_id, w.w_power2
-
-
-        ) , c as (    
-            select 
-              c.c_end
-             ,c.c_power2
-            , t.task_id
-            from completed c
-            join t on t.task_id = c.task_id
-            
-            
-        ), wc as (
-            select
-              c.c_end
-            , w.w_end
-            , COALESCE(c.c_power2, w.w_power2) as power2
-            , COALESCE(c.task_id, w.task_id) as task_id
-            from c
-            right join w on w.w_power2 = c.c_power2 and w.task_id = c.task_id
-            UNION    
-            select
-              c.c_end
-            , w.w_end
-            , COALESCE(c.c_power2, w.w_power2) as power2 
-            , COALESCE(c.task_id, w.task_id) as task_id
-            from c
-            left join w on w.w_power2 = c.c_power2 and w.task_id = c.task_id
-
-        ), curr as (
-            select 
-              wc.*
-            , case 
-                when  c_end is null then w_end
-                when  w_end is null then c_end
-                else greatest(c_end, w_end) end as work_end 
-            , p2.p2_end_max_offset
-
-            from wc
-            join power2 p2 on p2.power2_id = wc.power2
-
-        # select highest power2. 
-        ), nw0 as (
-                select max(power2) as max_power2 from curr
-
-        # work only with the highest power
-        ), nw as (
-            select
-            curr.*
-            from curr
-            join nw0  on nw0.max_power2 = curr.power2
-
-        # Select next work (only begin) 
-        ) , nw2 as (
-            select
-            task_id, power2, p2_end_max_offset
-            , case
-                when isnull(work_end) THEN 0
-                when work_end < p2_end_max_offset THEN  work_end + 1
-                else null
-            end as new_begin
-            from nw
-
-        # and if needed skip to the next power2    
-        ), nw3 as ( 
-                select 
-                  task_id 
-                , case when isnull(new_begin) then power2+1 else power2 end as power2
-                , case when isnull(new_begin) then p2_end_max_offset + 1 + p2_end_max_offset else p2_end_max_offset end as p2_end_max_offset
-                , case when isnull(new_begin) then 0 else new_begin end as new_begin
-                from nw2
-
-        # compute end from begin
-        ), nw4 as (
-                select
-                  task_id 
-                , power2
-                , p2_end_max_offset
-                , new_begin
-                , LEAST(new_begin + 1000000000, p2_end_max_offset) as new_end
-                from nw3
-        ) 
-        select 
-          *
-        from nw4
-        );        
-    
-        
-    INSERT INTO work (task_id, worker_id, progress_status_id, w_begin, w_end, w_power2)  	
-    select 
-          task_id
-        , asking_worker_id
-        , 1 as progress_status_id
-        , new_begin
-        , new_end
-        , power2
-    from new_work_record;
-        
-        
-	select
-          task_id
-        , asking_worker_id   
-        , new_begin
-        , new_end
-        , power2
-        , last_insert_id() as new_work_id
-    from new_work_record;
-        
-    drop table new_work_record;    
-      
-END IF;
-
-commit;
-    
-END$$
-
-CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `get_work_01` (IN `asking_worker_id` INT UNSIGNED)  MODIFIES SQL DATA
-BEGIN
-   with t as (
-    SELECT `task_id` FROM `tasks` WHERE t_current = 1
-), p2 as (
-	SELECT t.task_id, coalesce(max(c.c_power2),1) as c_power2 
-    from completed as c 
-    right join t on t.task_id = c.task_id
-), c as (
-	SELECT p2.task_id, p2.c_power2, c.c_end
-    FROM completed as c
-    right JOIN p2 on p2.c_power2 = c.c_power2 and p2.task_id = c.task_id 
-), cend as (
-	SELECT task_id, c_power2, coalesce(max(c_end),0) as c_end
-    from c
-    group by task_id, c_power2
-), cend2 as (
-    SELECT task_id, c_power2, c_end, p.p2_end_max_offset
-    from cend
-    join power2 p on p.power2_id = cend.c_power2
-), wrk as (
-	select cend2.task_id, cend2.c_power2, cend2.c_end, cend2.p2_end_max_offset, w.w_begin, w.w_end, w.w_creation, w.progress_status_id, w.worker_id, w.work_id
-    from work as w
-    right join cend2 on cend2.task_id = w.task_id and cend2.c_power2 = w.w_power2 and w.w_begin > cend2.c_end 
-)
-select 
-    task_id, c_power2, c_end, p2_end_max_offset, w_begin, w_end, w_creation, progress_status_id, worker_id, work_id 
-from wrk;
-    
-END$$
-
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `register_user_get_workers` (IN `email` VARCHAR(50))  READS SQL DATA
 SELECT
   wer.worker_id
@@ -672,6 +338,16 @@ upper(u.u_mail) = upper(email)$$
 
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `register_worker` (IN `post` VARCHAR(20000))  MODIFIES SQL DATA
 BEGIN
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+    #GET CURRENT DIAGNOSTICS CONDITION 1 errno = MYSQL_ERRNO;
+    #SELECT errno AS MYSQL_ERROR;
+    ROLLBACK;
+    RESIGNAL;
+    END;
+
+
+
 START TRANSACTION;
 
 set @post = post;
@@ -721,6 +397,116 @@ where w.worker_id = @worker_id
     
 END$$
 
+CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `user_merit` ()  READS SQL DATA
+BEGIN
+select 
+p2.p2_end_max_offset+1 into @Scale 
+from 
+power2 p2 
+where p2.power2_id = 40;
+
+#select @scale;
+
+
+with A1 as ( 
+    SELECT 
+            wm.worker_id
+          , sum((p2.p2_end_max_offset * wm.wm_merit)/(@scale*100.0)) as Merit 
+
+    FROM worker_merit wm
+    join power2 as p2 on wm.power2_id = p2.power2_id
+    join tasks t on t.task_id = wm.task_id and t.t_current =1
+
+    group by  wm.worker_id
+    
+) , A2 as (
+ 	SELECT  
+      u.u_mail
+    , u.u_name
+    , u.u_registered_date   
+    , w.w_name
+    , w.w_registered
+    , A1.merit
+    from A1
+    join worker w on w.worker_id = A1.worker_id
+    join user u on u.user_id = w.user_id
+), A3 as (
+    select 
+      u_mail
+    , u_name
+    , u_registered_date 
+    , sum(merit) as merit
+    from A2
+    group by 
+      u_mail
+    , u_name
+    , u_registered_date   
+), A4 as (
+     select 
+      case when instr(u_mail, '@')=0 THEN  @mail
+      ELSE 
+        concat(substring(u_mail, 1,1), '***' , substring(u_mail, instr(u_mail, '@')-1,1 ), substring(u_mail, instr(u_mail, '@') ))
+      end as u_mail      
+    , u_name
+    , u_registered_date 
+    , merit
+    from A3
+)
+select 
+* 
+from A4
+order by Merit desc
+limit 500
+;
+
+
+
+END$$
+
+CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `worker_merit` ()  READS SQL DATA
+BEGIN
+select 
+p2.p2_end_max_offset+1 into @Scale 
+from 
+power2 p2 
+where p2.power2_id = 40;
+
+with A1 as ( 
+    SELECT 
+            wm.worker_id
+          , sum((p2.p2_end_max_offset * wm.wm_merit)/(@scale*100.0)) as Merit 
+
+    FROM worker_merit wm
+    join power2 as p2 on wm.power2_id = p2.power2_id
+    join tasks t on t.task_id = wm.task_id and t.t_current =1
+
+    group by  wm.worker_id
+    
+) , A2 as (
+ 	SELECT  
+      case when instr(u.u_mail, '@')=0 THEN  @mail
+      ELSE 
+        concat(substring(u.u_mail, 1,1), '***' , substring(u.u_mail, instr(u.u_mail, '@')-1,1 ), substring(u.u_mail, instr(u.u_mail, '@') ))
+      end as u_mail     
+    , u.u_name
+    , u.u_registered_date   
+    , w.w_name
+    , w.w_registered
+    , A1.merit
+    from A1
+    join worker w on w.worker_id = A1.worker_id
+    join user u on u.user_id = w.user_id
+)
+select 
+* 
+from A2
+order by Merit desc
+limit 500
+;
+
+
+END$$
+
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `work_output` ()  READS SQL DATA
     COMMENT 'provides also csv format'
 select
@@ -735,6 +521,17 @@ order by  power2  asc, bits asc$$
 
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `work_received` (IN `post_input` VARCHAR(20000) CHARSET utf8)  MODIFIES SQL DATA
 BEGIN
+
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+        BEGIN
+            #GET CURRENT DIAGNOSTICS CONDITION 1 errno = MYSQL_ERRNO;
+    		#SELECT errno AS MYSQL_ERROR;    
+    		ROLLBACK;
+            RESIGNAL;
+        END;
+
+
 START TRANSACTION;
 set @post = post_input;
 
@@ -873,7 +670,28 @@ ELSE
     ELSE
     	set @msg = concat(@msg,  "no new end ");
         #select @msg as output; 
-    end if;
+    end if;    
+   
+
+    select 
+        (100.0 * (@new_end - @new_begin + 1)) / p2.p2_end_max_offset into @wm_merit
+    from power2 as p2 
+    where p2.power2_id = @c_power2;
+
+    select 
+    worker_merit_id into @worker_merit_id
+    from worker_merit as wm
+    where wm.task_id = @task_id and wm.worker_id = @asking_worker_id and wm.power2_id = @c_power2;
+
+    if @worker_merit_id is null THEN
+        INSERT INTO worker_merit (task_id, worker_id, power2_id, wm_merit) VALUES (@task_id, @asking_worker_id, @c_power2, @wm_merit);
+    ELSE
+        UPDATE worker_merit 
+        SET wm_merit =wm_merit + wm_merit 
+        where  worker_merit_id = @worker_merit_id;
+    END IF;  
+   
+    
    
 end if;
 if @msg is null then set @msg="An error, output msg is null"; end if;
@@ -883,14 +701,6 @@ commit;
 
     
 END$$
-
-CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `work_received2` (IN `post` VARCHAR(2000))  MODIFIES SQL DATA
-BEGIN
-    	set @post2 = SUBSTRING_INDEX(post, ',', 1);
-		select @post2 from work;
-
-    
-	END$$
 
 DELIMITER ;
 
@@ -944,16 +754,6 @@ CREATE TABLE `tasks` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `test`
---
-
-CREATE TABLE `test` (
-  `teststr` varchar(1000) COLLATE utf8_unicode_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `user`
 --
 
@@ -998,6 +798,20 @@ CREATE TABLE `worker` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `worker_merit`
+--
+
+CREATE TABLE `worker_merit` (
+  `worker_merit_id` int(10) UNSIGNED NOT NULL,
+  `task_id` tinyint(3) UNSIGNED NOT NULL,
+  `worker_id` int(10) UNSIGNED NOT NULL,
+  `power2_id` tinyint(3) UNSIGNED NOT NULL,
+  `wm_merit` double NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `work_results`
 --
 
@@ -1017,6 +831,20 @@ CREATE TABLE `work_results` (
 
 CREATE TABLE `work_results01` (
   `work_results01_id` int(10) UNSIGNED NOT NULL,
+  `wr_inner_bits` tinyint(3) UNSIGNED NOT NULL,
+  `wr_value` bigint(20) UNSIGNED NOT NULL,
+  `wr_power2` tinyint(3) UNSIGNED NOT NULL,
+  `task_id` tinyint(3) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `work_results02`
+--
+
+CREATE TABLE `work_results02` (
+  `work_results_id` int(10) UNSIGNED NOT NULL,
   `wr_inner_bits` tinyint(3) UNSIGNED NOT NULL,
   `wr_value` bigint(20) UNSIGNED NOT NULL,
   `wr_power2` tinyint(3) UNSIGNED NOT NULL,
@@ -1077,6 +905,15 @@ ALTER TABLE `worker`
   ADD KEY `fk_worker_user_id` (`user_id`);
 
 --
+-- Indexes for table `worker_merit`
+--
+ALTER TABLE `worker_merit`
+  ADD PRIMARY KEY (`worker_merit_id`),
+  ADD KEY `work_merit_task_id` (`task_id`),
+  ADD KEY `work_merit_worker_id` (`worker_id`),
+  ADD KEY `work_merit_power2_id` (`power2_id`);
+
+--
 -- Indexes for table `work_results`
 --
 ALTER TABLE `work_results`
@@ -1089,6 +926,13 @@ ALTER TABLE `work_results`
 ALTER TABLE `work_results01`
   ADD PRIMARY KEY (`work_results01_id`),
   ADD KEY `work_results01_task_id` (`task_id`);
+
+--
+-- Indexes for table `work_results02`
+--
+ALTER TABLE `work_results02`
+  ADD PRIMARY KEY (`work_results_id`),
+  ADD KEY `work_results_task_id` (`task_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -1119,6 +963,12 @@ ALTER TABLE `worker`
   MODIFY `worker_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID of the worker';
 
 --
+-- AUTO_INCREMENT for table `worker_merit`
+--
+ALTER TABLE `worker_merit`
+  MODIFY `worker_merit_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `work_results`
 --
 ALTER TABLE `work_results`
@@ -1129,6 +979,12 @@ ALTER TABLE `work_results`
 --
 ALTER TABLE `work_results01`
   MODIFY `work_results01_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `work_results02`
+--
+ALTER TABLE `work_results02`
+  MODIFY `work_results_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -1153,6 +1009,14 @@ ALTER TABLE `work`
 --
 ALTER TABLE `worker`
   ADD CONSTRAINT `fk_worker_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+
+--
+-- Constraints for table `worker_merit`
+--
+ALTER TABLE `worker_merit`
+  ADD CONSTRAINT `work_merit_power2_id` FOREIGN KEY (`power2_id`) REFERENCES `power2` (`power2_id`),
+  ADD CONSTRAINT `work_merit_task_id` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`task_id`),
+  ADD CONSTRAINT `work_merit_worker_id` FOREIGN KEY (`worker_id`) REFERENCES `worker` (`worker_id`);
 
 --
 -- Constraints for table `work_results`

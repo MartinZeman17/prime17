@@ -1,15 +1,12 @@
-<html>
-<body style="background-image: url('pic/index_background_gradient.jpg'); background-repeat: repeat-x;"> 
-<!--  <h1 style="text-align: center; background-color: #d37693;"><strong>Welcome to prime mystery of primes!</strong></h1> -->
-<h1 class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><img src="pic/index_title.jpg"/></h1>
-<h1><!-- Navbar --></h1>
-<h4 class="w3-bar-item">&nbsp;</h4>
+<div style="background-image: url('pic/index_background_gradient.jpg'); background-repeat: repeat-x;">
+<h1 style="background-color: #d37692;"><strong>Welcome to prime mystery of the primes!</strong></h1>
+<!-- Navbar -->
+<div class="w3-top" style="background-color: #86d0f6;">
+<div class="w3-bar w3-theme w3-top w3-left-align w3-large"><a href="completed.php">Completed</a> <a href="work_output.php">output&nbsp;</a></div>
+</div>
+<!-- Sidebar --><nav id="mySidebar" class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left">
 <h4 class="w3-bar-item"><strong>Menu</strong></h4>
-<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="completed.php">Completed</a></nav>
-<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="work_output.php">output</a></nav>
-<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="user_merit.php">User merit</a></nav>
-<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="worker_merit.php">Worker merit</a></nav>
-<h1><!-- Overlay effect when opening sidebar on small screens --><!-- Main content: shift it to the right by 250 pixels when the sidebar is visible --></h1>
+</nav><nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="completed.php">Completed</a></nav><nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="work_output.php">output</a></nav><!-- Overlay effect when opening sidebar on small screens --><!-- Main content: shift it to the right by 250 pixels when the sidebar is visible -->
 <div class="w3-main" style="margin-left: 250px;">
 <div class="w3-row w3-padding-64">
 <div class="w3-twothird w3-container">
@@ -17,14 +14,14 @@
 <p><span style="font-weight: 400;">This is a father and son rather amateurish project.<br />We are aware there is a lot to complain about, but the time and know-how is limited.<br />The project evolved from&nbsp; a year long secondary school thesis focused on primes.<br />Matej Zeman (a student and an author) and&nbsp; Martin Zeman (consultant) of the thesis decided to continue in revealing mysteries of the primes even after the thesis was submitted for approval.&nbsp;</span></p>
 <hr />
 <h2 class="w3-text-teal">Downloads</h2>
-<p>Download of Prime 17 executable:<br />Linux 64 bit version: <a class="w3-bar-item w3-button w3-hover-black" href="download/linux_prime17.zip">zip</a> <br />Windows 64 bit version: <a class="w3-bar-item w3-button w3-hover-black" href="download/win_prime17.zip">zip</a><br />Installation notes: just unzip the files wherever you have a write access righs. If something fails, please send an email. If you are resilient you may try to build executable by yourself from the source codes (see readme file patched with the source codes).</p>
+<p>Prime 17 project downloads:<br />Linux version: <a class="w3-bar-item w3-button w3-hover-black" href="download/linux_prime17.zip">zip</a> <br />Windows 64 bit version: <a class="w3-bar-item w3-button w3-hover-black" href="download/win_prime17.zip">zip</a><br />Installation notes: just unzip the files wherever you have a write access righs.</p>
 <hr /></div>
 </div>
 <div class="w3-row w3-padding-64">
 <div class="w3-twothird w3-container">
 <h2><strong>Tasks</strong></h2>
 <p><span style="font-weight: 400;">Prime17 project currently support only one distributed task:</span></p>
-<p><span style="font-weight: 400;">measurement of primes distribution within bit slices in intervals of length given by power of two (see jigsaw graph on the website).&nbsp;</span></p>
+<p><span style="font-weight: 400;">measurement of distribution of primes distribution within bit slices in intervals of length given by power of two (see jigsaw graph on the website).&nbsp;</span></p>
 <p><span style="font-weight: 400;">When this task is completed (or the unusual behavior explained) we may move onto another task which is verification of the BPSW primality test.&nbsp;</span></p>
 <p>&nbsp;</p>
 <p><span style="font-weight: 400;">You may contribute to the project by:</span></p>
@@ -36,22 +33,22 @@
 <p><span style="font-weight: 400;">There is no package nor installer yet so there may be some manual configuration steps required.</span></p>
 <p><span style="font-weight: 400;">Just unzip all the files in a folder with write access. Then just run the prime17 (linux) or prime17.exe (Windows 64) file.&nbsp;</span></p>
 <p><span style="font-weight: 400;">A basic wizard should guide you through the very first configuration.&nbsp;</span></p>
-<h4 style="text-align: left;"><strong>Linux Installation&nbsp;&nbsp;</strong></h4>
-<p style="text-align: left;"><span style="font-weight: 400;">1. Missing rights for an execution. Run following commands from the terminal:</span></p>
-<p style="text-align: left;"><span style="font-weight: 400;">&nbsp;chmod a+rx prime17</span></p>
-<p style="text-align: left;"><span style="font-weight: 400;">&nbsp;chmod a+rx cpu25_tmp.sh</span></p>
-<p style="text-align: left;"><span style="font-weight: 400;">&nbsp;...</span></p>
-<p style="text-align: left;"><span style="font-weight: 400;">&nbsp;chmod a+rx cpu100.sh</span></p>
-<p style="text-align: left;">&nbsp;</p>
-<p style="text-align: left;"><span style="font-weight: 400;">2. Some libraries may be missing. In case of Ubuntu you may run the following commands from the terminal:</span></p>
-<p style="text-align: left;"><span style="font-weight: 400;">sudo apt update</span></p>
-<p style="text-align: left;"><span style="font-weight: 400;">sudo apt upgrade</span></p>
-<p style="text-align: left;"><span style="font-weight: 400;">sudo apt install libgmp3-dev</span></p>
-<p style="text-align: left;"><span style="font-weight: 400;">sudo apt install libjsoncpp-dev</span></p>
-<p style="text-align: left;"><span style="font-weight: 400;">sudo apt install libcurl4-openssl-dev</span></p>
-<p style="text-align: left;">&nbsp;</p>
-<h4 style="text-align: left;"><strong>Windows Installation</strong></h4>
-<p style="text-align: left;"><span style="font-weight: 400;">There exists only a 64 bit version compiled via MSYS2-MinGW64 environment. Zip file should contain all necessary libraries.</span></p>
+<h4 style="text-align: center;"><strong>Linux Installation&nbsp;&nbsp;</strong></h4>
+<p style="text-align: center;"><span style="font-weight: 400;">1. Missing rights for an execution. Run following commands from the terminal:</span></p>
+<p style="text-align: center;"><span style="font-weight: 400;">&nbsp;chmod a+rx prime17</span></p>
+<p style="text-align: center;"><span style="font-weight: 400;">&nbsp;chmod a+rx cpu25_tmp.sh</span></p>
+<p style="text-align: center;"><span style="font-weight: 400;">&nbsp;...</span></p>
+<p style="text-align: center;"><span style="font-weight: 400;">&nbsp;chmod a+rx cpu100.sh</span></p>
+<p style="text-align: center;">&nbsp;</p>
+<p style="text-align: center;"><span style="font-weight: 400;">&nbsp;2. Some libraries may be missing. In case of Ubuntu you may run the following commands from the terminal:</span></p>
+<p style="text-align: center;"><span style="font-weight: 400;">sudo apt update</span></p>
+<p style="text-align: center;"><span style="font-weight: 400;">sudo apt upgrade</span></p>
+<p style="text-align: center;"><span style="font-weight: 400;">sudo apt install libgmp3-dev</span></p>
+<p style="text-align: center;"><span style="font-weight: 400;">sudo apt install libjsoncpp-dev</span></p>
+<p style="text-align: center;"><span style="font-weight: 400;">sudo apt install libcurl4-openssl-dev</span></p>
+<p>&nbsp;</p>
+<h4 style="text-align: center;"><strong>Windows Installation</strong></h4>
+<p style="text-align: center;"><span style="font-weight: 400;">There exists only a 64 bit version compiled via MSYS2-MinGW64 environment. Zip file should contain all necessary libraries.</span></p>
 <p style="text-align: center;">&nbsp;</p>
 <p style="text-align: center;">&nbsp;</p>
 <h3><strong>Source Codes</strong></h3>
@@ -89,5 +86,4 @@
 </div>
 </div>
 </div>
-</body>
-</html>
+</div>

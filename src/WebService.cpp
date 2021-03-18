@@ -127,7 +127,7 @@ WebService::WebService(){
         _SpecialCommunication = HTTP_SpecialCommunication::UseNativeCA;
         WebInput = WebPost(url, GetWorkPostString);
         if (!WebInput.empty()) {
-            Log::out() << "libcurl using the operating system's native CA store for certificate verification. Works only on Windows when built to use OpenSSL. This option is experimental and behavior is subject to change";
+            Log::out().logRight("libcurl using the operating system's native CA store for certificate verification. Works only on Windows when built to use OpenSSL.\nThis option is experimental and behavior is subject to change.\n");
             _Initialized=true;
             return;
         }
@@ -135,7 +135,7 @@ WebService::WebService(){
         _SpecialCommunication = HTTP_SpecialCommunication::UseLocalCertificate;
         WebInput = WebPost(url, GetWorkPostString);
         if (!WebInput.empty()) {
-            Log::out() << "libcurl using local certificate";
+            Log::out().logRight("libcurl using local certificate\n");
             _Initialized=true;
             return;
         }
@@ -143,7 +143,7 @@ WebService::WebService(){
         _SpecialCommunication = HTTP_SpecialCommunication::TurnOffSSL;
         WebInput = WebPost(url, GetWorkPostString);
         if (!WebInput.empty()) {
-            Log::out() << "No certificate available. I feel depply sorry for turnig off SSL..." << "\n";
+            Log::out().logRight("No certificate available. I feel depply sorry for turnig off SSL...\n");
             _Initialized=true;
             return;
         }

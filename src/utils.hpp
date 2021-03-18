@@ -24,6 +24,7 @@
 
 #include <fstream>
 
+
 namespace fs = std::filesystem;
 
 
@@ -31,6 +32,8 @@ namespace utils {
 
     constexpr std::string_view C_AppName = "Prime17"; 
     constexpr std::string_view C_AppNameConfig = "Prime17.json";
+    constexpr std::string_view C_AppLog = "Prime17.log";
+
     constexpr std::string_view C_AppNameConfigThreads = "threads.json"; 
     constexpr std::string_view C_AppNameConfigHomeSubdir =".config";
 
@@ -79,6 +82,13 @@ namespace utils {
         return p.string();
     }
 
+    std::string static getLogFile(){
+        fs::path p(getConfigDir());
+        p /= C_AppLog;
+        return p.string();
+    }
+
+
     std::string static getConfigFileThreads(){
         fs::path p(getConfigDir());
         p /= C_AppNameConfigThreads;
@@ -92,7 +102,7 @@ namespace utils {
         builder["indentation"] = "   ";
 
         std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-        cout << ConfigFile << endl;
+        // cout << ConfigFile << endl;
         std::ofstream outputFileStream(ConfigFile);
         writer -> write(JS, &outputFileStream);
     }
@@ -101,8 +111,8 @@ namespace utils {
         Json::Value root;
         std::ifstream rawJson(ConfigFile);
         if (!rawJson.good()) {
-            const std::string C_Msg("Json file issue. It probably does not exist.\n");
-            Log::out().logRight(C_Msg);
+            const std::string C_Msg("Json file probably does not exist.\n");
+            // Log::out().logRight(C_Msg);
             throw(C_Msg);   
         }
         rawJson >> root;
@@ -110,7 +120,7 @@ namespace utils {
         return root;
     } catch(...) {
         const std::string C_Msg("Load Json parsing error.\n");
-        Log::out().logRight(C_Msg);
+        // Log::out().logRight(C_Msg);
         throw(C_Msg);   
     }
     

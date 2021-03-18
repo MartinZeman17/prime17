@@ -254,7 +254,7 @@ void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double
     row = 0 + PId;
 
     std::stringstream RowMsg;
-    RowMsg << PId << ":" ;
+    RowMsg << utils_str::FormatNumber(PId, 2, 0) << ":" ;
     int C_ProgressBarCnt = cols - 20;
     unsigned int Chars = (unsigned int) ((Percent * C_ProgressBarCnt) / 100.0);
     for(unsigned int i = 0; i< Chars; i++){
@@ -271,7 +271,7 @@ void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double
 
     {
         // const std::lock_guard<std::mutex> lock(_cout_mutex);
-        mvwprintw(Log::out().win_right, row, 1, RowMsg.str().c_str());
+        mvwprintw(Log::out().win_right, row, 0, RowMsg.str().c_str());
         wrefresh(Log::out().win_right);
     }
     // endwin();
@@ -417,16 +417,12 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
 
                         auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _StartTime);
                         MinTillEnd = ceill(((duration.count() / NewPerc) * (100.0L-NewPerc))/6000.0L) / 10.0L;
-                        // {
-                        //     const std::lock_guard<std::mutex> lock(_Log::out()_mutex);
-                        //     // std::Log::out() << NewPerc << " " << MinTillEnd  << " " << std::flush;
-                            // std::Log::out() << " " << MinTillEnd  << " " << std::flush;
-                            // std::Log::out() << PId << "> " << NewPerc << " " << std::flush;
-                        // }
                     }
                     {
-                    const std::lock_guard<std::mutex> lock(_cout_mutex);
+                    // const std::lock_guard<std::mutex> lock(_cout_mutex);
                     PrintProgress(iPId,_Percent, MinTillEnd);
+                    // Log::out() << MinTillEnd << " ";
+                    // std::cout << flush;
                     }
                 }
             }
@@ -503,6 +499,7 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
     const auto processor_count = std::thread::hardware_concurrency();
     // const size_t C_Threads = processor_count;
     Log::out() << "Processor count detected: " << processor_count << " Threads to spawn: " << _Threads  << "\n";
+    Log::out().ClearRight();
     
     // getyx(stdscr, _ncursesY, _ncursesX);
 
