@@ -18,8 +18,8 @@ using namespace primecount;
 
 // use Eratosthenes sieve with the following primorial
 #ifdef NDEBUG
-// const unsigned int C_SieveGeneratorDefaultMaxPrime=23;   //??? ToDo for final release
-const unsigned int C_SieveGeneratorDefaultMaxPrime=19;
+const unsigned int C_SieveGeneratorDefaultMaxPrime=23;   //for final release, leads to not so frequent update and better efficiency
+// const unsigned int C_SieveGeneratorDefaultMaxPrime=19;
 #else
 const unsigned int C_SieveGeneratorDefaultMaxPrime=19;
 #endif 

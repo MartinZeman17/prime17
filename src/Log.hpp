@@ -119,6 +119,15 @@ class Log final: public Singleton<Log> {
         SmartFlush(Msg);
     }
 
+    template <typename T>
+    void logToFile(const T& Input) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        std::stringstream Msg;
+        Msg << Input;
+        _LogFile << Input;
+        SmartFlush(Msg);
+    }
+
 
     void init(bool LogToFile=true) {
         if (win_left!=nullptr){

@@ -24,15 +24,15 @@ using std::vector;
 namespace Wizard { 
 
     WorkerStruct RegisterUserDB(std::string & email){
-        WebService web;
+        // WebService web;
 
         const char url[] = "https://prime17.000webhostapp.com/register_user.php";
         std::string PostString ("email=" + email);
-        std::string WebResponse = web.WebPost(url, PostString);
+        std::string WebResponse = WebService::out().WebPost(url, PostString);
         if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
         // Log::out() <<WebResponse << "\n";
-        WebResponse=web.HTMLFindOutput(WebResponse);
+        WebResponse=WebService::out().HTMLFindOutput(WebResponse);
         // Log::out() << WebResponse <<"\n";
         Json::Value root = utils::parseJsonStr(WebResponse);
         std::vector<WorkerStruct> workers;
@@ -47,7 +47,7 @@ namespace Wizard {
             utils_str::string_replace(UserName, ",", "");
             utils_str::string_replace(UserName, "\t", "");
 
-            Log::out() << "Great, your name is: " << UserName << "\n\n";
+            Log::out() << "Nice to meet you, " << UserName << "\n\n";
         }
 
         if (workers.size()>0){
@@ -87,10 +87,10 @@ namespace Wizard {
         // get threads strategy
         const char url_register_worker[] = "https://prime17.000webhostapp.com/register_worker.php";
         PostString = "email_worker_name=" + email + "," + SelectedWorkerInput + "," + UserName;
-        WebResponse = web.WebPost(url_register_worker, PostString);
+        WebResponse = WebService::out().WebPost(url_register_worker, PostString);
         if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         // Log::out() <<WebResponse << "\n";
-        WebResponse=web.HTMLFindOutput(WebResponse);
+        WebResponse=WebService::out().HTMLFindOutput(WebResponse);
         // Log::out() << WebResponse <<"\n";
 
         Json::Value root2 = utils::parseJsonStr(WebResponse);
@@ -134,13 +134,13 @@ namespace Wizard {
     
 
     bool CheckWorker(WorkerStruct &w){
-        WebService web;
+        // WebService web;
 
         const char url[] = "https://prime17.000webhostapp.com/check_worker.php";
         std::string PostString (w.PrepareCheckWorkerPost());
-        std::string WebResponse = web.WebPost(url, PostString);
+        std::string WebResponse = WebService::out().WebPost(url, PostString);
         if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        WebResponse=web.HTMLFindOutput(WebResponse);
+        WebResponse=WebService::out().HTMLFindOutput(WebResponse);
         // Log::out() << WebResponse <<"\n";
         if (WebResponse=="[{\"status\":\"OK\"}]") return true;
         Log::out().logRight("There is something wrong with the worker. I wonder who was toying with the configuration file?\n");

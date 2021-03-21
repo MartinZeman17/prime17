@@ -88,12 +88,12 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
         p_TestArrayCount = TACount;        
         // p_TestArrayCount=p_TestArray.size();
         p_MaxPrime = MaxPrime;
-        long double MeasuredEffectivity = (long double) p_TestArrayCount / (long double) p_Primorial;
+        long double MeasuredEffectivity = 100.0L * (long double) p_TestArrayCount / (long double) p_Primorial;
 
         Log::out() << "Sieve Max Prime: " << MaxPrime << " ";
-        Log::out() << "Primorial: " << p_Primorial << " ";
-        Log::out() << "Test Array Size: " << p_TestArrayCount << " ";
-        Log::out() << "Effectivity: " << MeasuredEffectivity  << "\n"; 
+        Log::out() << "Primorial: " << utils_str::FormatUInt(p_Primorial) << " ";
+        Log::out() << "Test Array Size: " << utils_str::FormatUInt(p_TestArrayCount) << " ";
+        Log::out() << "Effectivity %: " << MeasuredEffectivity  << "\n"; 
 
         Threads(100);        
     }
@@ -482,9 +482,9 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
     _kp = k * p_Primorial;  // primorial p multiplied by some integer k
     _Percent=-1.0;
 
-    Log::out()  << "Sieve Begin: " << Begin << " ";        
-    Log::out()  << "Sieve End  : " << End <<  " ";
-    Log::out()  << "Sieve End-Begin: " << End - Begin << "\n";        
+    Log::out()  << "Sieve Begin: " << utils_str::FormatUInt(Begin) << "\n";        
+    Log::out()  << "Sieve End  : " << utils_str::FormatUInt(End) <<  "\n";
+    Log::out()  << "Sieve End-Begin: " << utils_str::FormatUInt(End - Begin) << "\n";        
     // Log::out()  << "End - UINT64_MAX: " << (uint128_t) End - (uint128_t) UINT64_MAX << endl;
     // Log::out()  << "End - 2 * UINT64_MAX: " << (uint128_t) End - (uint128_t) UINT64_MAX - (uint128_t) UINT64_MAX << endl;        
     // Log::out()  << "UINT64_MAX: " <<  UINT64_MAX << endl;        
@@ -492,13 +492,16 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
         Log::out() << "A serious warning!!! End looks too big." << "\n";
     }    
    
-    Log::out() << "Primorials skipped: " << k <<  " ";
-    Log::out() << "Nearest left multiple of primorial: " << _kp <<  " ";
-    Log::out() << "... till Begin: " << Begin - _kp << "\n";
+    Log::out() << "Primorials skipped: " << utils_str::FormatUInt(k) <<  "\n";
+    Log::out() << "Multiple of primorial: " << utils_str::FormatUInt(_kp) <<  " ";
+    Log::out() << "...till Begin: " << utils_str::FormatUInt(Begin - _kp) << "\n";
    
     const auto processor_count = std::thread::hardware_concurrency();
     // const size_t C_Threads = processor_count;
-    Log::out() << "Processor count detected: " << processor_count << " Threads to spawn: " << _Threads  << "\n";
+    // Log::out() << "Processor count detected: " << processor_count << " Threads to spawn: " << _Threads  << "\n";
+    Log::out() << "Using " << (100 * _Threads)/processor_count << "%% CPU = spawning " << _Threads << " thread";
+    if (_Threads > 1) Log::out() << "s";
+    Log::out() << " out of " << processor_count << " available logical CPUs.\n";
     Log::out().ClearRight();
     
     // getyx(stdscr, _ncursesY, _ncursesX);

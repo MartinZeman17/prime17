@@ -41,7 +41,7 @@ class WebWork {
     void WebBitStatisticsWork(WorkerStruct &w);
     
     private:
-    WebService web;
+    // WebService web;
 
     std::string PrepareWebPostString(WebGetWork &GetWork, GeneratorFunctionBitStatistics & BS);
 

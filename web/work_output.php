@@ -5,7 +5,7 @@ Welcome to prime mystery of the primes!
 
 <?php
 echo "<table style='border: solid 1px black;'>";
-echo "<table><tr> <th>Interval</th> <th>Bits</th> <th>Cnt</th>  <th>csv</th> </tr>";
+echo "<table><tr> <th>Interval</th> <th>Bits</th> <th>Cnt</th> </tr>";
 
 class TableRows extends RecursiveIteratorIterator {
     function __construct($it) {

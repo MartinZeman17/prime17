@@ -19,51 +19,45 @@ ToDo Cpp:
 - versioning
 - PrimeStorage  - použít config dir
 - prejít na c++20? a nové threads se zastavováním
-- use cpp wrapper for ncurses? 
-- see https://stackoverflow.com/questions/53857540/using-native-c-wrappers-for-ncurses-how-can-i-create-a-menu-submenu-system
-- libcurl se nesmi zabit, jinak nefunguje spojeni?? Cistit resources??
+- use cpp wrapper for ncurses? https://stackoverflow.com/questions/53857540/using-native-c-wrappers-for-ncurses-how-can-i-create-a-menu-submenu-system
 - resize
-- backspace
-- deadlock - file
-- nezobrazovat email - wizard, procedura
-- check register zorazi mail worker
--  
-- test deadlock a update completed
-- dve instance tridy webs
-- flushovani do souboru na win je podivne
-- warningy na static unused
-- opravit primorial pro release
+- mazat netisknutelne znaky z wizardu - backspace 08h -clean funkce
 
 ToDo Web:
 - FAQ
 - graf s výsledky?
 
 ToDo DB:
-- vymyslet tabulky pro testování
-- konfigurace chunks
+- vymyslet tabulky pro testování- druha db?
 - vstup jako Json?
-- výpočet spojených slices
-
+- výpočet super slices
+- work_results_rec  - promazavání
+- formatovat cisla 000 000
 
 
 Tests:
 - reentrantnost aprcl? statické proměnné? ověřit APRCL na více vláknech
-- zátěžový test z více počítačů
+- libcurl err 6  - vypis, sleepem
 
 Issues:
+- implementace v header?
+- dve instance tridy webs - todo test
 - libcurl global_init není thread safe
 - statický linking gmp a chyba v gcc
-- Libcurl: curl https://prime17.000webhostapp.com/completed.php -v -o internet_test.txt
+- Libcurl cmd test: curl https://prime17.000webhostapp.com/completed.php -v -o internet_test.txt
+- wizard - nejprve se pta na threads??
+- cmd po 10%
 
 Links:
 https://prime17.000webhostapp.com/
 https://stackoverflow.com/questions/4064444/returning-json-from-a-php-script
 
 
-DB:
+DB refresh:
 delete from completed;
 delete from worker_merit;
 delete from work_results;
+delete from work_results_rec;
 delete from work;
 delete from worker;
 delete from user;

@@ -6,6 +6,8 @@
 #include <sstream>  
 
 #include <fstream>
+#include <locale>
+#include <memory>
 
 
 
@@ -45,6 +47,8 @@ namespace utils_str{
 
   // std::string FormatNumber(T Input, unsigned int StrLen, unsigned int Precision)
   
+
+  // ToDo use std::fixed << std::setprecision(2) << std::setfill('0')
   template <typename T>
   std::string FormatNumber(T Input, unsigned int StrLen, unsigned int Precision){
     std::stringstream Aux;
@@ -58,6 +62,21 @@ namespace utils_str{
     res.append(Aux.str());
     return res;
   }
+
+struct separate_thousands : std::numpunct<char> {
+    char_type do_thousands_sep() const override { return ' '; }  // separate with commas
+    string_type do_grouping() const override { return "\3"; } // groups of 3 digit
+};
+
+template <typename T>
+std::string FormatUInt(T Input){
+    auto thousands = std::make_unique<separate_thousands>();
+
+    std::stringstream Aux;
+    Aux.imbue(std::locale(std::cout.getloc(), thousands.release()));
+    Aux << Input;
+    return Aux.str();
+}
   
 
   string string_replace(string src, string const& target, string const& repl);

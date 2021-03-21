@@ -1,0 +1,1 @@
+prime17.exe -t 90

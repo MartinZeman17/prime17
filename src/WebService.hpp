@@ -3,10 +3,14 @@
 
 #include <iostream>
 #include <string>
+#include "Log.hpp"
 
-class WebService {
+// class Log final: public Singleton<Log>
+class WebService final: public Singleton<WebService>  {
     private:
-    const std::string C_NoInternet{"Internet connection is not available, however my creator wishes me to be be resilient and versatile. If I'm bothering you, just kill me. Ouch :-("};
+    const std::string C_NoInternet{"Internet connection is not available, however my creator wishes me to be be resilient and versatile. If I'm bothering you, just kill me. Ouch :-(\n"};
+    const std::string C_NoDNS{"This is a typicall situation after multiple kills when the web server detects multiple dangling connections and as a safety measure refuses further connections. Fortunately after timeouts connections will expire and communicaton may resume as normal. Let's wait 5 minutes and see..."};
+
     enum class HTTP_SpecialCommunication 
     {
         NoSpecialSettings,

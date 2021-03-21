@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <body>
-This is a report on the overall progress...
+Welcome to prime mystery of the primes!
 
 <?php
 echo "<table style='border: solid 1px black;'>";
-echo "<table><tr> <th>Interval</th> <th>Fully Completed</th> <th>Completed (gaps)</th>  <th>Taken</th> <th>Fully Completed %</th> <th>Completed (gaps) %</th>  <th>Taken %</th> <th>Start</th> <th>Last update</th></tr>";
+echo "<table><tr> <th>Key</th> <th>Value</th> </tr>";
 
 class TableRows extends RecursiveIteratorIterator {
     function __construct($it) {
@@ -33,7 +33,7 @@ $dbname = "id16232074_prime17";
 try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $stmt = $conn->prepare("CALL completed_report;");
+    $stmt = $conn->prepare("CALL configuration;");
     $stmt->execute();
 
     // set the resulting array to associative

@@ -1,17 +1,12 @@
 #include "WebService.hpp"
 #include "Log.hpp"
 
-
 #include <iostream>
-// #include <fstream>B
-
 #include <string>
 #include <cstring>
-
 #include <chrono>
 #include <thread>
 #include <curl/curl.h>
-// #include <stdbool.h>
 
 
 size_t WebService::WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -20,28 +15,6 @@ size_t WebService::WriteCallback(void *contents, size_t size, size_t nmemb, void
     return size * nmemb;
 }
 
-// size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
-//     size_t written;
-//     written = fwrite(ptr, size, nmemb, stream);
-//     return written;
-// }
-
-// void downloadFile(const char* url, const char* fname) {
-//     CURL *curl;
-//     FILE *fp;
-//     CURLcode res;
-//     curl = curl_easy_init();
-//     if (curl){
-//         fp = fopen(fname, "wb");
-//         curl_easy_setopt(curl, CURLOPT_URL, url);
-//         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-//         curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-//         res = curl_easy_perform(curl);
-//         curl_easy_cleanup(curl);
-//         fclose(fp);
-//         std::Log::out() << res << std::"\n";
-//     }
-// }
 
 
 std::string WebService::WebPost(const char url[], std::string &PostString){
@@ -56,6 +29,8 @@ std::string WebService::WebPost(const char url[], std::string &PostString){
         // curl_version_info_data *d = curl_version_info(CURLVERSION_NOW);
         // std::cout << d->version << "\n"; //Ubuntu 20 7.68.0
         
+    
+        // utils_str::string_replace(PostString, '104.18.108.8');
         if (curl){
             // https://prime17.000webhostapp.com/index.html
             curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -97,15 +72,21 @@ std::string WebService::WebPost(const char url[], std::string &PostString){
             res = curl_easy_perform(curl);
             if(res != CURLE_OK){
                 readBuffer = "";
+                unsigned long long Sleep=0;
                 
                 if (res != CURLE_SSL_CACERT_BADFILE || _SpecialCommunication==HTTP_SpecialCommunication::TurnOffSSL) {
                     Log::out() << "libcurl: " << res << ": " << errbuf << "\n";            
                     Log::out() << C_NoInternet << "\n";
+                    Sleep = 5000;
+                } else if (res == CURLE_COULDNT_RESOLVE_HOST)  {
+                    Log::out() << "libcurl: " << res << ": " << errbuf << "\n";            
+                    Log::out() << C_NoDNS << "\n";
+                    Sleep = 5*60*1000;
                 }
-                if (res != CURLE_SSL_CACERT_BADFILE) std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+                if (res != CURLE_SSL_CACERT_BADFILE) std::this_thread::sleep_for(std::chrono::milliseconds(Sleep));
             }
             curl_easy_cleanup(curl);
-            curl_global_cleanup(); //??
+            curl_global_cleanup();
         }
     } while (res == CURLE_COULDNT_RESOLVE_HOST);
     return readBuffer;    
@@ -115,6 +96,7 @@ WebService::WebService(){
     do {
         _Initialized=false;
         const char url[] = "https://prime17.000webhostapp.com/index.html";
+        // const char url[] = "http://104.18.108.8/index.html";
         std::string GetWorkPostString ("");
 
         _SpecialCommunication = HTTP_SpecialCommunication::NoSpecialSettings;
@@ -153,33 +135,6 @@ WebService::WebService(){
     } while (_SpecialCommunication == HTTP_SpecialCommunication::Failure);
 }
 
-// std::string GetWebNewWorkHTMLPage(){
-//     const char url[] = "https://prime17.000webhostapp.com/get_work.php";
-
-//     CURL *curl;
-//     CURLcode res;
-//     std::string readBuffer("");
-//     curl = curl_easy_init();
-//     if (curl){
-//         curl_easy_setopt(curl, CURLOPT_URL, url);
-//         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "worker_id=1");
-//         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-//         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-//         res = curl_easy_perform(curl);
-//         if(res != CURLE_OK){
-//             readBuffer = "";
-//             // TODO cleanup and wait??
-//             // curl_easy_strerror(res));
-//             // curl_global_cleanup();
-//         }
-
-//         curl_easy_cleanup(curl);
-//         // std::Log::out() << res << std::"\n";
-//         std::Log::out() << readBuffer << std::"\n";
-//     }
-//     return readBuffer;
-// }
 
 std::string WebService::HTMLFindOutput(std::string &HTMLPage){
     constexpr std::string_view strB ("OUTPUT_BEGIN");
@@ -188,15 +143,38 @@ std::string WebService::HTMLFindOutput(std::string &HTMLPage){
     std::size_t foundB = HTMLPage.find(strB);
     if (foundB==std::string::npos) return "";
     foundB+=strB.length();
-    // if (HTMLPage[foundB] == '[') foundB++; // skip [
     std::size_t foundE = HTMLPage.find(strE);
     if (foundE==std::string::npos) return "";
-    //move just before the text OUTPUT_END
     foundE--;
     
-    // if (HTMLPage[foundE] == ']') foundE--; //skip ]
     return HTMLPage.substr(foundB, foundE - foundB + 1);        
 }
 
 
 
+//     std::string readBuffer("");
+//         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+//         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+// size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream) {
+//     size_t written;
+//     written = fwrite(ptr, size, nmemb, stream);
+//     return written;
+// }
+
+// void downloadFile(const char* url, const char* fname) {
+//     CURL *curl;
+//     FILE *fp;
+//     CURLcode res;
+//     curl = curl_easy_init();
+//     if (curl){
+//         fp = fopen(fname, "wb");
+//         curl_easy_setopt(curl, CURLOPT_URL, url);
+//         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+//         curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+//         res = curl_easy_perform(curl);
+//         curl_easy_cleanup(curl);
+//         fclose(fp);
+//         std::Log::out() << res << std::"\n";
+//     }
+// }

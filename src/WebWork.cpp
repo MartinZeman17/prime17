@@ -73,10 +73,10 @@ WebGetWork WebWork::GetWebWork(WorkerStruct &w){
             const char url[] = "https://prime17.000webhostapp.com/get_work.php";
             std::string GetWorkPostString ("worker_id=");
             GetWorkPostString.append(w.worker_id);
-            WebInput = web.WebPost(url, GetWorkPostString);
+            WebInput = WebService::out().WebPost(url, GetWorkPostString);
             if (WebInput.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         } while (WebInput.empty());  
-        std::string WebOutput = web.HTMLFindOutput(WebInput);
+        std::string WebOutput = WebService::out().HTMLFindOutput(WebInput);
         if (WebOutput.empty()) {
         Log::out() <<  "WebOutput is missing: " << WebInput << "\n";
         } else {
@@ -93,7 +93,10 @@ WebGetWork WebWork::GetWebWork(WorkerStruct &w){
 
 void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
 
-    Log::out() << "Bit statistics for power: " << GetWork.c_power2 << " Offset Begin: " << GetWork.new_begin << " Offset End: " << GetWork.new_end << "\n";
+    Log::out() << "Bit statistics for power: " << GetWork.c_power2 << "\n";
+    Log::out() << "Started at: " << utils::GetCurrentDateTime() << "\n";
+    Log::out() << "Offset Begin: " << utils_str::FormatUInt(GetWork.new_begin) << "\n";
+    Log::out() << "Offset   End: " << utils_str::FormatUInt(GetWork.new_end) << "\n";
     if (GetWork.c_power2 <= 63) {
         GeneratorFunctionBitStatistics BSMT(GetWork.c_power2);
         SieveGenerator<unsigned long long> Sieve(C_SieveGeneratorDefaultMaxPrime);
@@ -103,14 +106,16 @@ void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
 
         unsigned long long Offset = static_cast<unsigned long long>(1) << GetWork.c_power2;
         Sieve.WorkMT(Offset + GetWork.new_begin, Offset + GetWork.new_end, BSMT);
-        BSMT.SaveFile();
+        // BSMT.SaveFile(); //It does not make sense to save partial files.
 
         // GetWebNewWorkHTMLPage();
         const char url[] = "https://prime17.000webhostapp.com/post_work.php";
         std::string PostString = PrepareWebPostString(GetWork, BSMT);
         // Log::out() << PostString << "\n";
-        std::string WebResponse = web.WebPost(url, PostString);
-       Log::out() << web.HTMLFindOutput(WebResponse) << "\n";
+        std::string WebResponse = WebService::out().WebPost(url, PostString);
+        // Log::out() << web.HTMLFindOutput(WebResponse) << "\n";
+        Log::out().logToFile(WebService::out().HTMLFindOutput(WebResponse));
+        Log::out().logToFile("\n");
 
     } else {
         Log::out() << "128 bit integers not ready yet, but it should be quite an easy task ..." << "\n";
