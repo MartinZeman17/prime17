@@ -1,83 +1,47 @@
-<html class="parallax">
-<head>
-    <link rel="stylesheet" href="index_style.css">
-</head>
-<body> 
+<html>
+<body style="background-image: url('pic/index_background_gradient.jpg'); background-repeat: repeat-x;"> 
+<!-- <h1 class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><img src="pic/index_title.jpg"/></h1>  -->
 
-<!-- Begin of the bar -->
-<nav class="menu_bar">
-    <ul>
+<h1 style="text-align: center; background-color: #d37693;"><strong>Welcome to prime mystery of the primes!</strong></h1>
 
-        <h2>Menu: 
-        </h2>
-        <h3 style="font-size: 125%;">
-        <li class="menu_bar"><a href="completed.php" title="Completed"><span>Completed</span></a></li>
-    
-        <p></p>
-        <li class="menu_bar"><a href="chart1.php" title="Charts 1"><span>Charts 1</span></a></li>
-        <li class="menu_bar"><a href="chart2.php" title="Charts 2"><span>Charts 2</span></a></li>
-        <li class="menu_bar"><a href="chart3.php" title="Charts 3"><span>Charts 3</span></a></li>
-        <li class="menu_bar"><a href="chart5.php" title="Charts 5"><span>Charts 4</span></a></li>
-        <p></p>
-        
-        <li class="menu_bar"><a href="work_out_T.php" title="Results T"><span>Results T</span></a></li>
-        
-        <li class="menu_bar"><a href="work_out_TT.php" title="Results TT"><span>Results TT</span></a></li>
-        
-        <li class="menu_bar"><a href="work_out_S.php" title="Results Superslices"><span>Results Superslices</span></a></li>
-     
-        <li class="menu_bar"><a href="work_out_S_odd.php" title="Results Odd Superslices"><span>Results Odd Superslices</span></a></li>
-    
-        <li class="menu_bar"><a href="work_out_S_even.php" title="Results Even Superslices"><span>Results Even Superslices</span></a></li>
-    
-        <li class="menu_bar"><a href="work_out_full.php" title="Results Full"><span>Results Full</span></a></li>
-        
-        <li class="menu_bar"><a href="work_output.php" title="Simple Result T"><span>Simple Result T</span></a></li>
-        
-        <li class="menu_bar"><a href="work_outputTT.php" title="Simple Result TT"><span>Simple Result TT</span></a></li>
-        <p></p>
-    
-        <li class="menu_bar"><a href="user_merit.php" title="User merit"><span>User merit</span></a></li>
-    
-        <li class="menu_bar"><a href="worker_merit.php" title="Worker merit"><span>Worker merit</span></a></li>
-    
-        <li class="menu_bar"><a href="check_work_results.php" title="Reconciliation"><span>Reconciliation</span></a></li>
-    
-        <li class="menu_bar"><a href="configuration.php" title="Configuration"><span>Configuration</span></a></li>
-        </h3>
-    </ul>
-</nav>
-<!-- End of the bar -->
 
-<!--<h1 id="welcome_box" class="welcome_bar"> <p></p> <strong>Welcome to prime mystery of the primes!</strong> <p></p> </h1>-->
+<h1><!-- Navbar --></h1>
+<h4 class="w3-bar-item">&nbsp;</h4>
+<h4 class="w3-bar-item"><strong>Menu</strong></h4>
+<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="completed.php">Completed</a></nav>
+<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="work_output.php">Results T</a></nav>
+<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="work_output_full_t.php">Results T - Full</a></nav>
 
-<div id="middlebox">
-<h1 class="welcome_bar"> <p></p> <strong>Welcome to prime mystery of the primes!</strong> <p></p> </h1>
-<img class="logo" src="pic/index_logo.png">
-<!--<div>-->
 
-<h2>About Prime17</h2>
+<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="work_outputTT.php">Results TT</a></nav>
 
-<p><span style="font-weight: 400;">This is a father and son rather amateurish project. We are aware there is a lot to complain about, but both our time and know-how are limited.<br />
+<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="user_merit.php">User merit</a></nav>
+<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="worker_merit.php">Worker merit</a></nav>
+<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="check_work_results.php">Reconciliation</a></nav>
+<nav class="w3-sidebar w3-bar-block w3-collapse w3-large w3-theme-l5 w3-animate-left"><a href="configuration.php">Configuration</a></nav>
+<h1><!-- Overlay effect when opening sidebar on small screens --><!-- Main content: shift it to the right by 250 pixels when the sidebar is visible --></h1>
+<div class="w3-main" style="margin-left: 250px;">
+<div class="w3-row w3-padding-64">
+<div class="w3-twothird w3-container">
+<h1 class="w3-text-teal">About Prime17</h1>
+<p><span style="font-weight: 400;">This is a father and son rather amateurish project. We are aware there is a lot to complain about, but the time and know-how is limited.<br />
 </span></p>
 
 <h2 class="w3-text-teal">The thesis</h2>
 <p><span style="font-weight: 400;">
-The project evolved from a year long secondary school thesis focused on primes.<br />Matej Zeman (a student and an author) and Martin Zeman (consultant) of the thesis decided to continue in revealing mysteries of the primes even after the thesis was submitted for approval. The original thesis (written in the Czech language) was led by <a href="https://www.mff.cuni.cz/cs/fakulta/organizacni-struktura/lide?hdl=13592">Filip Hložek</a> from the <a href="https://kdf.mff.cuni.cz/">Department of Physics Education</a> of the <a href="https://cuni.cz">Charles University in Prague</a> who is also a <a href="http://www.prirodniskola.cz/lide/lektori/filip-hlozek/">teacher</a> at Prirodni skola. The thesis can be found on the school website <a href="http://www.prirodniskola.cz">Prirodniskola.cz</a> or <a href="download/PP-Zeman-2020.pdf">here</a>. Currently researched question is described on pages 44-82. You can also see the <a href="download/Oponentsky_posudek_Veverka_Zeman.pdf"> opponent's report</a> prepared by <a href="http://physics.fjfi.cvut.cz/en/cb-profile/veverja3">Jakub Veverka</a> from the <a href="http://physics.fjfi.cvut.cz/en/">Department of Physics</a> of </a href="https://www.cvut.cz/">The Czech Technical University in Prague</a>. Comments to draft version of the thesis were also provided by <a href="https://fes.upce.cz/user/741/a0772d89-6109-41ba-b2aa-326edfc6e821">David Brebera</a> from the <a href="https://fes.upce.cz/">University of Pardubice, Faculty of Economics and Administration</a> and <a href="https://www2.karlin.mff.cuni.cz/~cuth/">Marek Cúth</a> from the <a href="https://www.mff.cuni.cz/en"> Faculty of Mathematics and Physics</a> of the <a href="https://cuni.cz">Charles University in Prague</a>.
+The project evolved from a year long secondary school thesis focused on primes.<br />Matej Zeman (a student and an author) and Martin Zeman (consultant) of the thesis decided to continue in revealing mysteries of the primes even after the thesis was submitted for approval. The original thesis (written in the Czech language) was led by <a href="https://www.mff.cuni.cz/cs/fakulta/organizacni-struktura/lide?hdl=13592">Filip Hložek</a> from the <a href="https://kdf.mff.cuni.cz/">Department of Physics Education</a> of the <a href="https://cuni.cz">Charles University in Prague</a> who is also a <a href="http://www.prirodniskola.cz/lide/lektori/filip-hlozek/">teacher</a> at Prirodni skola. The thesis can be found on the school website <a href="http://www.prirodniskola.cz/">Prirodniskola.cz</a> or <a href="download/PP-Zeman-2020.pdf">here</a>. Currently researched question is described on pages 44-82. You can also see the <a href="downloads/Oponentsky_posudek_Veverka_Zeman.pdf"> opponent's report</a> prepared by <a href="http://physics.fjfi.cvut.cz/en/cb-profile/veverja3">Jakub Veverka</a> from the <a href="http://physics.fjfi.cvut.cz/en/">Department of Physics</a> of </a href="https://www.cvut.cz/">The Czech Technical University in Prague</a>. Comments to draft version of the thesis were also provided by <a href="https://fes.upce.cz/user/741/a0772d89-6109-41ba-b2aa-326edfc6e821">David Brebera</a> from the <a href="https://fes.upce.cz/">University of Pardubice, Faculty of Economics and Administration</a> and <a href="https://www2.karlin.mff.cuni.cz/~cuth/">Marek Cúth</a> from the <a href="https://www.mff.cuni.cz/en"> Faculty of Mathematics and Physics</a> of the <a href="https://cuni.cz">Charles University in Prague</a>.
 
-    </span></p>
+</span></p>
 <hr />
 <h2 class="w3-text-teal">Graphs and results</h2>
-<p>
 Interim results and graphs can be found in <a href="https://docs.google.com/spreadsheets/d/1cdmOqepHAAYUg2JDrbS0Vaod4IOBCLDzQ56EQqfHXNM/edit?usp=sharing">this</a> Google table.
 
 All other data are in <a href="https://docs.google.com/spreadsheets/d/1YZKVsGMMEgvizjicBX59jQYdXLOTNTPxQfWsvlOgZO4/edit?usp=sharing">this</a> Google table.
-</p>
+
 <h2 class="w3-text-teal">Downloads</h2>
 <p>Download of Prime 17 executable:<br />Linux 64 bit version: <a class="w3-bar-item w3-button w3-hover-black" href="download/linux_prime17.zip">zip</a> <br />Windows 64 bit version: <a class="w3-bar-item w3-button w3-hover-black" href="download/win_prime17.zip">zip</a><br />Installation notes: just unzip the files wherever you have a write access righs. If something fails, please send an email. If you are resilient you may try to build executable by yourself from the source codes (see readme file patched with the source codes).</p>
-<hr />
-<!--</div>-->
-<!--</div>-->
+<hr /></div>
+</div>
 <div class="w3-row w3-padding-64">
 <div class="w3-twothird w3-container">
 <h2><strong>Tasks</strong></h2>
@@ -123,7 +87,8 @@ All other data are in <a href="https://docs.google.com/spreadsheets/d/1YZKVsGMME
 <p><span style="font-weight: 400;">Just run prime17 with the command line parameter -t or -t_tmp while another instance of prime17 is running.</span></p>
 <p><span style="font-weight: 400;">Set new cpu utilisation in percent (100 - all the virtual CPU cores will be utilised, 0 - no CPU core will be available and the program will end).</span></p>
 <p><span style="font-weight: 400;">The new settings will be saved to a config file and will take effect once the current work in progress is completed.</span></p>
-<p><span style="font-weight: 400;">You may also used prepared cmd or sh files for this purpose.</span></p>
+<p><span style="font-weight: 400;">You may also used prepared cmd&nbsp;</span></p>
+<p><span style="font-weight: 400;">'po99or sh files for this purpose.</span></p>
 <p>&nbsp;</p>
 <p><span style="font-weight: 400;">In case you terminate the program unexpectedly (closing, task manager, kill command, restart, power off) the current work in progress would be lost.</span></p>
 <p><span style="font-weight: 400;">After a certain timeout (an hour or so) the task will be reassigned to the first available computer =&nbsp; no big harm done!&nbsp;</span></p>
@@ -144,9 +109,6 @@ All other data are in <a href="https://docs.google.com/spreadsheets/d/1YZKVsGMME
 <p><span style="font-weight: 400;">LinkedIn: </span><a href="https://www.linkedin.com/in/matej-zeman-199867205/"><span style="font-weight: 400;">https://www.linkedin.com/in/matej-zeman-199867205/</span></a></p>
 </div>
 </div>
-<!--</div>-->
-<!--</ul>-->
-<br>
 </div>
 </body>
 </html>

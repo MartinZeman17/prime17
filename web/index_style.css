@@ -1,0 +1,179 @@
+.parallax {
+    background-image: url("https://us.123rf.com/450wm/31moonlight31/31moonlight311810/31moonlight31181000117/110483306-background-of-zeros-and-ones-in-dark-blue-colors.jpg?ver=6");
+    
+    /* Set a specific height */
+    min-height: 300px;
+    
+    /* Create the parallax scrolling effect */
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+
+
+/*   Pro PC   */
+@media only screen and (min-device-width: 1366px) {
+    #middlebox{
+        background:white;
+        width:75%;
+        /*height:100%;*/
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        border-left: 20px solid white;
+      	border-right: 20px solid white;
+    }
+    
+    body {
+        /*font-family: "Trebuchet MS", sans-serif;*/
+        font-family: "Comic Sans MS", sans-serif;
+        font-size: 150%;
+    }
+    /*border: 4px #dbc4bf;*/
+    #welcome_box{
+        width:75%;
+        top: 0;
+        overflow: hidden;
+        position: fixed;
+        margin-left: 12.5%;
+        margin-right: 12.5%;
+        margin-top: -1%;
+    }
+    .welcome_bar{
+        /*width:100%;*/
+        border: 2px solid black;
+      	font-size: 150%;
+        text-align: center;
+        background-color: #d37693;
+        /*text-shadow: 50px 30px 5px #794454;*/
+    }
+    
+    .welcome_bar p{
+      	font-size: 50%;
+        text-align: center;
+    }
+    
+    .menu_bar {
+        /*border: 2px solid black;*/
+        display: inline-block;
+        font-size: 85%;
+        /*display: table-row;*/
+    }
+    
+    .menu_bar a::after {
+        display: inline-block;
+        /*color: #000099;*/
+        color: #c7978b;
+        content: '';
+        font-size: 80%;
+        font-weight: bold;
+        padding: 0 5px;
+    }
+    
+    /* Change background on mouse-over */
+    .menu_bar a:hover {
+        background: #ffd6cc;
+        color: #000080;
+    }
+    nav {
+      	border: 10px;
+      	padding-right: 10px;
+      	border-color: black;
+      	background-color: #ffebe6;
+      	
+      	overflow: hidden;
+        position: fixed;
+        left: 0;
+        width: 11%;
+        height: 937px;
+        /*margin-top: 13%;*/
+        /*margin-bottom: 87%;*/
+    }
+}
+
+/*   Pro mobily   */
+@media only screen and (max-device-width: 1365px) {
+    #middlebox{
+        background:white;
+        border-color: white;
+        border-top: 15px;
+        border-bottom: 15px;
+        border-left: 15px;
+        border-right: 15px;
+    }
+    body {
+        font-family: "Arial", sans-serif;
+        font-size: 70%;
+    }
+    .parallax {
+        background-attachment: scroll;
+    }
+    .welcome_bar{
+        border-top: 2px solid black;
+        border-bottom: 2px solid black;
+      	border-left: 2px solid black;
+      	border-right: 2px solid black;
+      	font-size: 500%;
+        text-align: center;
+        background-color: #d37693;
+        /*text-shadow: 50px 30px 5px #794454;*/
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+    
+    .welcome_bar p{
+      	font-size: 100%;
+        text-align: center;
+    }
+    
+    
+    .menu_bar {
+        display: inline-block;
+        font-size: 125%;
+        /*display: table-row;*/
+    }
+    
+    .menu_bar a::after {
+        display: inline-block;
+        color: #000099;
+        content: '   ';
+        font-size: 150%;
+        font-weight: bold;
+        padding: 0 5px;
+    }
+    nav {
+        /*border: 10px #ba9288;*/
+        overflow: hidden;
+      	background-color: #ffebe6;
+        border: 2px solid black;
+        top: 0;
+        width: 99%;
+    }
+}
+
+div.relative {
+  position: relative;
+  width: 75%;
+  height: 100%;
+  border: 3px solid black;
+} 
+
+.menu_bar ol {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.logo {
+    width:400px;
+    height:400px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    opacity: 1;
+}
+
+img {
+    opacity: 0;
+}

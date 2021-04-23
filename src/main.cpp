@@ -29,7 +29,9 @@
 
 #include "Wizard.cpp"
 #include "Log.hpp"
-// #include "Log2.hpp"
+
+#include "Binomials.hpp"
+
 
 // C code must be used from C++ code using extern in order to disable messing with functions names needed for overloading (allowed only in C++, not in C)
 // Otherwise linking would fail
@@ -183,8 +185,9 @@ int main(int argc, char* argv[])
     check();
     checkWeb();
 
-    // Log::out() << utils_str::FormatUInt(UINT64_MAX) << "\n";
-
+    // Binomials::ComputeBinomials();
+    SieveGeneratorTestMT();
+    return 0;
 
     // bHelp =true;
     if (bHelp) {

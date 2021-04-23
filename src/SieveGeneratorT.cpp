@@ -90,9 +90,9 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
         p_MaxPrime = MaxPrime;
         long double MeasuredEffectivity = 100.0L * (long double) p_TestArrayCount / (long double) p_Primorial;
 
-        Log::out() << "Sieve Max Prime: " << MaxPrime << " ";
+        Log::out() << "Sieve Prime: " << MaxPrime << " ";
         Log::out() << "Primorial: " << utils_str::FormatUInt(p_Primorial) << " ";
-        Log::out() << "Test Array Size: " << utils_str::FormatUInt(p_TestArrayCount) << " ";
+        Log::out() << "Coprimes #: " << utils_str::FormatUInt(p_TestArrayCount) << " ";
         Log::out() << "Effectivity %: " << MeasuredEffectivity  << "\n"; 
 
         Threads(100);        

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Mar 21, 2021 at 01:48 PM
+-- Generation Time: Apr 23, 2021 at 06:38 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.23
 
@@ -22,6 +22,7 @@ DELIMITER $$
 --
 -- Procedures
 --
+DROP PROCEDURE IF EXISTS `check_diff02`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `check_diff02` ()  READS SQL DATA
 select 
 *
@@ -30,6 +31,7 @@ join work_results02 B on A.task_id = B.task_id and A.wr_power2 = B.wr_power2 and
 
 where A.wr_value <> B.wr_value$$
 
+DROP PROCEDURE IF EXISTS `check_worker`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `check_worker` (IN `post_input` VARCHAR(20000))  READS SQL DATA
 BEGIN
 set @post = post_input;
@@ -56,6 +58,7 @@ end if;
 
 END$$
 
+DROP PROCEDURE IF EXISTS `check_work_results`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `check_work_results` ()  READS SQL DATA
     COMMENT 'checks work_results against sum from work_results_rec'
 with 
@@ -77,6 +80,7 @@ left join work_results B on A.task_id = B.task_id and A.wr_power2 = B.wr_power2 
 select * from A2
 where wr_value <> wr_value_sum$$
 
+DROP PROCEDURE IF EXISTS `completed_report`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `completed_report` ()  READS SQL DATA
     COMMENT 'table of continually and partialy completed range'
 with         
@@ -150,7 +154,16 @@ w as (
     , AA.c_last_update as LastUpdate
     from c2 AA
     join power2 p2 on AA.power2 = p2.power2_id     
+),  p5 as (
+    
+    SELECT
+      AA.*
+    , timediff(LastUpdate, Created) as Duration
+    , format( EXTRACT(DAY FROM timediff(LastUpdate, Created)) + EXTRACT(HOUR FROM timediff(LastUpdate, Created))/24.0 + EXTRACT(MINUTE FROM timediff(LastUpdate, Created)) /(24.0 * 60), 2) as Days
+    , (Completed + Completed_Gaps + Taken) / 300.0 as ComplAvg
+    from p4 AA
 )
+    
 select 
       power2
     , c_end
@@ -159,16 +172,31 @@ select
     , Completed
     , case when Completed_Gaps = Completed then null else Completed_Gaps end as Completed_Gaps
     , case when Taken = Completed then null else Taken end as Taken
-    , Created
-    , LastUpdate
-from p4
+    , convert_tz(Created, '+0:00','+2:00') as Created
+    , convert_tz(LastUpdate, '+0:00','+2:00') as LastUpdate 
+    , Duration
+    , Days
+    , format(Days *  (1- ComplAvg) / ComplAvg, 2) as  RemainingDays
+
+from p5
 order by power2 DESC$$
 
+DROP PROCEDURE IF EXISTS `configuration`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `configuration` ()  READS SQL DATA
 select 
 cg.cg_key, cg.cg_val_ui
 from configuration cg$$
 
+DROP PROCEDURE IF EXISTS `get_graph_data`$$
+CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `get_graph_data` (IN `tbl` VARCHAR(50), IN `nbeg` VARCHAR(1000), IN `nend` VARCHAR(1000), IN `seq` VARCHAR(50))  READS SQL DATA
+BEGIN
+	SET @sql = CONCAT('SELECT COUNT(*) FROM ', tbl);
+	PREPARE stmt FROM @sql;
+	EXECUTE stmt;
+	DEALLOCATE PREPARE stmt;
+END$$
+
+DROP PROCEDURE IF EXISTS `get_work`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `get_work` (IN `asking_worker_id` INT UNSIGNED)  MODIFIES SQL DATA
 BEGIN
 
@@ -364,6 +392,7 @@ commit;
     
 END$$
 
+DROP PROCEDURE IF EXISTS `get_work_backup`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `get_work_backup` (IN `asking_worker_id` INT UNSIGNED)  MODIFIES SQL DATA
 BEGIN
 
@@ -559,6 +588,7 @@ commit;
     
 END$$
 
+DROP PROCEDURE IF EXISTS `register_user_get_workers`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `register_user_get_workers` (IN `email` VARCHAR(50))  READS SQL DATA
 SELECT
   wer.worker_id
@@ -571,6 +601,7 @@ join worker wer on wer.user_id = u.user_id
 WHERE 
 upper(u.u_mail) = upper(email)$$
 
+DROP PROCEDURE IF EXISTS `register_worker`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `register_worker` (IN `post` VARCHAR(20000))  MODIFIES SQL DATA
 BEGIN
 DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -635,6 +666,7 @@ where w.worker_id = @worker_id
     
 END$$
 
+DROP PROCEDURE IF EXISTS `user_merit`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `user_merit` ()  READS SQL DATA
 BEGIN
 
@@ -703,6 +735,7 @@ limit 500
 
 END$$
 
+DROP PROCEDURE IF EXISTS `worker_merit`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `worker_merit` ()  READS SQL DATA
 BEGIN
 select 
@@ -747,6 +780,7 @@ limit 500
 
 END$$
 
+DROP PROCEDURE IF EXISTS `work_output`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `work_output` ()  READS SQL DATA
     COMMENT 'number of primes in T slices'
 select
@@ -759,6 +793,7 @@ from  work_results wr
 where task_id =1 and wr.wr_inner_bits <= wr.wr_power2
 order by  power2  asc, bits asc$$
 
+DROP PROCEDURE IF EXISTS `work_outputTT`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `work_outputTT` ()  READS SQL DATA
     COMMENT 'number of primes in T slices'
 with 
@@ -788,6 +823,70 @@ select
 from A3
 order by power2 asc, bits asc$$
 
+DROP PROCEDURE IF EXISTS `work_output_full_t`$$
+CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `work_output_full_t` ()  READS SQL DATA
+    COMMENT 'number of primes in T slices'
+WITH
+A1 as (
+    
+select
+	  wr_power2 as power2
+	, wr.wr_inner_bits as bits
+	, wr.wr_value as pi_Nj
+	from  work_results wr
+where task_id =1 and wr.wr_inner_bits <= wr.wr_power2
+
+), A2 as (
+    
+    select
+    power2, 
+    sum(pi_Nj) as Pi_N
+    from  A1 AA
+    group by power2 
+    
+), A3 as (
+	select 
+      A1.*
+    , A2.Pi_N
+    from A1
+    join A2 on A1.power2 = A2.power2
+    
+),  A4 as (
+	select 
+    AA.*
+    , b.bin_val as T_Nj
+    , sum(b.bin_val) over (partition by  b.bin_n) as  T_N
+    from A3 AA
+    left join binomials b on b.bin_n+1 =  AA.power2 and  b.bin_k+1 = AA.bits
+
+), A5 as (
+
+select 
+  AA.power2 as N 
+, AA.bits as j 
+, AA.T_Nj
+, AA.Pi_N
+, AA.Pi_Nj
+, 100.0 * Pi_Nj/ Pi_N as q_Nj
+, 100.0 * T_Nj/T_N as Z_Nj
+from A4 AA 
+) , A6 as (
+    
+    select 
+      AA.* 
+    , q_Nj - Z_Nj as F_Nj
+    , q_Nj / Z_Nj as V_Nj
+    , Pi_N * Z_Nj as L_Nj
+    
+    from A5 AA
+) 
+    select 
+        AA.*
+      , Pi_Nj - L_Nj as  P_Nj
+    from A6 AA    
+    order by  N  asc, j asc$$
+
+DROP PROCEDURE IF EXISTS `work_received`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `work_received` (IN `post_input` VARCHAR(20000) CHARSET utf8)  MODIFIES SQL DATA
 BEGIN
 
@@ -948,16 +1047,16 @@ ELSE
     set @completed_end_old =null;    
     set @completed_end_old = null;
     set @sel_inserted_completed_id = null;
-    set @inserted_c_end = null;
+    set @inserted_c_end = null;    
     
-	if  @new_end_to_update is not null then
-
-        select completed_id, c.c_end into @completed_id, @completed_end_old
+    select completed_id, c.c_end into @completed_id, @completed_end_old
         from completed c
         where  c.task_id = @task_id and c.c_power2 = @c_power2;
-        set @msg = concat(@msg, "@completed_id=", COALESCE(@completed_id,"NULL"), " ");
-        set @msg = concat(@msg, "@completed_end_old=", COALESCE(@completed_end_old,"NULL"), " ");        
 
+    set @msg = concat(@msg, "@completed_id=", COALESCE(@completed_id,"NULL"), " ");
+    set @msg = concat(@msg, "@completed_end_old=", COALESCE(@completed_end_old,"NULL"), " ");        
+
+	if  @new_end_to_update is not null then
         if @completed_id is null then
             insert into completed (task_id, c_power2, c_end, c_created, c_last_update) values (@task_id, @c_power2, @new_end_to_update, @w_creation, now());
             #set @msg = concat(@msg, "new end inserted ", COALESCE(LAST_INSERT_ID(), "NULL", " ");
@@ -985,8 +1084,13 @@ ELSE
             
         end if;
     ELSE
-    	set @msg = concat(@msg,  "no new end ");
-        #select @msg as output; 
+    	if @completed_id is null THEN
+        	set @msg = concat(@msg,  "Error -  @new_end_to_update and @completed_id is null -> rollback");	
+            rollback;
+        ELSE
+    		update completed set c_last_update = now() where completed_id  = @completed_id;
+    	end if;
+        set @msg = concat(@msg,  "no new end ");
     end if;    
    
 	# power64 length is 2^64-1. When 1 is added it would overflow
@@ -1022,6 +1126,7 @@ commit;
     
 END$$
 
+DROP PROCEDURE IF EXISTS `work_received_backup`$$
 CREATE DEFINER=`id16232074_main`@`%` PROCEDURE `work_received_backup` (IN `post_input` VARCHAR(20000) CHARSET utf8)  MODIFIES SQL DATA
 BEGIN
 
@@ -1071,7 +1176,7 @@ where w.work_id = @new_work_id and w.task_id = @task_id and  w.w_begin=@new_begi
 
 
 #select @check_work;
-if @w_creation <> 1 THEN 
+if @w_creation = null THEN 
 	#select concat ("Work task not found.", @msg) as output;
     set @msg = concat(@msg, "Work task not found. ");
 ELSE
@@ -1182,16 +1287,16 @@ ELSE
     set @completed_end_old =null;    
     set @completed_end_old = null;
     set @sel_inserted_completed_id = null;
-    set @inserted_c_end = null;
+    set @inserted_c_end = null;    
     
-	if  @new_end_to_update is not null then
-
-        select completed_id, c.c_end into @completed_id, @completed_end_old
+    select completed_id, c.c_end into @completed_id, @completed_end_old
         from completed c
         where  c.task_id = @task_id and c.c_power2 = @c_power2;
-        set @msg = concat(@msg, "@completed_id=", COALESCE(@completed_id,"NULL"), " ");
-        set @msg = concat(@msg, "@completed_end_old=", COALESCE(@completed_end_old,"NULL"), " ");        
 
+    set @msg = concat(@msg, "@completed_id=", COALESCE(@completed_id,"NULL"), " ");
+    set @msg = concat(@msg, "@completed_end_old=", COALESCE(@completed_end_old,"NULL"), " ");        
+
+	if  @new_end_to_update is not null then
         if @completed_id is null then
             insert into completed (task_id, c_power2, c_end, c_created, c_last_update) values (@task_id, @c_power2, @new_end_to_update, @w_creation, now());
             #set @msg = concat(@msg, "new end inserted ", COALESCE(LAST_INSERT_ID(), "NULL", " ");
@@ -1219,8 +1324,13 @@ ELSE
             
         end if;
     ELSE
-    	set @msg = concat(@msg,  "no new end ");
-        #select @msg as output; 
+    	if @completed_id is null THEN
+        	set @msg = concat(@msg,  "Error -  @new_end_to_update and @completed_id is null -> rollback");	
+            rollback;
+        ELSE
+    		update completed set c_last_update = now() where completed_id  = @completed_id;
+    	end if;
+        set @msg = concat(@msg,  "no new end ");
     end if;    
    
 	# power64 length is 2^64-1. When 1 is added it would overflow
@@ -1261,16 +1371,32 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `binomials`
+--
+
+DROP TABLE IF EXISTS `binomials`;
+CREATE TABLE IF NOT EXISTS `binomials` (
+  `bin_n` tinyint(3) UNSIGNED NOT NULL,
+  `bin_k` tinyint(3) UNSIGNED NOT NULL,
+  `bin_val` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `completed`
 --
 
-CREATE TABLE `completed` (
-  `completed_id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `completed`;
+CREATE TABLE IF NOT EXISTS `completed` (
+  `completed_id` int(11) NOT NULL AUTO_INCREMENT,
   `task_id` tinyint(3) UNSIGNED NOT NULL,
   `c_power2` tinyint(3) UNSIGNED NOT NULL,
   `c_end` bigint(20) UNSIGNED NOT NULL COMMENT 'offset from power2',
   `c_created` datetime DEFAULT current_timestamp(),
-  `c_last_update` datetime DEFAULT NULL
+  `c_last_update` datetime DEFAULT NULL,
+  PRIMARY KEY (`completed_id`),
+  KEY `fk_completed_task_id` (`task_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1279,10 +1405,12 @@ CREATE TABLE `completed` (
 -- Table structure for table `configuration`
 --
 
-CREATE TABLE `configuration` (
-  `configuration_id` tinyint(4) NOT NULL,
+DROP TABLE IF EXISTS `configuration`;
+CREATE TABLE IF NOT EXISTS `configuration` (
+  `configuration_id` tinyint(4) NOT NULL AUTO_INCREMENT,
   `cg_key` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  `cg_val_ui` bigint(20) UNSIGNED NOT NULL
+  `cg_val_ui` bigint(20) UNSIGNED NOT NULL,
+  PRIMARY KEY (`configuration_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1291,9 +1419,11 @@ CREATE TABLE `configuration` (
 -- Table structure for table `power2`
 --
 
-CREATE TABLE `power2` (
+DROP TABLE IF EXISTS `power2`;
+CREATE TABLE IF NOT EXISTS `power2` (
   `power2_id` tinyint(3) UNSIGNED NOT NULL COMMENT 'ID=value of exponent for power of 2. Rage 1..64',
-  `p2_end_max_offset` bigint(20) UNSIGNED NOT NULL COMMENT '(2^^id)-1'
+  `p2_end_max_offset` bigint(20) UNSIGNED NOT NULL COMMENT '(2^^id)-1',
+  PRIMARY KEY (`power2_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1302,9 +1432,11 @@ CREATE TABLE `power2` (
 -- Table structure for table `progress_status`
 --
 
-CREATE TABLE `progress_status` (
+DROP TABLE IF EXISTS `progress_status`;
+CREATE TABLE IF NOT EXISTS `progress_status` (
   `progress_status_id` tinyint(3) UNSIGNED NOT NULL COMMENT 'ID of the progress status',
-  `ps_description` varchar(1000) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Description of the progress status'
+  `ps_description` varchar(1000) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Description of the progress status',
+  PRIMARY KEY (`progress_status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1313,10 +1445,12 @@ CREATE TABLE `progress_status` (
 -- Table structure for table `tasks`
 --
 
-CREATE TABLE `tasks` (
+DROP TABLE IF EXISTS `tasks`;
+CREATE TABLE IF NOT EXISTS `tasks` (
   `task_id` tinyint(3) UNSIGNED NOT NULL COMMENT 'ID of the task',
   `t_description` varchar(1000) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Description of the task',
-  `t_current` tinyint(1) NOT NULL COMMENT 'only one task may be current'
+  `t_current` tinyint(1) NOT NULL COMMENT 'only one task may be current',
+  PRIMARY KEY (`task_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1325,12 +1459,231 @@ CREATE TABLE `tasks` (
 -- Table structure for table `user`
 --
 
-CREATE TABLE `user` (
-  `user_id` int(11) NOT NULL COMMENT 'ID of the user',
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE IF NOT EXISTS `user` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID of the user',
   `u_mail` varchar(254) COLLATE utf8_unicode_ci NOT NULL COMMENT 'user email',
   `u_registered_date` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'time of user registration',
-  `u_name` varchar(50) COLLATE utf8_unicode_ci NOT NULL
+  `u_name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `idx__user_unique` (`u_mail`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_aux`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_aux`;
+CREATE TABLE IF NOT EXISTS `v_aux` (
+`N` tinyint(3) unsigned
+,`j` tinyint(3) unsigned
+,`m` decimal(8,1)
+,`mm` bigint(10)
+,`pi_Nj` bigint(20) unsigned
+,`pi_N` bigint(20) unsigned
+,`T_Nj` bigint(20) unsigned
+,`T_N` decimal(42,0)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_full`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_full`;
+CREATE TABLE IF NOT EXISTS `v_full` (
+`N` tinyint(3) unsigned
+,`Odd` int(3) unsigned
+,`j` tinyint(3) unsigned
+,`m` decimal(8,1)
+,`mm` bigint(10)
+,`pi_N` bigint(20) unsigned
+,`T_Nj` bigint(20) unsigned
+,`pi_Nj` bigint(20) unsigned
+,`q_Nj` double
+,`Z_Nj` double
+,`F_Nj` double
+,`V_Nj` double
+,`L_Nj` double
+,`P_Nj` double
+,`TT_Nj` bigint(21) unsigned
+,`ppi_Nj` decimal(21,0)
+,`qq_Nj` double
+,`ZZ_Nj` double
+,`FF_Nj` double
+,`VV_Nj` double
+,`LL_Nj` double
+,`PP_Nj` double
+,`TTCnt` int(1)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_S`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_S`;
+CREATE TABLE IF NOT EXISTS `v_S` (
+`N` tinyint(3) unsigned
+,`Odd` int(3) unsigned
+,`T_Ns` decimal(42,0)
+,`pi_N` bigint(20) unsigned
+,`pi_Ns0` decimal(42,0)
+,`pi_Ns1` decimal(42,0)
+,`qs0` double
+,`qs1` double
+,`Z_N` decimal(3,1)
+,`V_Ns0` double
+,`V_Ns1` double
+,`F_Ns0` varchar(71)
+,`F_Ns1` varchar(71)
+,`L_Ns` double
+,`P_Ns0` varchar(70)
+,`P_Ns1` varchar(70)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_S_aux`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_S_aux`;
+CREATE TABLE IF NOT EXISTS `v_S_aux` (
+`N` tinyint(3) unsigned
+,`Odd` int(3) unsigned
+,`jOdd` int(1)
+,`pi_N` bigint(20) unsigned
+,`T_Ns` decimal(42,0)
+,`pi_Ns` decimal(42,0)
+,`qs` double
+,`F_Ns` double
+,`L_Ns` double
+,`P_Ns` double
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_S_aux2`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_S_aux2`;
+CREATE TABLE IF NOT EXISTS `v_S_aux2` (
+`N` tinyint(3) unsigned
+,`Odd` int(3) unsigned
+,`T_Ns` decimal(42,0)
+,`pi_N` bigint(20) unsigned
+,`pi_Ns0` decimal(42,0)
+,`pi_Ns1` decimal(42,0)
+,`qs0` double
+,`qs1` double
+,`F_Ns0` double
+,`F_Ns1` double
+,`L_Ns` double
+,`P_Ns0` double
+,`P_Ns1` double
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_S_even`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_S_even`;
+CREATE TABLE IF NOT EXISTS `v_S_even` (
+`N` tinyint(3) unsigned
+,`Odd` int(3) unsigned
+,`T_Ns` decimal(42,0)
+,`pi_N` bigint(20) unsigned
+,`pi_Ns0` decimal(42,0)
+,`pi_Ns1` decimal(42,0)
+,`qs0` double
+,`F_Ns0` varchar(71)
+,`P_Ns0` varchar(70)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_S_odd`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_S_odd`;
+CREATE TABLE IF NOT EXISTS `v_S_odd` (
+`N` tinyint(3) unsigned
+,`Odd` int(3) unsigned
+,`T_Ns` decimal(42,0)
+,`pi_N` bigint(20) unsigned
+,`pi_Ns0` decimal(42,0)
+,`pi_Ns1` decimal(42,0)
+,`qs0` double
+,`F_Ns0` varchar(71)
+,`P_Ns0` varchar(70)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_T`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_T`;
+CREATE TABLE IF NOT EXISTS `v_T` (
+`N` tinyint(3) unsigned
+,`Odd` int(3) unsigned
+,`j` tinyint(3) unsigned
+,`m` decimal(8,1)
+,`mm` bigint(10)
+,`pi_N` bigint(20) unsigned
+,`T_Nj` bigint(20) unsigned
+,`pi_Nj` bigint(20) unsigned
+,`q_Nj` double
+,`Z_Nj` double
+,`F_Nj` double
+,`V_Nj` double
+,`L_Nj` double
+,`P_Nj` double
+);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `v_t2`
+--
+
+DROP TABLE IF EXISTS `v_t2`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_t2`  AS  with A4 as (select `A`.`N` AS `N`,`A`.`j` AS `j`,`A`.`m` AS `m`,`A`.`mm` AS `mm`,`A`.`pi_Nj` AS `pi_Nj`,`A`.`Pi_N` AS `Pi_N`,`A`.`T_Nj` AS `T_Nj`,`A`.`T_N` AS `T_N`,case when `A`.`mm` is null then NULL else case when `A`.`j` = `B`.`j` then `A`.`pi_Nj` else `A`.`pi_Nj` + `B`.`pi_Nj` end end AS `ppi_Nj`,case when `A`.`j` = `B`.`j` then 1 else 2 end AS `TTCnt` from (`v_T_aux` `A` left join `v_T_aux` `B` on(`A`.`N` = `B`.`N` and `A`.`j` + `B`.`j` = `B`.`N` + 1))), A5 as (select `AA`.`N` AS `N`,`AA`.`j` AS `j`,`AA`.`m` AS `m`,`AA`.`mm` AS `mm`,`AA`.`T_Nj` AS `T_Nj`,`AA`.`Pi_N` AS `Pi_N`,`AA`.`pi_Nj` AS `Pi_Nj`,cast(100.0 * `AA`.`pi_Nj` / `AA`.`Pi_N` as double) AS `q_Nj`,cast(100.0 * `AA`.`T_Nj` / `AA`.`T_N` as double) AS `Z_Nj`,cast(`AA`.`Pi_N` * (`AA`.`T_Nj` / `AA`.`T_N`) as double) AS `L_Nj`,`AA`.`ppi_Nj` AS `ppi_Nj`,`AA`.`TTCnt` AS `TTCnt` from `A4` `AA`), A6 as (select `AA`.`N` AS `N`,`AA`.`j` AS `j`,`AA`.`m` AS `m`,`AA`.`mm` AS `mm`,`AA`.`T_Nj` AS `T_Nj`,`AA`.`Pi_N` AS `Pi_N`,`AA`.`Pi_Nj` AS `Pi_Nj`,`AA`.`q_Nj` AS `q_Nj`,`AA`.`Z_Nj` AS `Z_Nj`,`AA`.`q_Nj` - `AA`.`Z_Nj` AS `F_Nj`,cast(`AA`.`q_Nj` / `AA`.`Z_Nj` as double) AS `V_Nj`,`AA`.`L_Nj` AS `L_Nj`,`AA`.`ppi_Nj` AS `ppi_Nj`,`AA`.`TTCnt` AS `TTCnt` from `A5` `AA`)select `AA`.`N` AS `N`,case when `AA`.`N` & 0x01 then 1 else 0 end AS `Odd`,`AA`.`j` AS `j`,`AA`.`m` AS `m`,`AA`.`mm` AS `mm`,`AA`.`T_Nj` AS `T_Nj`,`AA`.`Pi_N` AS `Pi_N`,`AA`.`Pi_Nj` AS `Pi_Nj`,`AA`.`q_Nj` AS `q_Nj`,`AA`.`Z_Nj` AS `Z_Nj`,`AA`.`F_Nj` AS `F_Nj`,`AA`.`V_Nj` AS `V_Nj`,`AA`.`L_Nj` AS `L_Nj`,`AA`.`Pi_Nj` - `AA`.`L_Nj` AS `P_Nj`,`AA`.`ppi_Nj` AS `ppi_Nj`,`AA`.`TTCnt` AS `TTCnt` from `A6` `AA` order by `AA`.`N`,`AA`.`j` ;
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_TT`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_TT`;
+CREATE TABLE IF NOT EXISTS `v_TT` (
+`N` tinyint(3) unsigned
+,`Odd` int(3) unsigned
+,`j` tinyint(3) unsigned
+,`m` decimal(8,1)
+,`mm` bigint(10)
+,`pi_N` bigint(20) unsigned
+,`TT_Nj` bigint(21) unsigned
+,`ppi_Nj` decimal(21,0)
+,`qq_Nj` double
+,`ZZ_Nj` double
+,`FF_Nj` double
+,`VV_Nj` double
+,`LL_Nj` double
+,`PP_Nj` double
+,`TTCnt` int(1)
+);
 
 -- --------------------------------------------------------
 
@@ -1338,15 +1691,21 @@ CREATE TABLE `user` (
 -- Table structure for table `work`
 --
 
-CREATE TABLE `work` (
-  `work_id` bigint(20) NOT NULL COMMENT 'ID of work',
+DROP TABLE IF EXISTS `work`;
+CREATE TABLE IF NOT EXISTS `work` (
+  `work_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID of work',
   `task_id` tinyint(4) UNSIGNED NOT NULL,
   `worker_id` int(10) UNSIGNED NOT NULL,
   `progress_status_id` tinyint(11) UNSIGNED NOT NULL,
   `w_creation` timestamp NOT NULL DEFAULT current_timestamp(),
   `w_begin` bigint(20) NOT NULL,
   `w_end` bigint(20) NOT NULL,
-  `w_power2` tinyint(4) UNSIGNED NOT NULL COMMENT 'power frompower of two indication beginning if interval being analysed'
+  `w_power2` tinyint(4) UNSIGNED NOT NULL COMMENT 'power frompower of two indication beginning if interval being analysed',
+  PRIMARY KEY (`work_id`),
+  UNIQUE KEY `idx_unique` (`w_power2`,`w_begin`),
+  KEY `fk_work_progress_status_id` (`progress_status_id`),
+  KEY `fk_work_task_id` (`task_id`),
+  KEY `fk_work_worker_id` (`worker_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1355,12 +1714,15 @@ CREATE TABLE `work` (
 -- Table structure for table `worker`
 --
 
-CREATE TABLE `worker` (
-  `worker_id` int(10) UNSIGNED NOT NULL COMMENT 'ID of the worker',
+DROP TABLE IF EXISTS `worker`;
+CREATE TABLE IF NOT EXISTS `worker` (
+  `worker_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID of the worker',
   `user_id` int(11) NOT NULL,
   `w_registered` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `w_seed` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  `w_name` varchar(1000) COLLATE utf8_unicode_ci NOT NULL
+  `w_name` varchar(1000) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`worker_id`),
+  KEY `fk_worker_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1369,12 +1731,17 @@ CREATE TABLE `worker` (
 -- Table structure for table `worker_merit`
 --
 
-CREATE TABLE `worker_merit` (
-  `worker_merit_id` int(10) UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `worker_merit`;
+CREATE TABLE IF NOT EXISTS `worker_merit` (
+  `worker_merit_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `task_id` tinyint(3) UNSIGNED NOT NULL,
   `worker_id` int(10) UNSIGNED NOT NULL,
   `power2_id` tinyint(3) UNSIGNED NOT NULL,
-  `wm_merit` double NOT NULL
+  `wm_merit` double NOT NULL,
+  PRIMARY KEY (`worker_merit_id`),
+  KEY `work_merit_task_id` (`task_id`),
+  KEY `work_merit_worker_id` (`worker_id`),
+  KEY `work_merit_power2_id` (`power2_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1383,12 +1750,15 @@ CREATE TABLE `worker_merit` (
 -- Table structure for table `work_results`
 --
 
-CREATE TABLE `work_results` (
-  `work_results_id` int(10) UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `work_results`;
+CREATE TABLE IF NOT EXISTS `work_results` (
+  `work_results_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `wr_inner_bits` tinyint(3) UNSIGNED NOT NULL,
   `wr_value` bigint(20) UNSIGNED NOT NULL,
   `wr_power2` tinyint(3) UNSIGNED NOT NULL,
-  `task_id` tinyint(3) UNSIGNED NOT NULL
+  `task_id` tinyint(3) UNSIGNED NOT NULL,
+  PRIMARY KEY (`work_results_id`),
+  KEY `work_results_task_id` (`task_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1397,8 +1767,26 @@ CREATE TABLE `work_results` (
 -- Table structure for table `work_results02`
 --
 
-CREATE TABLE `work_results02` (
-  `work_results_id` int(10) UNSIGNED NOT NULL,
+DROP TABLE IF EXISTS `work_results02`;
+CREATE TABLE IF NOT EXISTS `work_results02` (
+  `work_results_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `wr_inner_bits` tinyint(3) UNSIGNED NOT NULL,
+  `wr_value` bigint(20) UNSIGNED NOT NULL,
+  `wr_power2` tinyint(3) UNSIGNED NOT NULL,
+  `task_id` tinyint(3) UNSIGNED NOT NULL,
+  PRIMARY KEY (`work_results_id`),
+  KEY `work_results_task_id` (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `work_results_rec`
+--
+
+DROP TABLE IF EXISTS `work_results_rec`;
+CREATE TABLE IF NOT EXISTS `work_results_rec` (
+  `work_id` bigint(20) UNSIGNED NOT NULL,
   `wr_inner_bits` tinyint(3) UNSIGNED NOT NULL,
   `wr_value` bigint(20) UNSIGNED NOT NULL,
   `wr_power2` tinyint(3) UNSIGNED NOT NULL,
@@ -1408,150 +1796,83 @@ CREATE TABLE `work_results02` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `work_results_rec`
+-- Structure for view `v_aux`
 --
+DROP TABLE IF EXISTS `v_aux`;
 
-CREATE TABLE `work_results_rec` (
-  `work_id` bigint(20) UNSIGNED NOT NULL,
-  `wr_inner_bits` tinyint(3) UNSIGNED NOT NULL,
-  `wr_value` bigint(20) UNSIGNED NOT NULL,
-  `wr_power2` tinyint(3) UNSIGNED NOT NULL,
-  `task_id` tinyint(3) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_aux`  AS  with A1 as (select `wr`.`wr_power2` AS `N`,`wr`.`wr_inner_bits` AS `j`,round(1.0 * `wr`.`wr_inner_bits` - (`wr`.`wr_power2` + 1.0) / 2.0,1) AS `m`,`wr`.`wr_value` AS `pi_Nj`,cast(sum(`wr`.`wr_value`) over ( partition by `wr`.`wr_power2`) as unsigned) AS `pi_N` from `work_results` `wr` where `wr`.`task_id` = 1 and `wr`.`wr_inner_bits` <= `wr`.`wr_power2`), A3 as (select `AA`.`N` AS `N`,`AA`.`j` AS `j`,`AA`.`m` AS `m`,case when `AA`.`N` & 0x01 = 1 then case when round(`AA`.`m` - 0.25,0) <= 0 then cast(round(`AA`.`m` - 0.25,0) as signed) else NULL end else case when round(`AA`.`m` - 0.25,0) < 0 then cast(round(`AA`.`m` - 0.25,0) as signed) else NULL end end AS `mm`,`AA`.`pi_Nj` AS `pi_Nj`,`AA`.`pi_N` AS `pi_N`,`b`.`bin_val` AS `T_Nj`,sum(`b`.`bin_val`) over ( partition by `b`.`bin_n`) AS `T_N` from (`A1` `AA` left join `binomials` `b` on(`b`.`bin_n` + 1 = `AA`.`N` and `b`.`bin_k` + 1 = `AA`.`j`)))select `A3`.`N` AS `N`,`A3`.`j` AS `j`,`A3`.`m` AS `m`,`A3`.`mm` AS `mm`,`A3`.`pi_Nj` AS `pi_Nj`,`A3`.`pi_N` AS `pi_N`,`A3`.`T_Nj` AS `T_Nj`,`A3`.`T_N` AS `T_N` from `A3` order by `A3`.`N`,`A3`.`j` ;
+
+-- --------------------------------------------------------
 
 --
--- Indexes for dumped tables
+-- Structure for view `v_full`
 --
+DROP TABLE IF EXISTS `v_full`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_full`  AS  with A4 as (select `A`.`N` AS `N`,`A`.`j` AS `j`,`A`.`m` AS `m`,`A`.`mm` AS `mm`,`A`.`pi_Nj` AS `pi_Nj`,`A`.`pi_N` AS `pi_N`,`A`.`T_Nj` AS `T_Nj`,`A`.`T_N` AS `T_N`,case when `A`.`mm` is null then NULL else case when `A`.`j` = `B`.`j` then `A`.`pi_Nj` else `A`.`pi_Nj` + `B`.`pi_Nj` end end AS `ppi_Nj`,case when `A`.`j` = `B`.`j` then 1 else 2 end AS `TTCnt`,case when `A`.`j` = `B`.`j` then `A`.`T_Nj` else `A`.`T_Nj` + `A`.`T_Nj` end AS `TT_Nj` from (`v_aux` `A` left join `v_aux` `B` on(`A`.`N` = `B`.`N` and `A`.`j` + `B`.`j` = `B`.`N` + 1))), A5 as (select `AA`.`N` AS `N`,`AA`.`j` AS `j`,`AA`.`m` AS `m`,`AA`.`mm` AS `mm`,`AA`.`T_Nj` AS `T_Nj`,`AA`.`pi_N` AS `pi_N`,`AA`.`pi_Nj` AS `pi_Nj`,cast(100.0 * `AA`.`pi_Nj` / `AA`.`pi_N` as double) AS `q_Nj`,cast(100.0 * `AA`.`T_Nj` / `AA`.`T_N` as double) AS `Z_Nj`,cast(`AA`.`pi_N` * (`AA`.`T_Nj` / `AA`.`T_N`) as double) AS `L_Nj`,`AA`.`ppi_Nj` AS `ppi_Nj`,`AA`.`TTCnt` AS `TTCnt`,`AA`.`T_N` AS `T_N`,`AA`.`TT_Nj` AS `TT_Nj` from `A4` `AA`), A6 as (select `AA`.`N` AS `N`,`AA`.`j` AS `j`,`AA`.`m` AS `m`,`AA`.`mm` AS `mm`,`AA`.`T_Nj` AS `T_Nj`,`AA`.`pi_N` AS `pi_N`,`AA`.`pi_Nj` AS `pi_Nj`,`AA`.`q_Nj` AS `q_Nj`,`AA`.`Z_Nj` AS `Z_Nj`,`AA`.`q_Nj` - `AA`.`Z_Nj` AS `F_Nj`,cast(`AA`.`q_Nj` / `AA`.`Z_Nj` as double) AS `V_Nj`,`AA`.`L_Nj` AS `L_Nj`,`AA`.`TT_Nj` AS `TT_Nj`,`AA`.`ppi_Nj` AS `ppi_Nj`,`AA`.`TTCnt` AS `TTCnt`,cast(100.0 * `AA`.`ppi_Nj` / `AA`.`pi_N` as double) AS `qq_Nj`,cast(100.0 * `AA`.`TT_Nj` / `AA`.`T_N` as double) AS `ZZ_Nj`,cast(`AA`.`pi_N` * (`AA`.`TT_Nj` / `AA`.`T_N`) as double) AS `LL_Nj` from `A5` `AA`)select `AA`.`N` AS `N`,`AA`.`N` MOD 4 AS `Odd`,`AA`.`j` AS `j`,`AA`.`m` AS `m`,`AA`.`mm` AS `mm`,`AA`.`pi_N` AS `pi_N`,`AA`.`T_Nj` AS `T_Nj`,`AA`.`pi_Nj` AS `pi_Nj`,`AA`.`q_Nj` AS `q_Nj`,`AA`.`Z_Nj` AS `Z_Nj`,`AA`.`F_Nj` AS `F_Nj`,`AA`.`V_Nj` AS `V_Nj`,`AA`.`L_Nj` AS `L_Nj`,`AA`.`pi_Nj` - `AA`.`L_Nj` AS `P_Nj`,`AA`.`TT_Nj` AS `TT_Nj`,`AA`.`ppi_Nj` AS `ppi_Nj`,`AA`.`qq_Nj` AS `qq_Nj`,`AA`.`ZZ_Nj` AS `ZZ_Nj`,`AA`.`qq_Nj` - `AA`.`ZZ_Nj` AS `FF_Nj`,cast(`AA`.`qq_Nj` / `AA`.`ZZ_Nj` as double) AS `VV_Nj`,`AA`.`LL_Nj` AS `LL_Nj`,`AA`.`ppi_Nj` - `AA`.`LL_Nj` AS `PP_Nj`,`AA`.`TTCnt` AS `TTCnt` from `A6` `AA` order by `AA`.`N`,`AA`.`j` ;
+
+-- --------------------------------------------------------
 
 --
--- Indexes for table `completed`
+-- Structure for view `v_S`
 --
-ALTER TABLE `completed`
-  ADD PRIMARY KEY (`completed_id`),
-  ADD KEY `fk_completed_task_id` (`task_id`);
+DROP TABLE IF EXISTS `v_S`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_S`  AS  select `A`.`N` AS `N`,`A`.`Odd` AS `Odd`,`A`.`T_Ns` AS `T_Ns`,`A`.`pi_N` AS `pi_N`,`A`.`pi_Ns0` AS `pi_Ns0`,`A`.`pi_Ns1` AS `pi_Ns1`,`A`.`qs0` AS `qs0`,`A`.`qs1` AS `qs1`,50.0 AS `Z_N`,`A`.`qs0` / 50.0 AS `V_Ns0`,`A`.`qs1` / 50.0 AS `V_Ns1`,format(`A`.`F_Ns0`,15) AS `F_Ns0`,format(`A`.`F_Ns1`,15) AS `F_Ns1`,`A`.`L_Ns` AS `L_Ns`,format(`A`.`P_Ns0`,1) AS `P_Ns0`,format(`A`.`P_Ns1`,1) AS `P_Ns1` from `v_S_aux2` `A` order by `A`.`N` ;
+
+-- --------------------------------------------------------
 
 --
--- Indexes for table `configuration`
+-- Structure for view `v_S_aux`
 --
-ALTER TABLE `configuration`
-  ADD PRIMARY KEY (`configuration_id`);
+DROP TABLE IF EXISTS `v_S_aux`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_S_aux`  AS  with A as (select `v_full`.`N` AS `N`,`v_full`.`Odd` AS `Odd`,case when `v_full`.`j` & 0x01 then 1 else 0 end AS `jOdd`,max(`v_full`.`pi_N`) AS `pi_N`,sum(case when `v_full`.`T_Nj` is null then 0 else `v_full`.`T_Nj` end) AS `T_Ns`,sum(`v_full`.`pi_Nj`) AS `pi_Ns` from `v_full` group by `v_full`.`N`,`v_full`.`Odd`,case when `v_full`.`j` & 0x01 then 1 else 0 end)select `A`.`N` AS `N`,`A`.`Odd` AS `Odd`,`A`.`jOdd` AS `jOdd`,`A`.`pi_N` AS `pi_N`,`A`.`T_Ns` AS `T_Ns`,`A`.`pi_Ns` AS `pi_Ns`,cast(100.0 * (`A`.`pi_Ns` / `A`.`pi_N`) as double) AS `qs`,cast(100.0 * (`A`.`pi_Ns` / `A`.`pi_N`) as double) - 50.0 AS `F_Ns`,cast(`A`.`pi_N` / 2.0 as double) AS `L_Ns`,cast(`A`.`pi_Ns` - `A`.`pi_N` / 2.0 as double) AS `P_Ns` from `A` order by `A`.`N`,`A`.`Odd`,`A`.`jOdd` ;
+
+-- --------------------------------------------------------
 
 --
--- Indexes for table `power2`
+-- Structure for view `v_S_aux2`
 --
-ALTER TABLE `power2`
-  ADD PRIMARY KEY (`power2_id`);
+DROP TABLE IF EXISTS `v_S_aux2`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_S_aux2`  AS  select `A`.`N` AS `N`,`A`.`Odd` AS `Odd`,`A`.`T_Ns` AS `T_Ns`,`A`.`pi_N` AS `pi_N`,`A`.`pi_Ns` AS `pi_Ns0`,`B`.`pi_Ns` AS `pi_Ns1`,`A`.`qs` AS `qs0`,`B`.`qs` AS `qs1`,`A`.`F_Ns` AS `F_Ns0`,`B`.`F_Ns` AS `F_Ns1`,cast(`A`.`pi_N` * 0.5 as double) AS `L_Ns`,cast(`A`.`pi_Ns` - `A`.`pi_N` * 0.5 as double) AS `P_Ns0`,cast(`B`.`pi_Ns` - `A`.`pi_N` * 0.5 as double) AS `P_Ns1` from (`v_S_aux` `A` join `v_S_aux` `B` on(`A`.`N` = `B`.`N` and `A`.`jOdd` <> `B`.`jOdd`)) where `A`.`jOdd` = 0 order by `A`.`N` ;
+
+-- --------------------------------------------------------
 
 --
--- Indexes for table `progress_status`
+-- Structure for view `v_S_even`
 --
-ALTER TABLE `progress_status`
-  ADD PRIMARY KEY (`progress_status_id`);
+DROP TABLE IF EXISTS `v_S_even`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_S_even`  AS  select `A`.`N` AS `N`,`A`.`Odd` AS `Odd`,`A`.`T_Ns` AS `T_Ns`,`A`.`pi_N` AS `pi_N`,`A`.`pi_Ns0` AS `pi_Ns0`,`A`.`pi_Ns1` AS `pi_Ns1`,`A`.`qs0` AS `qs0`,format(`A`.`F_Ns0`,15) AS `F_Ns0`,format(`A`.`P_Ns0`,1) AS `P_Ns0` from `v_S_aux2` `A` where `A`.`Odd` in (0,2) order by `A`.`N` ;
+
+-- --------------------------------------------------------
 
 --
--- Indexes for table `tasks`
+-- Structure for view `v_S_odd`
 --
-ALTER TABLE `tasks`
-  ADD PRIMARY KEY (`task_id`);
+DROP TABLE IF EXISTS `v_S_odd`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_S_odd`  AS  select `A`.`N` AS `N`,`A`.`Odd` AS `Odd`,`A`.`T_Ns` AS `T_Ns`,`A`.`pi_N` AS `pi_N`,`A`.`pi_Ns0` AS `pi_Ns0`,`A`.`pi_Ns1` AS `pi_Ns1`,`A`.`qs0` AS `qs0`,format(`A`.`F_Ns0`,15) AS `F_Ns0`,format(`A`.`P_Ns0`,1) AS `P_Ns0` from `v_S_aux2` `A` where `A`.`Odd` in (1,3) order by `A`.`N` ;
+
+-- --------------------------------------------------------
 
 --
--- Indexes for table `user`
+-- Structure for view `v_T`
 --
-ALTER TABLE `user`
-  ADD PRIMARY KEY (`user_id`),
-  ADD UNIQUE KEY `idx__user_unique` (`u_mail`) USING BTREE;
+DROP TABLE IF EXISTS `v_T`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_T`  AS  select `v_full`.`N` AS `N`,`v_full`.`Odd` AS `Odd`,`v_full`.`j` AS `j`,`v_full`.`m` AS `m`,`v_full`.`mm` AS `mm`,`v_full`.`pi_N` AS `pi_N`,`v_full`.`T_Nj` AS `T_Nj`,`v_full`.`pi_Nj` AS `pi_Nj`,`v_full`.`q_Nj` AS `q_Nj`,`v_full`.`Z_Nj` AS `Z_Nj`,`v_full`.`F_Nj` AS `F_Nj`,`v_full`.`V_Nj` AS `V_Nj`,`v_full`.`L_Nj` AS `L_Nj`,`v_full`.`P_Nj` AS `P_Nj` from `v_full` order by `v_full`.`N`,`v_full`.`j` ;
+
+-- --------------------------------------------------------
 
 --
--- Indexes for table `work`
+-- Structure for view `v_TT`
 --
-ALTER TABLE `work`
-  ADD PRIMARY KEY (`work_id`),
-  ADD UNIQUE KEY `idx_unique` (`w_power2`,`w_begin`),
-  ADD KEY `fk_work_progress_status_id` (`progress_status_id`),
-  ADD KEY `fk_work_task_id` (`task_id`),
-  ADD KEY `fk_work_worker_id` (`worker_id`);
+DROP TABLE IF EXISTS `v_TT`;
 
---
--- Indexes for table `worker`
---
-ALTER TABLE `worker`
-  ADD PRIMARY KEY (`worker_id`),
-  ADD KEY `fk_worker_user_id` (`user_id`);
-
---
--- Indexes for table `worker_merit`
---
-ALTER TABLE `worker_merit`
-  ADD PRIMARY KEY (`worker_merit_id`),
-  ADD KEY `work_merit_task_id` (`task_id`),
-  ADD KEY `work_merit_worker_id` (`worker_id`),
-  ADD KEY `work_merit_power2_id` (`power2_id`);
-
---
--- Indexes for table `work_results`
---
-ALTER TABLE `work_results`
-  ADD PRIMARY KEY (`work_results_id`),
-  ADD KEY `work_results_task_id` (`task_id`);
-
---
--- Indexes for table `work_results02`
---
-ALTER TABLE `work_results02`
-  ADD PRIMARY KEY (`work_results_id`),
-  ADD KEY `work_results_task_id` (`task_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `completed`
---
-ALTER TABLE `completed`
-  MODIFY `completed_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `configuration`
---
-ALTER TABLE `configuration`
-  MODIFY `configuration_id` tinyint(4) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user`
---
-ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID of the user';
-
---
--- AUTO_INCREMENT for table `work`
---
-ALTER TABLE `work`
-  MODIFY `work_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID of work';
-
---
--- AUTO_INCREMENT for table `worker`
---
-ALTER TABLE `worker`
-  MODIFY `worker_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID of the worker';
-
---
--- AUTO_INCREMENT for table `worker_merit`
---
-ALTER TABLE `worker_merit`
-  MODIFY `worker_merit_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `work_results`
---
-ALTER TABLE `work_results`
-  MODIFY `work_results_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `work_results02`
---
-ALTER TABLE `work_results02`
-  MODIFY `work_results_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_TT`  AS  select `v_full`.`N` AS `N`,`v_full`.`Odd` AS `Odd`,`v_full`.`j` AS `j`,`v_full`.`m` AS `m`,`v_full`.`mm` AS `mm`,`v_full`.`pi_N` AS `pi_N`,`v_full`.`TT_Nj` AS `TT_Nj`,`v_full`.`ppi_Nj` AS `ppi_Nj`,`v_full`.`qq_Nj` AS `qq_Nj`,`v_full`.`ZZ_Nj` AS `ZZ_Nj`,`v_full`.`FF_Nj` AS `FF_Nj`,`v_full`.`VV_Nj` AS `VV_Nj`,`v_full`.`LL_Nj` AS `LL_Nj`,`v_full`.`PP_Nj` AS `PP_Nj`,`v_full`.`TTCnt` AS `TTCnt` from `v_full` where `v_full`.`mm` is not null and `v_full`.`TT_Nj` is not null order by `v_full`.`N`,`v_full`.`j` ;
 
 --
 -- Constraints for dumped tables

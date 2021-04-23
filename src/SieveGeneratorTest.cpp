@@ -16,16 +16,31 @@ using std::cout;
 
 void SieveGeneratorTest(){
     const SieveGenerator<uint128_t> A(C_SieveGeneratorDefaultMaxPrime);
-    // GeneratorFunctionBitStatistics GF(nullptr);
     GeneratorFunctionBitStatistics GF;
 
     uint128_t Begin = UINT64_MAX; // UINT64_MAX + 1 is evaluated at compile time as 0 !!!  
     Begin++;
-    uint128_t End = Begin + 1000000000UL;
+    uint128_t End = Begin + 100000000UL;
 
     A.Work(Begin, End, GF);
+    GF.SaveFile();
 
 }
+
+void SieveGeneratorTestMT(){
+    SieveGenerator<unsigned long long> A(C_SieveGeneratorDefaultMaxPrime);
+    GeneratorFunctionBitStatistics GF;
+
+    unsigned long long Begin = static_cast<uint64_t>(1) << 39;
+    unsigned long long End = Begin + (Begin -1);
+    // End = Begin + 1000000000UL;
+
+    // A.Work(Begin, End, GF);
+    A.WorkMT(Begin, End, GF);
+    GF.SaveFile();
+
+}
+
 
 /* Works fine up to 31 (computation time is several hours). For higher primorials some form of optimization is needed.*/
 void EratosthenesEffectivity(){

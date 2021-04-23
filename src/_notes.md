@@ -22,6 +22,7 @@ ToDo Cpp:
 - use cpp wrapper for ncurses? https://stackoverflow.com/questions/53857540/using-native-c-wrappers-for-ncurses-how-can-i-create-a-menu-submenu-system
 - resize
 - mazat netisknutelne znaky z wizardu - backspace 08h -clean funkce
+- start bez internetu - chce registraci
 
 ToDo Web:
 - FAQ
@@ -32,7 +33,9 @@ ToDo DB:
 - vstup jako Json?
 - výpočet super slices
 - work_results_rec  - promazavání
-- formatovat cisla 000 000
+- formatovat cisla 000 000??
+- time_zones +2 jen v completed
+- FNj pridat desetinna mista
 
 
 Tests:
@@ -51,6 +54,11 @@ Issues:
 Links:
 https://prime17.000webhostapp.com/
 https://stackoverflow.com/questions/4064444/returning-json-from-a-php-script
+
+Reading:
+https://isocpp.org/wiki/faq/exceptions#ctors-can-throw
+https://stackoverflow.com/questions/45836650/how-do-i-integrate-msys2-shell-into-visual-studio-code-on-window
+
 
 
 DB refresh:

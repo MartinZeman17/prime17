@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-Welcome to prime mystery of the primes!
 
 <?php
 echo "<table style='border: solid 1px black;'>";
@@ -49,6 +48,9 @@ catch(PDOException $e) {
 $conn = null;
 echo "</table>";
 ?>
+</br></br>
+Hall of fame of individual users. Each user may have more computers-workers. Merit is an artificial metrics reflecting overall lenght (across various intervals) sucessfully computed and delivered nibbles. Despite the spent effort no merit can be gained for unfinished nibbles.
+
 
 </body>
 </html>
