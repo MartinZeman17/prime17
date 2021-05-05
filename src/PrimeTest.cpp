@@ -75,6 +75,7 @@ PrimeTest::PrimeTest(unsigned int iBits){
 }
 
 PrimeTest::~PrimeTest(){
+    // private variables
     mpz_clear(mpzB);
     mpz_clear(mpzNm1);
     mpz_clear(mpzd);
@@ -86,6 +87,9 @@ PrimeTest::~PrimeTest(){
 
     mpz_clear(tmp);
     mpz_clear(mpz_Prime64);
+
+    //public part of the class
+    mpz_clear(NumberWithMaxD);
 }
 
 

@@ -3,11 +3,11 @@
 
 #include <gmp.h>
 #include <chrono>
+#include <memory>
 
 #include "int128_t.hpp"
 using namespace primecount;
 
-#include "PrimeTest.hpp"
 
 using namespace std::chrono;
 

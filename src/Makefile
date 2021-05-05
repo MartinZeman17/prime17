@@ -5,8 +5,9 @@
 CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3
 
 # debug version
-# CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations
-# -fsanitize=address
+# CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -fsanitize=address
+#CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations 
+
 
 # output binary dir
 BINDIR := ../bin/
@@ -90,6 +91,7 @@ LDLIBS := -lgmp -lgmpxx -lstdc++fs -lpthread -lcurl -ljsoncpp -lncurses
 # it may be possible to staticaly link only gmp library by linking gmp.a just like ordinary .o file
 # LDFLAGS := -static
 LDFLAGS := 
+# LDFLAGS := -fsanitize=address
 # Bug with combination of static linking and pthread 
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=52590
 

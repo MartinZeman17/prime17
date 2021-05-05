@@ -23,10 +23,14 @@ ToDo Cpp:
 - resize
 - mazat netisknutelne znaky z wizardu - backspace 08h -clean funkce
 - start bez internetu - chce registraci
+- Azure chyba: config file toying: {"status":",,,"}]
+- sanitizer na web work
+
+
+
 
 ToDo Web:
 - FAQ
-- graf s výsledky?
 
 ToDo DB:
 - vymyslet tabulky pro testování- druha db?

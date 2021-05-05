@@ -163,7 +163,50 @@ void checkWeb(){
 
 }
 
+void ShowHelp(){
+    Log::out() <<  "Help:" << "\n";
+    Log::out() << "\t-h \t\t\t\tHelp. You may also try to visit web pages at prime17.000webhostapp.com" << "\n";
+    Log::out() << "\t-w -wizard \t\t\tRun wizard - first init or re-register." << "\n";
+    Log::out() << "\t-t -thread -cpu \t\tSet number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
+    Log::out() << "\t-t_tmp -thread_tmp -cpu_tmp \tTemporarily set number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
+}
 
+void ConfigThread(int argc, char* argv[], bool bThread){
+    WorkerStruct w;
+    if (argc>=3) {
+        std::string ArgThreads(argv[2]);
+        if (bThread) {
+            if (w.ThreadsPct(ArgThreads)) {
+                Log::out() << "The number of threads is set, it will take effect when the work in progress ends." << "\n";
+                w.SaveToConfigThreads();
+            }
+        } else {
+            if (w.SaveToConfigThreadsTmp(ArgThreads)) {
+                Log::out() << "The number of threads is temporarily set, it will take effect when the work in progress ends." << "\n";
+            }
+        }
+    } else {
+        Wizard::ThreadSettings(w);
+    }
+}
+
+
+void RunDefaultWork(){
+    WorkerStruct w;
+    if (w.LoadConfig()) {
+        w.LoadThreads();
+        if (w.ThreadsPct()<=0){
+            Wizard::ThreadSettings(w);
+        }
+    }
+    
+    //check worker and in case of suspicious troubles run wizard
+    if (!Wizard::CheckWorker(w)) {
+        w = Wizard::NewWorker();
+    }
+
+    WebBitStatistics(w);
+}
 
 int main(int argc, char* argv[])
 {   
@@ -171,10 +214,8 @@ int main(int argc, char* argv[])
     bool bWizard = false;
     bool bThread = false;
     bool bThreadTmp =false;
-    // Log::out() <<argc <<"\n";
     if (argc>=2) {
         std::string Arg(argv[1]);
-        // Log::out() << Arg << "\n";
         if (Arg=="-wizard" || Arg=="-w" ) bWizard = true;
         else if (Arg=="-thread" || Arg=="-threads" || Arg=="-t" || Arg=="-CPU" || Arg=="-cpu") bThread = true;
         else if (Arg=="-thread_tmp" || Arg=="-threads_tmp" || Arg=="-t_tmp" || Arg=="-CPU_tmp" || Arg=="-cpu_tmp") bThreadTmp = true;
@@ -185,85 +226,60 @@ int main(int argc, char* argv[])
     check();
     checkWeb();
 
-    // Binomials::ComputeBinomials();
-    SieveGeneratorTestMT();
-    return 0;
+    // when debugging  pass standard computation as a safety measure
+    #ifdef NDEBUG
+    bool bRunAsUsusal = true;
+    #else
+    bool bRunAsUsusal = false;
+    #endif      
+    // bRunAsUsusal = false;
 
-    // bHelp =true;
     if (bHelp) {
-        Log::out() <<  "Help:" << "\n";
-        Log::out() << "\t-h \t\t\t\tHelp. You may also try to visit web pages at prime17.000webhostapp.com" << "\n";
-        Log::out() << "\t-w -wizard \t\t\tRun wizard - first init or re-register." << "\n";
-        Log::out() << "\t-t -thread -cpu \t\tSet number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
-        Log::out() << "\t-t_tmp -thread_tmp -cpu_tmp \tTemporarily set number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
-
+        ShowHelp();
     } else if (bThread || bThreadTmp) {
-        WorkerStruct w;
-        if (argc>=3) {
-            std::string ArgThreads(argv[2]);
-            // Log::out() << ArgThreads << "\n";
-            if (bThread) {
-                if (w.ThreadsPct(ArgThreads)) {
-                    Log::out() << "The number of threads is set, it will take effect when the work in progress ends." << "\n";
-                    w.SaveToConfigThreads();
-                }
-            } else {
-                if (w.SaveToConfigThreadsTmp(ArgThreads)) {
-                    Log::out() << "The number of threads is temporarily set, it will take effect when the work in progress ends." << "\n";
-                }
-            }
-        } else {
-            Wizard::ThreadSettings(w);
-        }
+        ConfigThread(argc, argv, bThread);
     } else if (bWizard) {
         Wizard::NewWorker();
+    } else if (bRunAsUsusal) {
+        RunDefaultWork();
     } else {
+        Log::out() << "Ususal run has been passed. Apparently something is being tested.\n";
 
-        WorkerStruct w;
-        if (w.LoadConfig()) {
-            w.LoadThreads();
-            if (w.ThreadsPct()<=0){
-                Wizard::ThreadSettings(w);
-            }
-        }
-        
-        //check worker and in case of suspicious troubles run wizard
-        if (!Wizard::CheckWorker(w)) {
-            w = Wizard::NewWorker();
-        }
+        // SieveGeneratorTestMT();
+        // SieveGeneratorTest();
 
-        WebBitStatistics(w);
+        // Binomials::ComputeBinomials();
+
+        // downloadFile("https://drive.google.com/drive/u/0/folders/1zkuCWyipKIXkHrs62nKsnf834TxRhOFM", "aaa.txt");
+
+        // PrimesRangeServiceTest();
+
+        // BitRangeTest();
+
+        // BitStatisticsTest();
+
+        // PrimeTestTest();
+
+        // int128Test();
+
+        // SieveGeneratorTest();
+
+        // EratosthenesEffectivity();
+
+        // SliceTBalanceTest();
+
+        // MethodTestsNearBegin();
+        // MethodTestsNearEnd();
+        // MethodTestsOnPrime();
+
+        // SliceTBalanceTest(); 
+        // GFTTest();
+        // GFTTestMT();
+
+        // GeneratorFunctionBitStatisticsTestOld();
     }
+
     Log::out().Free();
-
-
-    // downloadFile("https://drive.google.com/drive/u/0/folders/1zkuCWyipKIXkHrs62nKsnf834TxRhOFM", "aaa.txt");
-
-    // PrimesRangeServiceTest();
-
-    // BitRangeTest();
-
-    // BitStatisticsTest();
-
-    // PrimeTestTest();
-
-    // int128Test();
-
-    // SieveGeneratorTest();
-
-    // EratosthenesEffectivity();
-
-    // SliceTBalanceTest();
-
-    // MethodTestsNearBegin();
-    // MethodTestsNearEnd();
-    // MethodTestsOnPrime();
-
-    // SliceTBalanceTest(); 
-    // GFTTest();
-    // GFTTestMT();
-
-    // GeneratorFunctionBitStatisticsTestOld();
     return 0; 
 }
 

@@ -91,9 +91,10 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
         long double MeasuredEffectivity = 100.0L * (long double) p_TestArrayCount / (long double) p_Primorial;
 
         Log::out() << "Sieve Prime: " << MaxPrime << " ";
-        Log::out() << "Primorial: " << utils_str::FormatUInt(p_Primorial) << " ";
+        Log::out() << "Primorial: " << utils_str::FormatUInt(p_Primorial) << "\n";
         Log::out() << "Coprimes #: " << utils_str::FormatUInt(p_TestArrayCount) << " ";
         Log::out() << "Effectivity %: " << MeasuredEffectivity  << "\n"; 
+        // TODO sanitizer complains about % sign in printf
 
         Threads(100);        
     }
@@ -127,6 +128,7 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
 
     mpz_init2(mpz_kp, 65);
     mpz_init2(mpz_X, 65);
+
     T k = Begin/p_Primorial;
     T kp = k * p_Primorial;  // primorial p multiplied by some integer k
 

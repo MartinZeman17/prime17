@@ -13,6 +13,7 @@ Linux packages for development
 - sudo apt install libjsoncpp-dev
 - sudo apt install libcurl4-openssl-dev
 - sudo apt install libgmp3-dev
+- sudo apt-get install libncurses5-dev libncursesw5-dev
 - and other basic packages: git, latest gcc and g++, make, gdb,...
 
 Fresh install of MSYS2 (64 bit)
@@ -28,7 +29,7 @@ Certificates
 - pacman -S mingw-w64-x86_64-ca-certificates
 - https://curl.se/docs/sslcerts.html
 - still not working under Windows so cacert is copied to bin folder and it works
-- newer version of libcurl hav better windows cert support
+- newer version of libcurl have a better windows cert support
 
 
 Adding execute right under Linux:
@@ -89,3 +90,8 @@ style: Formatting, missing semi colons, etc; no code change
 refactor: Refactoring production code
 test: Adding tests, refactoring test; no production code change
 chore: Updating build tasks, package manager configs, etc; no production code change
+
+**Azure:**
+tmux
+tmux detach or you can use the shortcut (Ctrl+b then d)
+tmux attach

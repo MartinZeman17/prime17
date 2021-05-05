@@ -35,7 +35,6 @@ class GeneratorFunctionBitStatistics : public GeneratorFunction<GeneratorFunctio
     // CntPrimesWithOneAtPosition[0] is the highest number as all primes are odd except of prime 2
     unsigned long long _CntPrimesWithOneAtPosition[C_Bits_ + 1];  
 
-
     public:
     // GeneratorFunctionBitStatistics(BitStatistics *pBS);
     GeneratorFunctionBitStatistics(const unsigned int iSliceBitIndex=0) noexcept; //  Slice is than defined as a range from 2^iSliceBitIndex to 2^(iSliceBitIndex+1)-1

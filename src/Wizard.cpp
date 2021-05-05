@@ -134,11 +134,10 @@ namespace Wizard {
     
 
     bool CheckWorker(WorkerStruct &w){
-        // WebService web;
-
         const char url[] = "https://prime17.000webhostapp.com/check_worker.php";
-        std::string PostString (w.PrepareCheckWorkerPost());
+        std::string PostString(w.PrepareCheckWorkerPost());
         std::string WebResponse = WebService::out().WebPost(url, PostString);
+        utils_str::trim(WebResponse);
         if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         WebResponse=WebService::out().HTMLFindOutput(WebResponse);
         // Log::out() << WebResponse <<"\n";

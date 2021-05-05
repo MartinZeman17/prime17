@@ -13,4 +13,5 @@ void Binomials::ComputeBinomials(){
             Log::out() <<  "insert into binomials (bin_n, bin_k, bin_val) values (" << n << ", " << k << ", " << mpz_res << ");\n";
          }
     }
+    mpz_clear(mpz_res);
 }

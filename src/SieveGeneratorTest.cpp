@@ -23,6 +23,7 @@ void SieveGeneratorTest(){
     uint128_t End = Begin + 100000000UL;
 
     A.Work(Begin, End, GF);
+    
     GF.SaveFile();
 
 }
@@ -31,11 +32,10 @@ void SieveGeneratorTestMT(){
     SieveGenerator<unsigned long long> A(C_SieveGeneratorDefaultMaxPrime);
     GeneratorFunctionBitStatistics GF;
 
-    unsigned long long Begin = static_cast<uint64_t>(1) << 39;
+    unsigned long long Begin = static_cast<uint64_t>(1) << 28;
     unsigned long long End = Begin + (Begin -1);
     // End = Begin + 1000000000UL;
 
-    // A.Work(Begin, End, GF);
     A.WorkMT(Begin, End, GF);
     GF.SaveFile();
 
