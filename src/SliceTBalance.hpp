@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <fstream>
+#include <array>
 
 using std::vector;
 
@@ -36,6 +37,10 @@ class SliceTBalance {
     ~SliceTBalance();
     void CompInterval(const unsigned int N);
     void CompIntervalJoin(const unsigned int N, const bool bJoin);
+
+    void CompCorrectionLi(const unsigned int N);
+    void CompCorrectionLiWorker(const unsigned int N, uint64_t Beg, uint64_t End, std::array<long double, 65> &res);
+
 
 };
 

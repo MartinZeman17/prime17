@@ -47,12 +47,10 @@ namespace utils_str{
     return result;
   }
 
-  // std::string FormatNumber(T Input, unsigned int StrLen, unsigned int Precision)
-  
 
   // ToDo use std::fixed << std::setprecision(2) << std::setfill('0')
   template <typename T>
-  std::string FormatNumber(T Input, unsigned int StrLen, unsigned int Precision){
+  std::string FormatNumber(const T &Input, const unsigned int &StrLen, const unsigned int &Precision){
     std::stringstream Aux;
     Aux.precision(Precision);
     Aux << std::fixed;
@@ -60,7 +58,7 @@ namespace utils_str{
 
     long long filler = StrLen-Aux.tellp();
     if (filler<0) filler = 0;
-    std::string res(" ", filler);
+    std::string res(filler, ' ');
     res.append(Aux.str());
     return res;
   }
@@ -71,7 +69,7 @@ struct separate_thousands : std::numpunct<char> {
 };
 
 template <typename T>
-std::string FormatUInt(T Input){
+std::string FormatUInt(const T &Input){
     auto thousands = std::make_unique<separate_thousands>();
 
     std::stringstream Aux;

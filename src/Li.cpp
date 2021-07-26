@@ -52,6 +52,12 @@ else
     return li(x) - li2;
 }
 
+long double Li::NoPrimesInt(const long double Beg, const long double End)
+{
+    return li(End) - li(Beg);
+}
+
+
 long double Li::NoPrimesInt(const unsigned long long Beg, const unsigned long long End)
 {
     return li(End) - li(Beg);

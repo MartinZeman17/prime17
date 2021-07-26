@@ -27,10 +27,10 @@ ToDo Cpp:
 - sanitizer na web work
 
 
-
-
 ToDo Web:
 - FAQ
+- vyuzivat includy a prepsat stare all in one pages
+- https://oeis.org/search?q=2%2C2%2C3%2C3%2C3%2C2%2C3%2C4%2C4&sort=&language=czech&go=Hledej
 
 ToDo DB:
 - vymyslet tabulky pro testování- druha db?
@@ -41,6 +41,11 @@ ToDo DB:
 - time_zones +2 jen v completed
 - FNj pridat desetinna mista
 
+ToDo:
+- Google cloud
+- last datetime worker was active
+- worker percent for current power
+- rezy U joining TT slices
 
 Tests:
 - reentrantnost aprcl? statické proměnné? ověřit APRCL na více vláknech
@@ -53,7 +58,7 @@ Issues:
 - statický linking gmp a chyba v gcc
 - Libcurl cmd test: curl https://prime17.000webhostapp.com/completed.php -v -o internet_test.txt
 - wizard - nejprve se pta na threads??
-- cmd po 10%
+- AWS vykon
 
 Links:
 https://prime17.000webhostapp.com/
@@ -62,7 +67,6 @@ https://stackoverflow.com/questions/4064444/returning-json-from-a-php-script
 Reading:
 https://isocpp.org/wiki/faq/exceptions#ctors-can-throw
 https://stackoverflow.com/questions/45836650/how-do-i-integrate-msys2-shell-into-visual-studio-code-on-window
-
 
 
 DB refresh:

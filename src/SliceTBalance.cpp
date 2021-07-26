@@ -4,12 +4,17 @@
 #include <iostream>
 #include <cassert>
 #include <cstdlib>
+#include <cmath>    
+#include <chrono>
 
 #include "PrimeTest.hpp"
 #include "utils_mpz.hpp"
+#include "Li.hpp"
+#include "Log.hpp"
+#include "utils_str.hpp"
+#include "VectorToFile.hpp"
 
-
-
+using namespace std::chrono;
 using std::endl;
 #define assertm(exp, msg) assert(((void)msg, exp));
 
@@ -218,11 +223,11 @@ void SliceTBalance::CompIntervalJoin(const unsigned int N, const bool  bJoin) {
         }
         _lCnt[iSlice]++;
 
-// TTN,i=TN,i + TN,N-i+1 pro i=1..N
-// T4,1={17}
-// T4,2={19,21,25}
-// T4,3={23,27,29} 
-// T4,4={31} 
+        // TTN,i=TN,i + TN,N-i+1 pro i=1..N
+        // T4,1={17}
+        // T4,2={19,21,25}
+        // T4,3={23,27,29} 
+        // T4,4={31} 
 
         // primality check and if so increase count of primes in a slice        
         utils_mpz::mpz_set_ull(X, B+i);
@@ -294,6 +299,81 @@ void SliceTBalance::CompIntervalJoin(const unsigned int N, const bool  bJoin) {
     // _myfile << endl;
     // std::cout << endl;
 
+}
+
+
+
+/*
+I3 1 000 .. 1 111
+Beg = 9
+End = 8+7 = 15 
+9,11,13,15
+9:   8 - 10
+11: 10 - 12
+13: 12 - 14
+*/
+        // N=0..64
+        // N=0 => 0 is returned
+        // N=2, perform two bit shifts
+void  SliceTBalance::CompCorrectionLi(const unsigned int N){
+    uint64_t Beg = static_cast<uint64_t>(1) << N;
+    uint64_t End = Beg + (Beg-1);
+
+    std::array<long double, 65> res {{
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0   }};
+
+    CompCorrectionLiWorker(N, Beg, End, res);
+
+    std::ofstream myfile;
+    myfile.open("LiCorrectionNew_" + std::to_string(N) + ".txt");
+
+    long double Sum=0;
+    for (auto i : res){
+        Sum+=i;
+    }
+
+    for (auto i : res){
+        // Log::out() << i << " " << (100.0L* i/Sum) << "\n";
+        myfile << utils_str::FormatNumber(i, 60, 20) << " " << (100.0L* i/Sum) << endl;
+
+    }
+    Log::out() << "\n";
+    myfile << endl;
+    myfile.close();
+}
+
+void  SliceTBalance::CompCorrectionLiWorker(const unsigned int N, uint64_t Beg, uint64_t End, std::array<long double, 65> &res){
+    std::chrono::time_point<std::chrono::high_resolution_clock> _BeginTime = high_resolution_clock::now();
+    
+    //Beg must be even
+    if (Beg&1) Beg--;
+
+    //End must be odd    
+    if (!(End & 1)) End++;
+
+    long double X=Beg;
+    // long double iB = X / std::log(X);    
+    long double iB = Li::li(X);
+
+    Beg++;  //move to the first odd number
+
+    for (uint64_t i = Beg; i <= End; ){
+        unsigned int iBits = Bits(i, N);
+        X = (long double) i + 1.0L;
+        // long double iE = X / std::log(X);
+        long double iE = Li::li(X);
+        
+        res[iBits] += iE - iB;
+        iB = iE;
+
+        i+=2;
+    }
+
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    Log::out() << "Duration sec: " << duration.count() / (1000.0l ) << "\n";;
 }
 
 

@@ -24,13 +24,11 @@
 #include "SliceTBalanceTest.cpp"
 #include "GeneratorFunctionTTTest.cpp"
 #include "GeneratorFunctionBitStatisticsTest.cpp"
-
 #include "WebWorkTest.cpp"
-
 #include "Wizard.cpp"
 #include "Log.hpp"
-
 #include "Binomials.hpp"
+// #include "Correction.cpp"
 
 
 // C code must be used from C++ code using extern in order to disable messing with functions names needed for overloading (allowed only in C++, not in C)
@@ -210,6 +208,8 @@ void RunDefaultWork(){
 
 int main(int argc, char* argv[])
 {   
+    Log::out().SetLogFileName(utils::ExtractFilename(std::string(argv[0])));
+
     bool bHelp = false;
     bool bWizard = false;
     bool bThread = false;
@@ -231,7 +231,10 @@ int main(int argc, char* argv[])
     bool bRunAsUsusal = true;
     #else
     bool bRunAsUsusal = false;
-    #endif      
+    #endif
+
+    // *********************************************************************************************************************
+    //override default setings      
     // bRunAsUsusal = false;
 
     if (bHelp) {
@@ -243,8 +246,10 @@ int main(int argc, char* argv[])
     } else if (bRunAsUsusal) {
         RunDefaultWork();
     } else {
-        Log::out() << "Ususal run has been passed. Apparently something is being tested.\n";
+        Log::out() << "Usual run has been passed. Apparently something is being tested.\n";
 
+        SliceTBalanceCorrection();
+    // *********************************************************************************************************************
         // SieveGeneratorTestMT();
         // SieveGeneratorTest();
 

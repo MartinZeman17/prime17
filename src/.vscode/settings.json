@@ -81,6 +81,7 @@
         "ranges": "cpp",
         "span": "cpp",
         "stop_token": "cpp",
-        "locale": "cpp"
+        "locale": "cpp",
+        "semaphore": "cpp"
     }
 }

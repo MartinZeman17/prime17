@@ -66,6 +66,7 @@ protected:
 class Log final: public Singleton<Log> {
     private:
     std::ofstream _LogFile;
+    std::string _LogFileName;
     std::mutex _mutex;
     int _winCOLS  = 0;
     int _winLINES = 0;    
@@ -128,6 +129,9 @@ class Log final: public Singleton<Log> {
         SmartFlush(Msg);
     }
 
+    void SetLogFileName(const std::string &FileName){
+        _LogFileName = FileName;
+    }
 
     void init(bool LogToFile=true) {
         if (win_left!=nullptr){
@@ -160,7 +164,12 @@ class Log final: public Singleton<Log> {
         wrefresh(win_right);
 
         if (LogToFile) {
-            if (!_LogFile.is_open()) _LogFile.open(utils::getLogFile(), std::ios::trunc);        
+            if (!_LogFile.is_open()) {
+                fs::path p(utils::getConfigDir());
+                if (_LogFileName.empty()) _LogFileName = utils::C_AppName;
+                p /= _LogFileName.append(".log");
+                _LogFile.open( p.string(), std::ios::trunc);     
+            }   
         }
     }
 

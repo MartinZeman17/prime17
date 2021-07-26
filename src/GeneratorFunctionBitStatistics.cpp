@@ -99,7 +99,7 @@ int GeneratorFunctionBitStatistics::GenFunct(const uint128_t & X, const mpz_t & 
         // std::cout << X << endl;
         // _pBS->ComputePrimeStats(X); //???
 
-        // only 64 bit numbers supported so far, Be careful with the input.
+        // TODO only 64 bit numbers supported so far, Be careful with the input.
         unsigned long long Prime = (unsigned long long) X;
         int CntOfOnes=-1;  // correction in order to count only inner bits, the highest bit defining interval being tested will increase it to 0
         for(unsigned long long j=0; j<=C_Bits_; j++) {

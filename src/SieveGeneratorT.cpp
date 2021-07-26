@@ -382,13 +382,6 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
     }
 
 
-    // initscr();
-    // if (iPId == 0) {
-    //     // initscr();
-    //     unsigned int x, y;
-    //     getyx(stdscr, y, x);
-    //     _ncursesRow = y;  
-    // }
     // i is now a valid index within the array bounds
     while(true)
     {
@@ -506,22 +499,13 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
     Log::out() << " out of " << processor_count << " available logical CPUs.\n";
     Log::out().ClearRight();
     
-    // getyx(stdscr, _ncursesY, _ncursesX);
-
-    // std::string LinesSpace(_Threads, '\n');
-    // Log::out() << LinesSpace;
 
     // No two std::thread objects may represent the same thread of execution;
-    //  std::thread is not CopyConstructible or CopyAssignable, 
+    // std::thread is not CopyConstructible or CopyAssignable, 
     // although it is MoveConstructible and MoveAssignable.
     // T (the container's element type) must meet the requirements of MoveInsertable and EmplaceConstructible.
     std::vector<std::thread> Threads;
     Threads.reserve(_Threads);
-
-    // {
-    //     std::unique_ptr<GeneratorFunctionAbstract> aaa = GF.clone();
-    //     aaa->PrintResult();
-    // }
 
     // prepare all clones of GeneratorFunction before starting any thread
     std::vector<std::unique_ptr<GeneratorFunctionAbstract>> GFClones;
@@ -538,13 +522,6 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
     for (auto &TS : Threads) {
         TS.join();
     }
-
-    // move(_ncursesY, _ncursesX);
-    // refresh();
-    // Log::out() << LinesSpace;
-    // move(_ncursesY, _ncursesX);
-    // refresh();
-
 
     // consolidate all results into input GF object
     for (unsigned int i = 0; i < _Threads; i++){

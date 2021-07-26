@@ -35,8 +35,12 @@ namespace utils{
     constexpr std::string_view C_AppNameConfig = "Prime17.json";
     constexpr std::string_view C_AppLog = "Prime17.log";
 
+    // std::string AppName;
+
     constexpr std::string_view C_AppNameConfigThreads = "threads.json"; 
     constexpr std::string_view C_AppNameConfigHomeSubdir =".config";
+
+    std::string ExtractFilename( const std::string& path );
 
     std::string getenvEx(const std::string &variable);
 
@@ -55,6 +59,7 @@ namespace utils{
     Json::Value parseJsonStr(const std::string & rawJson);
 
     std::string GetCurrentDateTime();
+
 }
 
 #endif
