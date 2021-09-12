@@ -31,6 +31,7 @@ const std::vector<unsigned long long> C_TestArraySizes({1,2,8,48, 480, 5760, 921
 // const std::vector <long double> C_Effectivity({0.5, 0.333333, 0.266667, 0.228571, 0.207792,  0.191808, 0.180525, 0.171024, 0.163588, 0.157947, 0.152852});
 
 // ToDo: make class template for 64 or 128 bits?
+// template <class T, int SieveType=0> 
 template <class T> 
 class SieveGenerator {
     private:

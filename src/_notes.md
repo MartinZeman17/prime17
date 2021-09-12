@@ -77,3 +77,12 @@ delete from work_results_rec;
 delete from work;
 delete from worker;
 delete from user;
+
+
+Packaging
+- packaging is not working undew WLS unless fakeroot is tweaked a bit: sudo update-alternatives --set fakeroot /usr/bin/fakeroot-tcp
+- 'hithere' example for debianization of some upstream: https://wiki.debian.org/Packaging/Intro?action=show&redirect=IntroDebianPackaging
+- update changelog, manpage,...
+- building a package: debuild -us -uc
+- installing: sudo dpkg -i ./prime17_1.0-1_amd64.deb
+- uninstalling: sudo dpkg --remove prime17

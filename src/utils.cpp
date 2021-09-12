@@ -33,7 +33,7 @@
 namespace fs = std::filesystem;
 
 std::string utils::ExtractFilename( const std::string& path ) {
-    return fs::path(path).stem();
+    return fs::path(path).stem().string();
 }
 
 std::string utils::getenvEx(const std::string &variable){

@@ -127,7 +127,10 @@ distclean: clean
 
 .PHONY: install
 install:
-	@echo no install tasks configured
+	@echo install tasks is configured only for packaging purposes (no testing)
+	install prime17 $(DESTDIR)$(prefix)/bin
+	# install prime17.1 $(DESTDIR)$(prefix)/share/man/man1
+
 
 .PHONY: uninstall
 uninstall:

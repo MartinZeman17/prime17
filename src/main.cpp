@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
 
     // *********************************************************************************************************************
     //override default setings      
-    // bRunAsUsusal = false;
+    bRunAsUsusal = false;
 
     if (bHelp) {
         ShowHelp();

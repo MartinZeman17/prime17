@@ -1,4 +1,4 @@
-// #include "SieveGenerator.hpp"
+#include "SieveGenerator.hpp"  //ToDo: This is a bit of an enigma here, if hpp is not included, VSCode reports strange issues, nevertheless  the code compiles
 #include "utils_mpz.hpp"
 #include "Log.hpp"
 #include "utils_str.hpp"
@@ -20,7 +20,6 @@
 #else
 #include <ncurses.h> 
 #endif
-
 
 
 using std::endl;
@@ -353,8 +352,10 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
 
     }
 
-
-    if (std::is_same_v<T, unsigned long long>) {
+    // The branch that fails the constexpr condition will not be compiled for the given template instantiation. Or I hope so...
+    // But it looks like constexpr is not needed, both binaries are identical.
+    // if (std::is_same_v<T, unsigned long long>) {
+    if constexpr(std::is_same_v<T, unsigned long long>) {
         utils_mpz::mpz_set_ull(mpz_kp, kp);
     } else {
         utils_mpz::mpz_set_ul128(mpz_kp, kp);
