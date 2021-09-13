@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE=1
+
+
+%:
+	dh $@ --sourcedirectory=src
+
+override_dh_clean:
+	echo === override_dh_clean === BEGIN ============
+	dh_clean
+	echo === override_dh_clean === END ============
+
+override_dh_auto_install:
+	echo === override_dh_auto_install ===  BEGIN ============
+	$(MAKE) DESTDIR=$$(pwd)/debian/prime17 prefix=/usr install
+	echo === override_dh_auto_install === END ============

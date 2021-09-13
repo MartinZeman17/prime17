@@ -6,8 +6,10 @@ CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarati
 
 # debug version
 # CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -fsanitize=address
-CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations 
+# CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations 
 
+# for debuild packaging
+prefix = /usr/local
 
 # output binary dir
 BINDIR := ../bin/
@@ -111,6 +113,7 @@ PRECOMPILE =
 # postcompile step
 POSTCOMPILE = mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d
 
+
 all: $(BIN)
 	@echo ============================================================================= OK ======================================================================
 
@@ -127,10 +130,11 @@ distclean: clean
 
 .PHONY: install
 install:
-	@echo install tasks is configured only for packaging purposes (no testing)
-	install prime17 $(DESTDIR)$(prefix)/bin
+	@echo ==== install tasks is configured only for packaging purposes ====
+	@echo ==== DESTDIR = $(DESTDIR)
+	@echo ==== prefix = $(prefix)
+	install $(BINDIR)prime17 $(DESTDIR)$(prefix)/bin
 	# install prime17.1 $(DESTDIR)$(prefix)/share/man/man1
-
 
 .PHONY: uninstall
 uninstall:
