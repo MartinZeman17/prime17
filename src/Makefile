@@ -130,15 +130,17 @@ distclean: clean
 
 .PHONY: install
 install:
-	@echo ==== install tasks is configured only for packaging purposes ====
+	@echo ==== install tasks is supposed to be used only for packaging purposes =======================
 	@echo ==== DESTDIR = $(DESTDIR)
 	@echo ==== prefix = $(prefix)
 	install $(BINDIR)prime17 $(DESTDIR)$(prefix)/bin
-	# install prime17.1 $(DESTDIR)$(prefix)/share/man/man1
+	install $(BINDIR)prime17.1 $(DESTDIR)$(prefix)/share/man/man1
 
 .PHONY: uninstall
 uninstall:
-	@echo no uninstall tasks configured
+	@echo ==== Let us pray :-)
+	-rm -f $(DESTDIR)$(prefix)/bin/prime17
+	-rm -f $(DESTDIR)$(prefix)/share/man/man1/prime17.1
 
 .PHONY: check
 check:

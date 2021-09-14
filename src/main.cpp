@@ -163,10 +163,15 @@ void checkWeb(){
 
 void ShowHelp(){
     Log::out() <<  "Help:" << "\n";
-    Log::out() << "\t-h \t\t\t\tHelp. You may also try to visit web pages at prime17.000webhostapp.com" << "\n";
+    Log::out() << "\t-h -help\t\t\t\tHelp. You may also try to visit web pages at prime17.000webhostapp.com" << "\n";
     Log::out() << "\t-w -wizard \t\t\tRun wizard - first init or re-register." << "\n";
     Log::out() << "\t-t -thread -cpu \t\tSet number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
     Log::out() << "\t-t_tmp -thread_tmp -cpu_tmp \tTemporarily set number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
+    Log::out() << "\n";
+    Log::out() << "\tExamples:\n";
+    Log::out() << "\tprime17 -t 100 Utilize all available computational power.\n";
+    Log::out() << "\tprime17 -t_tmp 0 Finish computation and shut down. Previously set cpu untilization remains unchanged for further executions.\n"; 
+
 }
 
 void ConfigThread(int argc, char* argv[], bool bThread){
@@ -235,7 +240,7 @@ int main(int argc, char* argv[])
 
     // *********************************************************************************************************************
     //override default setings      
-    bRunAsUsusal = false;
+    // bRunAsUsusal = false;
 
     if (bHelp) {
         ShowHelp();

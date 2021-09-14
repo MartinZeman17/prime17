@@ -1,0 +1,33 @@
+.\" Manpage for prime17.
+.\" Contact martin.zeman17@gmail.com to correct errors or typos.
+.TH man 1 "14 Sep 2021" "1.0" "prime17 man page"
+.SH NAME
+prime17 - run or stop computations of primes or run configuration wizard 
+.SH SYNOPSIS
+prime17 [OPTIONS]
+.SH DESCRIPTION
+prime17 is a program for computing ditribution of primes on specific intervals derived from binary representation of numbers. Results are stored in a databese on web page https://prime17.000webhostapp.com/ 
+.SH OPTIONS
+-h -help 
+Help
+
+-w -wizard
+Run wizard - first init or re-register.
+
+-t -thread -cpu
+Set number of threads in percent. Zero value will exit the program (after completion of the running task).
+
+-t_tmp -thread_tmp -cpu_tmp 
+Temporarily set number of threads in percent. Zero value will exit the program (after completion of the running task).
+
+Examples: 
+
+prime17 -t 100 Utilize all available computational power.
+
+prime17 -t_tmp 0 Finish computation and shut down. Previously set cpu untilization remains unchanged for further executions. 
+.SH SEE ALSO
+https://prime17.000webhostapp.com/
+.SH BUGS
+Windows cannot be resized.
+.SH AUTHOR
+Martin Zeman (martin.zeman17@gmail.com)

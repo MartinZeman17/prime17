@@ -2,12 +2,12 @@ Source: prime17
 Section: misc
 Priority: optional
 Maintainer: Martin Zeman <martin.zeman17@gmail.com>
-Build-Depends: libc6
-Standards-Version: 3.9.2
+Build-Depends: libc6, debhelper (>= 11~)
+Standards-Version: 4.1.4
 Homepage: http://prime17.000webhostapp.com
 
 Package: prime17
-Architecture: any 
+Architecture: amd64 
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: This is a prime17 package
  For details go to web site prime17.000webhostapp.com
