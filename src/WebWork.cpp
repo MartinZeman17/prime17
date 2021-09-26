@@ -93,10 +93,11 @@ WebGetWork WebWork::GetWebWork(WorkerStruct &w){
 
 void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
 
-    Log::out() << "Bit statistics for power: " << GetWork.c_power2 << "\n";
+
     Log::out() << "Started at: " << utils::GetCurrentDateTime() << "\n";
-    Log::out() << "Offset Begin: " << utils_str::FormatUInt(GetWork.new_begin) << "\n";
-    Log::out() << "Offset   End: " << utils_str::FormatUInt(GetWork.new_end) << "\n";
+    Log::out() << "Bit statistics for power: " << GetWork.c_power2 << "\n";
+    Log::out() << "Begin (offset): " << utils_str::FormatUInt(GetWork.new_begin) << "\n";
+    Log::out() << "End (offset):   " << utils_str::FormatUInt(GetWork.new_end) << "\n";
     if (GetWork.c_power2 <= 63) {
         GeneratorFunctionBitStatistics BSMT(GetWork.c_power2);
         SieveGenerator<unsigned long long> Sieve(C_SieveGeneratorDefaultMaxPrime);
@@ -105,6 +106,8 @@ void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
         Sieve.Threads(w.ThreadsPct());
 
         unsigned long long Offset = static_cast<unsigned long long>(1) << GetWork.c_power2;
+        Log::out() << "Begin in percent: " << utils_str::FormatNumber( ((long double) 100.0 * GetWork.new_begin ) / (long double) Offset, 11,7) << "\n";
+        Log::out() << "End in percent:   " << utils_str::FormatNumber( ((long double) 100.0 * GetWork.new_end ) / (long double) Offset, 11,7) << "\n";
         Sieve.WorkMT(Offset + GetWork.new_begin, Offset + GetWork.new_end, BSMT);
         // BSMT.SaveFile(); //It does not make sense to save partial files.
 

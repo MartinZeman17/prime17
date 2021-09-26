@@ -142,7 +142,7 @@ namespace Wizard {
         WebResponse=WebService::out().HTMLFindOutput(WebResponse);
         // Log::out() << WebResponse <<"\n";
         if (WebResponse=="[{\"status\":\"OK\"}]") return true;
-        Log::out().logRight("There is something wrong with the worker. I wonder who was toying with the configuration file?\n");
+        Log::out().logRight("Worker check failed. It could be lack of internet connection or may be someone was toying with the configuration file.\n");
         Log::out().logRight(WebResponse);
         Log::out().logRight("\n");
         return false;       
@@ -152,6 +152,7 @@ namespace Wizard {
         constexpr std::string_view C_InputEmail = "Hi, I am Prime17. I wonder, have we already met? \nI would like to use your e-mail as an unique id in order to monitor your specific progress. "
                 "If you enter an invalid email, I will still be satisfied, alas! if necessary, we will not be able to contact you in the future.\n"
                 "I will treat you mail with care and when neccessary I will replace some letters with an asterix sign *.\n"
+                "Please do not use backspace (it is a known bug) and try to type everything carefully.\n"                
                 "Please enter your mail/ID: ";
         Log::out() << C_InputEmail << "\n";
         std::string email;

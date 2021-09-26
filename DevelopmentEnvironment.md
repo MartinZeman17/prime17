@@ -119,11 +119,21 @@ ssh-add ~/.ssh/id_ed25519
 
 
 **Packaging**
-- https://honk.sigxcpu.org/projects/git-buildpackage/manual-html/gbp.import.upstream-git.html
-- https://wiki.debian.org/PackagingWithGit
+
+Packaging - Debian:
+- packaging is not working under WLS unless fakeroot is tweaked a bit: sudo update-alternatives --set fakeroot /usr/bin/fakeroot-tcp
+- sudo apt install devscripts build-essential lintian debhelper debmake
+- update changelog, manpage,...
+- building a package - run from prime17 folder: debuild -us -uc   OR debuild -us -uc   &>log.txt
+- installing: sudo apt install ./prime17_1.0_amd64.deb
+- uninstalling: sudo apt remove prime17
+- 
+- 'hithere' example for debianization of some upstream: https://wiki.debian.org/Packaging/Intro?action=show&redirect=IntroDebianPackaging
+- simple example https://www.debian.org/doc/manuals/debmake-doc/ch04.en.html
+- more examples  https://www.debian.org/doc/manuals/debmake-doc/ch08.en.html
 - https://wiki.debian.org/HowToPackageForDebian
 - https://wiki.debian.org/Packaging/Intro
-- sudo update-alternatives --set fakeroot /usr/bin/fakeroot-tcp
+
 
 **Azure:**
 tmux

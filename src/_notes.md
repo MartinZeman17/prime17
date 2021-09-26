@@ -22,7 +22,6 @@ ToDo Cpp:
 - use cpp wrapper for ncurses? https://stackoverflow.com/questions/53857540/using-native-c-wrappers-for-ncurses-how-can-i-create-a-menu-submenu-system
 - resize
 - mazat netisknutelne znaky z wizardu - backspace 08h -clean funkce
-- start bez internetu - chce registraci I wonder who was toying with the configuration file? |[{"status":",,,"}]
 - sanitizer na web work
 - ARM version - odstranit vsechny long promenne a nahradit je uint64
 
@@ -77,16 +76,3 @@ delete from work_results_rec;
 delete from work;
 delete from worker;
 delete from user;
-
-
-Packaging - Debian:
-- packaging is not working undew WLS unless fakeroot is tweaked a bit: sudo update-alternatives --set fakeroot /usr/bin/fakeroot-tcp
-- update changelog, manpage,...
-- sudo apt install devscripts build-essential lintian debhelper
-- building a package - run from prime17 folder: debuild -us -uc   OR debuild -us -uc   &>log.txt
-- installing: sudo dpkg -i ./prime17_1.0_amd64.deb
-- uninstalling: sudo dpkg --remove prime17
-- 
-- 'hithere' example for debianization of some upstream: https://wiki.debian.org/Packaging/Intro?action=show&redirect=IntroDebianPackaging
-- simple example https://www.debian.org/doc/manuals/debmake-doc/ch04.en.html
-- more examples  https://www.debian.org/doc/manuals/debmake-doc/ch08.en.html

@@ -201,10 +201,13 @@ void RunDefaultWork(){
         if (w.ThreadsPct()<=0){
             Wizard::ThreadSettings(w);
         }
+    } else {
+        w = Wizard::NewWorker();
     }
     
     //check worker and in case of suspicious troubles run wizard
-    if (!Wizard::CheckWorker(w)) {
+    //TODO: change of user in config file to nonsensical value goes unnoticed by this check    
+    while (!Wizard::CheckWorker(w)) {
         w = Wizard::NewWorker();
     }
 
@@ -239,8 +242,9 @@ int main(int argc, char* argv[])
     #endif
 
     // *********************************************************************************************************************
-    //override default setings      
+    //override default settings      
     // bRunAsUsusal = false;
+    // bRunAsUsusal = true;
 
     if (bHelp) {
         ShowHelp();
