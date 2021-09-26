@@ -21,7 +21,7 @@ class SliceTBalance {
     vector<unsigned long long> _lCntPrimes;
 
     const unsigned int C_HistBits = 6;
-    const unsigned int C_HistItems= static_cast<uint64_t>(1) << C_HistBits;
+    const unsigned int C_HistItems= static_cast<uint32_t>(1) << C_HistBits;
   
     vector<vector<long double>> _HistP;
     vector<vector<unsigned long long>> _HistCnt;

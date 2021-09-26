@@ -118,7 +118,7 @@ void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
         Log::out().logToFile("\n");
 
     } else {
-        Log::out() << "128 bit integers not ready yet, but it should be quite an easy task ..." << "\n";
+        Log::out() << "128 bit integers not ready yet, but it is supposed to be quite an easy task ..." << "\n";
         // GeneratorFunctionBitStatistics BSMT(GetWork.c_power2);
         // SieveGenerator<uint128_t> Sieve(C_SieveGeneratorDefaultMaxPrime);
     }

@@ -1,3 +1,6 @@
+Web page
+- https://prime17.000webhostapp.com/
+
 Development environment:
 - Ubuntu 20 running from Windows WSL (version 1)
 - VSCode with remote plugin to WSL (configuration files for VSCode are in .VSCode folder in Src)
@@ -21,10 +24,7 @@ Building, Compiling
 - In case custom GMP is needed: -L/gmp_install/lib 
 
 Linux packages for development
-- sudo apt install libjsoncpp-dev
-- sudo apt install libcurl4-openssl-dev
-- sudo apt install libgmp3-dev
-- sudo apt-get install libncurses5-dev libncursesw5-dev
+- sudo apt-get install libjsoncpp-dev libcurl4-openssl-dev libgmp3-dev libncurses5-dev libncursesw5-dev
 - and other basic packages: git, latest gcc and g++, make, gdb, 
 - debmake
 
@@ -110,6 +110,13 @@ git push main --tags
 
 Changelog
 git log --pretty="- %cs : %s" > CHANGELOG.md
+
+Git SSH
+https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#
+Copy SSH private and public keys to ~/.ssh folder
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+
 
 **Packaging**
 - https://honk.sigxcpu.org/projects/git-buildpackage/manual-html/gbp.import.upstream-git.html

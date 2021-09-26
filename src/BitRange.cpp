@@ -22,7 +22,7 @@ long double BitRange::BitRange2BitCond(const int BitCond1, const int BitCond2, c
 
   // const 1 has to be cast to uint64 bit first
   unsigned long long maskBC2 = static_cast<uint64_t>(1) << BC2;
-  unsigned long maskBC1 = static_cast<uint64_t>(1) << BC1;
+  unsigned long long maskBC1 = static_cast<uint64_t>(1) << BC1;
   unsigned long long maskEnd = maskBC1;
   if (maskEnd) maskEnd--;
 

@@ -328,7 +328,7 @@ void SmallStep(unsigned long long Cycles){
 
 
 unsigned long long** TestPrimeArray64;
-unsigned long long** CreateTestPrimes (unsigned long long Begin, unsigned long long Step, unsigned long StepCount, unsigned long PrimesCount)
+unsigned long long** CreateTestPrimes (unsigned long long Begin, unsigned long long Step, unsigned long long StepCount, unsigned long long PrimesCount)
 {    
     unsigned long long **TestPrimeArray, *ptr;
     unsigned long long len = sizeof(unsigned long long *) * StepCount + sizeof(unsigned long long) * PrimesCount * StepCount; 
@@ -342,7 +342,7 @@ unsigned long long** CreateTestPrimes (unsigned long long Begin, unsigned long l
     for(unsigned long long s=0;s<StepCount;s++)
     {
         unsigned long long x =Begin + s*Step;
-        for(unsigned int i=0;i<PrimesCount;)
+        for(unsigned long long i=0;i<PrimesCount;)
         {
             if (IsPrimeDivByPrime(x)) {
                 TestPrimeArray [s] [i] = x;

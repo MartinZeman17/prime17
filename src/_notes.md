@@ -24,6 +24,7 @@ ToDo Cpp:
 - mazat netisknutelne znaky z wizardu - backspace 08h -clean funkce
 - start bez internetu - chce registraci I wonder who was toying with the configuration file? |[{"status":",,,"}]
 - sanitizer na web work
+- ARM version - odstranit vsechny long promenne a nahradit je uint64
 
 
 ToDo Web:
@@ -81,6 +82,7 @@ delete from user;
 Packaging - Debian:
 - packaging is not working undew WLS unless fakeroot is tweaked a bit: sudo update-alternatives --set fakeroot /usr/bin/fakeroot-tcp
 - update changelog, manpage,...
+- sudo apt install devscripts build-essential lintian debhelper
 - building a package - run from prime17 folder: debuild -us -uc   OR debuild -us -uc   &>log.txt
 - installing: sudo dpkg -i ./prime17_1.0_amd64.deb
 - uninstalling: sudo dpkg --remove prime17
