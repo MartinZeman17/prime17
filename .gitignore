@@ -26,3 +26,4 @@ debian/.debhelper/
 debian/prime17/
 debian/prime17.debhelper.log
 debian/prime17.substvars
+bin/prime17

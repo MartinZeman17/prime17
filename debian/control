@@ -2,7 +2,7 @@ Source: prime17
 Section: misc
 Priority: optional
 Maintainer: Martin Zeman <martin.zeman17@gmail.com>
-Build-Depends: libc6, debhelper (>= 11~), libjsoncpp-dev, libcurl4-openssl-dev, libgmp3-dev, libncurses5-dev, libncursesw5-dev
+Build-Depends: debhelper (>= 11~), libjsoncpp-dev, libcurl4-openssl-dev, libgmp3-dev, libncurses5-dev, libncursesw5-dev
 Standards-Version: 4.1.4
 Homepage: http://prime17.000webhostapp.com
 

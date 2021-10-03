@@ -127,6 +127,10 @@ Packaging - Debian:
 - building a package - run from prime17 folder: debuild -us -uc   OR debuild -us -uc   &>log.txt
 - installing: sudo apt install ./prime17_1.0_amd64.deb
 - uninstalling: sudo apt remove prime17
+
+- warning related to probably to ncurses:
+- dpkg-shlibdeps: warning: package could avoid a useless dependency if debian/prime17/usr/bin/prime17 was not linked against libtinfo.so.6 (it uses none of the library's symbols)
+
 - 
 - 'hithere' example for debianization of some upstream: https://wiki.debian.org/Packaging/Intro?action=show&redirect=IntroDebianPackaging
 - simple example https://www.debian.org/doc/manuals/debmake-doc/ch04.en.html

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 23, 2021 at 06:38 AM
+-- Generation Time: Sep 27, 2021 at 05:18 PM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.23
 
@@ -158,8 +158,8 @@ w as (
     
     SELECT
       AA.*
-    , timediff(LastUpdate, Created) as Duration
-    , format( EXTRACT(DAY FROM timediff(LastUpdate, Created)) + EXTRACT(HOUR FROM timediff(LastUpdate, Created))/24.0 + EXTRACT(MINUTE FROM timediff(LastUpdate, Created)) /(24.0 * 60), 2) as Days
+    #, timediff(LastUpdate, Created) as Duration
+    , format(TIMESTAMPDIFF(MINUTE, Created, LastUpdate)/(60*24.0), 2) as Days
     , (Completed + Completed_Gaps + Taken) / 300.0 as ComplAvg
     from p4 AA
 )
@@ -174,7 +174,7 @@ select
     , case when Taken = Completed then null else Taken end as Taken
     , convert_tz(Created, '+0:00','+2:00') as Created
     , convert_tz(LastUpdate, '+0:00','+2:00') as LastUpdate 
-    , Duration
+    #, Duration
     , Days
     , format(Days *  (1- ComplAvg) / ComplAvg, 2) as  RemainingDays
 
@@ -1114,7 +1114,9 @@ ELSE
         where  worker_merit_id = @worker_merit_id;
         
         set @msg = concat(@msg, " merit ", @worker_merit_id, " increased by ", @wm_merit);     
-    END IF;     
+    END IF; 
+    
+    update worker set w_last_activity = now() where worker_id = @asking_worker_id;
     
    
 end if;
@@ -1354,7 +1356,9 @@ ELSE
         where  worker_merit_id = @worker_merit_id;
         
         set @msg = concat(@msg, " merit ", @worker_merit_id, " increased by ", @wm_merit);     
-    END IF;     
+    END IF; 
+    
+    update worker set w_last_activity = now() where worker_id = @asking_worker_id;
     
    
 end if;
@@ -1408,9 +1412,23 @@ CREATE TABLE IF NOT EXISTS `completed` (
 DROP TABLE IF EXISTS `configuration`;
 CREATE TABLE IF NOT EXISTS `configuration` (
   `configuration_id` tinyint(4) NOT NULL AUTO_INCREMENT,
+  `task_id` tinyint(3) UNSIGNED DEFAULT NULL,
   `cg_key` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
   `cg_val_ui` bigint(20) UNSIGNED NOT NULL,
   PRIMARY KEY (`configuration_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pi`
+--
+
+DROP TABLE IF EXISTS `pi`;
+CREATE TABLE IF NOT EXISTS `pi` (
+  `power2` tinyint(3) UNSIGNED NOT NULL,
+  `pi_N` bigint(20) UNSIGNED NOT NULL,
+  PRIMARY KEY (`power2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1490,6 +1508,21 @@ CREATE TABLE IF NOT EXISTS `v_aux` (
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `v_check_pi`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_check_pi`;
+CREATE TABLE IF NOT EXISTS `v_check_pi` (
+`Power2` tinyint(3) unsigned
+,`wr_pi_N` decimal(42,0)
+,`pi_N` bigint(20) unsigned
+,`diff` decimal(43,0)
+,`diffP` decimal(51,5)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Stand-in structure for view `v_full`
 -- (See below for the actual view)
 --
@@ -1518,6 +1551,81 @@ CREATE TABLE IF NOT EXISTS `v_full` (
 ,`LL_Nj` double
 ,`PP_Nj` double
 ,`TTCnt` int(1)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_merit`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_merit`;
+CREATE TABLE IF NOT EXISTS `v_merit` (
+`t_description` varchar(1000)
+,`u_mail` text
+,`u_name` varchar(50)
+,`u_registered_date` datetime
+,`w_name` varchar(1000)
+,`w_registered` timestamp
+,`power2` tinyint(3) unsigned
+,`IntervalPercent` double
+,`Merit` double
+,`current_power2` tinyint(3) unsigned
+,`worker_last_activity` timestamp
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_merit_user`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_merit_user`;
+CREATE TABLE IF NOT EXISTS `v_merit_user` (
+`t_description` varchar(1000)
+,`u_mail` text
+,`u_name` varchar(50)
+,`u_registered_date` datetime
+,`worker_last_activity` timestamp
+,`Merit` double
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_merit_worker`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_merit_worker`;
+CREATE TABLE IF NOT EXISTS `v_merit_worker` (
+`t_description` varchar(1000)
+,`u_mail` text
+,`u_name` varchar(50)
+,`u_registered_date` datetime
+,`w_registered` timestamp
+,`worker_last_activity` timestamp
+,`w_name` varchar(1000)
+,`Merit` double
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_merit_worker_current`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_merit_worker_current`;
+CREATE TABLE IF NOT EXISTS `v_merit_worker_current` (
+`t_description` varchar(1000)
+,`u_mail` text
+,`u_name` varchar(50)
+,`u_registered_date` datetime
+,`w_registered` timestamp
+,`worker_last_activity` timestamp
+,`current_power2` tinyint(3) unsigned
+,`w_name` varchar(1000)
+,`IntervalPercent` double
+,`Merit` double
 );
 
 -- --------------------------------------------------------
@@ -1688,6 +1796,76 @@ CREATE TABLE IF NOT EXISTS `v_TT` (
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `v_U`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_U`;
+CREATE TABLE IF NOT EXISTS `v_U` (
+`N` tinyint(3) unsigned
+,`Odd` int(3) unsigned
+,`pi_N` bigint(20) unsigned
+,`pi_Nu0` decimal(43,0)
+,`pi_Nu1` decimal(43,0)
+,`T_Nu0` decimal(43,0)
+,`T_Nu1` decimal(43,0)
+,`qu0` double
+,`qu1` double
+,`Z_Nu0` double
+,`Z_Nu1` double
+,`F_Nu0` double
+,`F_Nu1` double
+,`V_Nu0` double
+,`V_Nu1` double
+,`L_Nu0` double
+,`L_Nu1` double
+,`P_Nu0` double
+,`P_Nu1` double
+,`UCnt0` decimal(32,0)
+,`UCnt1` decimal(32,0)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_U_aux`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_U_aux`;
+CREATE TABLE IF NOT EXISTS `v_U_aux` (
+`N` tinyint(3) unsigned
+,`Odd` int(3) unsigned
+,`jOdd` int(1)
+,`pi_N` bigint(20) unsigned
+,`T_Nu` decimal(43,0)
+,`pi_Nu` decimal(43,0)
+,`q_Nu` double
+,`Z_Nu` double
+,`F_Nu` double
+,`V_Nu` double
+,`L_Nu` double
+,`P_Nu` double
+,`UCnt` decimal(32,0)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `v_worker_merit_current_work`
+-- (See below for the actual view)
+--
+DROP VIEW IF EXISTS `v_worker_merit_current_work`;
+CREATE TABLE IF NOT EXISTS `v_worker_merit_current_work` (
+`t_description` varchar(1000)
+,`power2_id` tinyint(3) unsigned
+,`u_mail` varchar(254)
+,`u_name` varchar(50)
+,`w_name` varchar(1000)
+,`wm_merit` double
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `work`
 --
 
@@ -1721,6 +1899,7 @@ CREATE TABLE IF NOT EXISTS `worker` (
   `w_registered` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `w_seed` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
   `w_name` varchar(1000) COLLATE utf8_unicode_ci NOT NULL,
+  `w_last_activity` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`worker_id`),
   KEY `fk_worker_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1786,11 +1965,14 @@ CREATE TABLE IF NOT EXISTS `work_results02` (
 
 DROP TABLE IF EXISTS `work_results_rec`;
 CREATE TABLE IF NOT EXISTS `work_results_rec` (
+  `wrr_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `work_id` bigint(20) UNSIGNED NOT NULL,
   `wr_inner_bits` tinyint(3) UNSIGNED NOT NULL,
   `wr_value` bigint(20) UNSIGNED NOT NULL,
   `wr_power2` tinyint(3) UNSIGNED NOT NULL,
-  `task_id` tinyint(3) UNSIGNED NOT NULL
+  `task_id` tinyint(3) UNSIGNED NOT NULL,
+  PRIMARY KEY (`wrr_id`),
+  UNIQUE KEY `work_result_rec_unique` (`work_id`,`task_id`,`wr_power2`,`wr_inner_bits`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1805,11 +1987,56 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VI
 -- --------------------------------------------------------
 
 --
+-- Structure for view `v_check_pi`
+--
+DROP TABLE IF EXISTS `v_check_pi`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_check_pi`  AS  with A1 as (select `wr`.`wr_power2` AS `wr_power2`,sum(`wr`.`wr_value`) AS `wr_pi_N` from `work_results` `wr` group by `wr`.`wr_power2`)select `BB`.`power2` AS `Power2`,`AA`.`wr_pi_N` AS `wr_pi_N`,`BB`.`pi_N` AS `pi_N`,`AA`.`wr_pi_N` - `BB`.`pi_N` AS `diff`,100.0 * (`AA`.`wr_pi_N` - `BB`.`pi_N`) / `BB`.`pi_N` AS `diffP` from (`A1` `AA` join `pi` `BB` on(`AA`.`wr_power2` = `BB`.`power2`)) where `BB`.`pi_N` <> `AA`.`wr_pi_N` ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `v_full`
 --
 DROP TABLE IF EXISTS `v_full`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_full`  AS  with A4 as (select `A`.`N` AS `N`,`A`.`j` AS `j`,`A`.`m` AS `m`,`A`.`mm` AS `mm`,`A`.`pi_Nj` AS `pi_Nj`,`A`.`pi_N` AS `pi_N`,`A`.`T_Nj` AS `T_Nj`,`A`.`T_N` AS `T_N`,case when `A`.`mm` is null then NULL else case when `A`.`j` = `B`.`j` then `A`.`pi_Nj` else `A`.`pi_Nj` + `B`.`pi_Nj` end end AS `ppi_Nj`,case when `A`.`j` = `B`.`j` then 1 else 2 end AS `TTCnt`,case when `A`.`j` = `B`.`j` then `A`.`T_Nj` else `A`.`T_Nj` + `A`.`T_Nj` end AS `TT_Nj` from (`v_aux` `A` left join `v_aux` `B` on(`A`.`N` = `B`.`N` and `A`.`j` + `B`.`j` = `B`.`N` + 1))), A5 as (select `AA`.`N` AS `N`,`AA`.`j` AS `j`,`AA`.`m` AS `m`,`AA`.`mm` AS `mm`,`AA`.`T_Nj` AS `T_Nj`,`AA`.`pi_N` AS `pi_N`,`AA`.`pi_Nj` AS `pi_Nj`,cast(100.0 * `AA`.`pi_Nj` / `AA`.`pi_N` as double) AS `q_Nj`,cast(100.0 * `AA`.`T_Nj` / `AA`.`T_N` as double) AS `Z_Nj`,cast(`AA`.`pi_N` * (`AA`.`T_Nj` / `AA`.`T_N`) as double) AS `L_Nj`,`AA`.`ppi_Nj` AS `ppi_Nj`,`AA`.`TTCnt` AS `TTCnt`,`AA`.`T_N` AS `T_N`,`AA`.`TT_Nj` AS `TT_Nj` from `A4` `AA`), A6 as (select `AA`.`N` AS `N`,`AA`.`j` AS `j`,`AA`.`m` AS `m`,`AA`.`mm` AS `mm`,`AA`.`T_Nj` AS `T_Nj`,`AA`.`pi_N` AS `pi_N`,`AA`.`pi_Nj` AS `pi_Nj`,`AA`.`q_Nj` AS `q_Nj`,`AA`.`Z_Nj` AS `Z_Nj`,`AA`.`q_Nj` - `AA`.`Z_Nj` AS `F_Nj`,cast(`AA`.`q_Nj` / `AA`.`Z_Nj` as double) AS `V_Nj`,`AA`.`L_Nj` AS `L_Nj`,`AA`.`TT_Nj` AS `TT_Nj`,`AA`.`ppi_Nj` AS `ppi_Nj`,`AA`.`TTCnt` AS `TTCnt`,cast(100.0 * `AA`.`ppi_Nj` / `AA`.`pi_N` as double) AS `qq_Nj`,cast(100.0 * `AA`.`TT_Nj` / `AA`.`T_N` as double) AS `ZZ_Nj`,cast(`AA`.`pi_N` * (`AA`.`TT_Nj` / `AA`.`T_N`) as double) AS `LL_Nj` from `A5` `AA`)select `AA`.`N` AS `N`,`AA`.`N` MOD 4 AS `Odd`,`AA`.`j` AS `j`,`AA`.`m` AS `m`,`AA`.`mm` AS `mm`,`AA`.`pi_N` AS `pi_N`,`AA`.`T_Nj` AS `T_Nj`,`AA`.`pi_Nj` AS `pi_Nj`,`AA`.`q_Nj` AS `q_Nj`,`AA`.`Z_Nj` AS `Z_Nj`,`AA`.`F_Nj` AS `F_Nj`,`AA`.`V_Nj` AS `V_Nj`,`AA`.`L_Nj` AS `L_Nj`,`AA`.`pi_Nj` - `AA`.`L_Nj` AS `P_Nj`,`AA`.`TT_Nj` AS `TT_Nj`,`AA`.`ppi_Nj` AS `ppi_Nj`,`AA`.`qq_Nj` AS `qq_Nj`,`AA`.`ZZ_Nj` AS `ZZ_Nj`,`AA`.`qq_Nj` - `AA`.`ZZ_Nj` AS `FF_Nj`,cast(`AA`.`qq_Nj` / `AA`.`ZZ_Nj` as double) AS `VV_Nj`,`AA`.`LL_Nj` AS `LL_Nj`,`AA`.`ppi_Nj` - `AA`.`LL_Nj` AS `PP_Nj`,`AA`.`TTCnt` AS `TTCnt` from `A6` `AA` order by `AA`.`N`,`AA`.`j` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `v_merit`
+--
+DROP TABLE IF EXISTS `v_merit`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_merit`  AS  with A0 as (select `p2`.`p2_end_max_offset` + 1 AS `scale` from `power2` `p2` where `p2`.`power2_id` = 40), A1 as (select `t`.`task_id` AS `task_id`,`t`.`t_description` AS `t_description`,max(`wm`.`power2_id`) AS `current_power2` from (`worker_merit` `wm` join `tasks` `t` on(`t`.`task_id` = `wm`.`task_id`)) where `t`.`t_current` = 1), A2 as (select `A1`.`t_description` AS `t_description`,case when locate('@',`u`.`u_mail`) = 0 then `u`.`u_mail` else concat(substr(`u`.`u_mail`,1,1),'***',substr(`u`.`u_mail`,locate('@',`u`.`u_mail`) - 1,1),substr(`u`.`u_mail`,locate('@',`u`.`u_mail`))) end AS `u_mail`,`u`.`u_name` AS `u_name`,`u`.`u_registered_date` AS `u_registered_date`,`w`.`w_name` AS `w_name`,`w`.`w_registered` AS `w_registered`,`wm`.`power2_id` AS `power2`,`wm`.`wm_merit` AS `IntervalPercent`,`p2`.`p2_end_max_offset` * `wm`.`wm_merit` / (`A0`.`scale` * 100.0) AS `Merit`,`A1`.`current_power2` AS `current_power2`,`A0`.`scale` AS `Scale`,`w`.`w_last_activity` AS `w_last_activity` from (((((`worker_merit` `wm` join `worker` `w` on(`w`.`worker_id` = `wm`.`worker_id`)) join `user` `u` on(`u`.`user_id` = `w`.`user_id`)) join `A1` on(`A1`.`task_id` = `wm`.`task_id`)) join `power2` `p2` on(`p2`.`power2_id` = `wm`.`power2_id`)) join `A0`))select `A2`.`t_description` AS `t_description`,`A2`.`u_mail` AS `u_mail`,`A2`.`u_name` AS `u_name`,`A2`.`u_registered_date` AS `u_registered_date`,`A2`.`w_name` AS `w_name`,`A2`.`w_registered` AS `w_registered`,`A2`.`power2` AS `power2`,`A2`.`IntervalPercent` AS `IntervalPercent`,`A2`.`Merit` AS `Merit`,`A2`.`current_power2` AS `current_power2`,`A2`.`w_last_activity` AS `worker_last_activity` from `A2` order by `A2`.`power2` desc,`A2`.`Merit` desc ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `v_merit_user`
+--
+DROP TABLE IF EXISTS `v_merit_user`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_merit_user`  AS  with A1 as (select `m`.`t_description` AS `t_description`,`m`.`u_mail` AS `u_mail`,`m`.`u_name` AS `u_name`,`m`.`u_registered_date` AS `u_registered_date`,sum(`m`.`Merit`) AS `Merit`,max(`m`.`worker_last_activity`) AS `worker_last_activity` from `v_merit` `m` group by `m`.`t_description`,`m`.`u_mail`,`m`.`u_name`,`m`.`u_registered_date`)select `A1`.`t_description` AS `t_description`,`A1`.`u_mail` AS `u_mail`,`A1`.`u_name` AS `u_name`,`A1`.`u_registered_date` AS `u_registered_date`,`A1`.`worker_last_activity` AS `worker_last_activity`,`A1`.`Merit` AS `Merit` from `A1` order by `A1`.`Merit` desc limit 1000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `v_merit_worker`
+--
+DROP TABLE IF EXISTS `v_merit_worker`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_merit_worker`  AS  with A1 as (select `m`.`t_description` AS `t_description`,`m`.`u_mail` AS `u_mail`,`m`.`u_name` AS `u_name`,`m`.`u_registered_date` AS `u_registered_date`,`m`.`w_registered` AS `w_registered`,`m`.`w_name` AS `w_name`,sum(`m`.`Merit`) AS `Merit`,max(`m`.`worker_last_activity`) AS `worker_last_activity` from `v_merit` `m` group by `m`.`t_description`,`m`.`u_mail`,`m`.`u_name`,`m`.`u_registered_date`,`m`.`w_name`,`m`.`w_registered`)select `A1`.`t_description` AS `t_description`,`A1`.`u_mail` AS `u_mail`,`A1`.`u_name` AS `u_name`,`A1`.`u_registered_date` AS `u_registered_date`,`A1`.`w_registered` AS `w_registered`,`A1`.`worker_last_activity` AS `worker_last_activity`,`A1`.`w_name` AS `w_name`,`A1`.`Merit` AS `Merit` from `A1` order by `A1`.`Merit` desc limit 1000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `v_merit_worker_current`
+--
+DROP TABLE IF EXISTS `v_merit_worker_current`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_merit_worker_current`  AS  select `m`.`t_description` AS `t_description`,`m`.`u_mail` AS `u_mail`,`m`.`u_name` AS `u_name`,`m`.`u_registered_date` AS `u_registered_date`,`m`.`w_registered` AS `w_registered`,`m`.`worker_last_activity` AS `worker_last_activity`,`m`.`current_power2` AS `current_power2`,`m`.`w_name` AS `w_name`,`m`.`IntervalPercent` AS `IntervalPercent`,`m`.`Merit` AS `Merit` from `v_merit` `m` where `m`.`current_power2` = `m`.`power2` order by `m`.`Merit` desc limit 1000 ;
 
 -- --------------------------------------------------------
 
@@ -1873,6 +2100,33 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VI
 DROP TABLE IF EXISTS `v_TT`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_TT`  AS  select `v_full`.`N` AS `N`,`v_full`.`Odd` AS `Odd`,`v_full`.`j` AS `j`,`v_full`.`m` AS `m`,`v_full`.`mm` AS `mm`,`v_full`.`pi_N` AS `pi_N`,`v_full`.`TT_Nj` AS `TT_Nj`,`v_full`.`ppi_Nj` AS `ppi_Nj`,`v_full`.`qq_Nj` AS `qq_Nj`,`v_full`.`ZZ_Nj` AS `ZZ_Nj`,`v_full`.`FF_Nj` AS `FF_Nj`,`v_full`.`VV_Nj` AS `VV_Nj`,`v_full`.`LL_Nj` AS `LL_Nj`,`v_full`.`PP_Nj` AS `PP_Nj`,`v_full`.`TTCnt` AS `TTCnt` from `v_full` where `v_full`.`mm` is not null and `v_full`.`TT_Nj` is not null order by `v_full`.`N`,`v_full`.`j` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `v_U`
+--
+DROP TABLE IF EXISTS `v_U`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_U`  AS  select `A`.`N` AS `N`,`A`.`Odd` AS `Odd`,`A`.`pi_N` AS `pi_N`,`A`.`pi_Nu` AS `pi_Nu0`,`B`.`pi_Nu` AS `pi_Nu1`,`A`.`T_Nu` AS `T_Nu0`,`B`.`T_Nu` AS `T_Nu1`,`A`.`q_Nu` AS `qu0`,`B`.`q_Nu` AS `qu1`,`A`.`Z_Nu` AS `Z_Nu0`,`B`.`Z_Nu` AS `Z_Nu1`,`A`.`F_Nu` AS `F_Nu0`,`B`.`F_Nu` AS `F_Nu1`,`A`.`V_Nu` AS `V_Nu0`,`B`.`V_Nu` AS `V_Nu1`,`A`.`L_Nu` AS `L_Nu0`,`B`.`L_Nu` AS `L_Nu1`,`A`.`P_Nu` AS `P_Nu0`,`B`.`P_Nu` AS `P_Nu1`,`A`.`UCnt` AS `UCnt0`,`B`.`UCnt` AS `UCnt1` from (`v_U_aux` `A` join `v_U_aux` `B` on(`A`.`N` = `B`.`N` and `A`.`jOdd` <> `B`.`jOdd` and `A`.`jOdd` = 0)) order by `A`.`N` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `v_U_aux`
+--
+DROP TABLE IF EXISTS `v_U_aux`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_U_aux`  AS  select `v_TT`.`N` AS `N`,`v_TT`.`Odd` AS `Odd`,case when `v_TT`.`j` & 0x01 then 1 else 0 end AS `jOdd`,`v_TT`.`pi_N` AS `pi_N`,sum(`v_TT`.`TT_Nj`) AS `T_Nu`,sum(`v_TT`.`ppi_Nj`) AS `pi_Nu`,sum(`v_TT`.`qq_Nj`) AS `q_Nu`,sum(`v_TT`.`ZZ_Nj`) AS `Z_Nu`,sum(`v_TT`.`qq_Nj`) - sum(`v_TT`.`ZZ_Nj`) AS `F_Nu`,sum(`v_TT`.`qq_Nj`) / sum(`v_TT`.`ZZ_Nj`) AS `V_Nu`,`v_TT`.`pi_N` * sum(`v_TT`.`ZZ_Nj`) / 100.0 AS `L_Nu`,sum(`v_TT`.`ppi_Nj`) - `v_TT`.`pi_N` * sum(`v_TT`.`ZZ_Nj`) / 100.0 AS `P_Nu`,sum(`v_TT`.`TTCnt`) AS `UCnt` from `v_TT` group by `v_TT`.`N`,`v_TT`.`Odd`,case when `v_TT`.`j` & 0x01 then 1 else 0 end,`v_TT`.`pi_N` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `v_worker_merit_current_work`
+--
+DROP TABLE IF EXISTS `v_worker_merit_current_work`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`id16232074_main`@`%` SQL SECURITY DEFINER VIEW `v_worker_merit_current_work`  AS  with A1 as (select `t`.`task_id` AS `task_id`,`t`.`t_description` AS `t_description`,max(`wm`.`power2_id`) AS `power2` from (`worker_merit` `wm` join `tasks` `t` on(`t`.`task_id` = `wm`.`task_id`)) where `t`.`t_current` = 1)select `A1`.`t_description` AS `t_description`,`wm`.`power2_id` AS `power2_id`,`u`.`u_mail` AS `u_mail`,`u`.`u_name` AS `u_name`,`w`.`w_name` AS `w_name`,`wm`.`wm_merit` AS `wm_merit` from (((`worker_merit` `wm` join `worker` `w` on(`w`.`worker_id` = `wm`.`worker_id`)) join `user` `u` on(`u`.`user_id` = `w`.`user_id`)) join `A1` on(`A1`.`task_id` = `wm`.`task_id` and `A1`.`power2` = `wm`.`power2_id`)) ;
 
 --
 -- Constraints for dumped tables

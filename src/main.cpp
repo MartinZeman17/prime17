@@ -162,16 +162,15 @@ void checkWeb(){
 }
 
 void ShowHelp(){
-    Log::out() <<  "Help:" << "\n";
-    Log::out() << "\t-h -help\t\t\t\tHelp. You may also try to visit web pages at prime17.000webhostapp.com" << "\n";
-    Log::out() << "\t-w -wizard \t\t\tRun wizard - first init or re-register." << "\n";
-    Log::out() << "\t-t -thread -cpu \t\tSet number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
-    Log::out() << "\t-t_tmp -thread_tmp -cpu_tmp \tTemporarily set number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
-    Log::out() << "\n";
-    Log::out() << "\tExamples:\n";
-    Log::out() << "\tprime17 -t 100 Utilize all available computational power.\n";
-    Log::out() << "\tprime17 -t_tmp 0 Finish computation and shut down. Previously set cpu untilization remains unchanged for further executions.\n"; 
-
+    std::cout  <<  "Help:" << "\n";
+    std::cout  << "\t-h -help\t\t\tHelp. You may also try to visit web pages at prime17.000webhostapp.com" << "\n";
+    std::cout  << "\t-w -wizard \t\t\tRun wizard - first init or re-register." << "\n";
+    std::cout  << "\t-t -thread -cpu \t\tSet number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
+    std::cout  << "\t-t_tmp -thread_tmp -cpu_tmp \tTemporarily set number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
+    std::cout  << "\n";
+    std::cout  << "\tExamples:\n";
+    std::cout  << "\tprime17 -t 100 Utilize all available computational power.\n";
+    std::cout  << "\tprime17 -t_tmp 0 Finish computation and shut down. Previously set cpu untilization remains unchanged for further executions.\n\n"; 
 }
 
 void ConfigThread(int argc, char* argv[], bool bThread){
@@ -230,70 +229,75 @@ int main(int argc, char* argv[])
         else bHelp = true;
     }
 
-    Log::out().init(!(bHelp || bWizard || bThread || bThreadTmp));
-    check();
-    checkWeb();
 
-    // when debugging  pass standard computation as a safety measure
-    #ifdef NDEBUG
-    bool bRunAsUsusal = true;
-    #else
-    bool bRunAsUsusal = false;
-    #endif
-
-    // *********************************************************************************************************************
-    //override default settings      
-    // bRunAsUsusal = false;
-    // bRunAsUsusal = true;
-
-    if (bHelp) {
+    if (bHelp){
         ShowHelp();
-    } else if (bThread || bThreadTmp) {
-        ConfigThread(argc, argv, bThread);
-    } else if (bWizard) {
-        Wizard::NewWorker();
-    } else if (bRunAsUsusal) {
-        RunDefaultWork();
     } else {
-        Log::out() << "Usual run has been passed. Apparently something is being tested.\n";
 
-        SliceTBalanceCorrection();
-    // *********************************************************************************************************************
-        // SieveGeneratorTestMT();
-        // SieveGeneratorTest();
+        Log::out().init(!(bHelp || bWizard || bThread || bThreadTmp));
+        check();
+        checkWeb();
 
-        // Binomials::ComputeBinomials();
+        // when debugging  pass standard computation as a safety measure
+        #ifdef NDEBUG
+        bool bRunAsUsusal = true;
+        #else
+        bool bRunAsUsusal = false;
+        #endif
 
-        // downloadFile("https://drive.google.com/drive/u/0/folders/1zkuCWyipKIXkHrs62nKsnf834TxRhOFM", "aaa.txt");
+        // *********************************************************************************************************************
+        //override default settings      
+        // bRunAsUsusal = false;
+        // bRunAsUsusal = true;
 
-        // PrimesRangeServiceTest();
+        if (bThread || bThreadTmp) {
+            ConfigThread(argc, argv, bThread);
+        } else if (bWizard) {
+            Wizard::NewWorker();
+        } else if (bRunAsUsusal) {
+            RunDefaultWork();
+        } else {
+            Log::out() << "Usual run has been passed. Apparently something is being tested.\n";
 
-        // BitRangeTest();
+            SliceTBalanceCorrection();
+        // *********************************************************************************************************************
+            // SieveGeneratorTestMT();
+            // SieveGeneratorTest();
 
-        // BitStatisticsTest();
+            // Binomials::ComputeBinomials();
 
-        // PrimeTestTest();
+            // downloadFile("https://drive.google.com/drive/u/0/folders/1zkuCWyipKIXkHrs62nKsnf834TxRhOFM", "aaa.txt");
 
-        // int128Test();
+            // PrimesRangeServiceTest();
 
-        // SieveGeneratorTest();
+            // BitRangeTest();
 
-        // EratosthenesEffectivity();
+            // BitStatisticsTest();
 
-        // SliceTBalanceTest();
+            // PrimeTestTest();
 
-        // MethodTestsNearBegin();
-        // MethodTestsNearEnd();
-        // MethodTestsOnPrime();
+            // int128Test();
 
-        // SliceTBalanceTest(); 
-        // GFTTest();
-        // GFTTestMT();
+            // SieveGeneratorTest();
 
-        // GeneratorFunctionBitStatisticsTestOld();
+            // EratosthenesEffectivity();
+
+            // SliceTBalanceTest();
+
+            // MethodTestsNearBegin();
+            // MethodTestsNearEnd();
+            // MethodTestsOnPrime();
+
+            // SliceTBalanceTest(); 
+            // GFTTest();
+            // GFTTestMT();
+
+            // GeneratorFunctionBitStatisticsTestOld();
+        }
+
+        Log::out().Free();
+
     }
-
-    Log::out().Free();
     return 0; 
 }
 
