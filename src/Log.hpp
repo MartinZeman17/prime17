@@ -133,6 +133,18 @@ class Log final: public Singleton<Log> {
         _LogFileName = FileName;
     }
 
+void handle_winch(int sig) {
+    endwin();
+    // Needs to be called after an endwin() so ncurses will initialize itself with the new terminal dimensions.
+    refresh();
+    clear();
+
+    mvprintw(0, 0, "COLS = %d, LINES = %d", COLS, LINES);
+    for (int i = 0; i < COLS; i++)
+        mvaddch(1, i, '*');
+    refresh();
+}
+
     void init(bool LogToFile=true) {
         if (win_left!=nullptr){
             if (COLS==_winCOLS && LINES == _winLINES) return;
