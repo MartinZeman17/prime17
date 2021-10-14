@@ -24,7 +24,9 @@ ToDo Cpp:
 - mazat netisknutelne znaky z wizardu - backspace 08h -clean funkce
 - sanitizer na web work
 - ARM version - odstranit vsechny long promenne a nahradit je uint64
-
+- ncurses resize bugs: seg fault, malloc(): unsorted double linked list corrupted
+- see - https://invisible-island.net/ncurses/ncurses.faq.html#handle_resize
+- see https://stackoverflow.com/questions/14897157/what-does-corrupted-double-linked-list-mean
 
 ToDo Web:
 - FAQ

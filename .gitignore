@@ -30,3 +30,4 @@ bin/prime17
 src/.vscode/configurationCache.log
 .gitignore
 src/.vscode/targets.log
+src/.vscode/dryrun.log

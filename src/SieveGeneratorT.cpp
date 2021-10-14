@@ -249,6 +249,8 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
 
 template <class T>
 void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double &Percent, const long double &MinTillEnd) const{
+    if (Log::out().win_right == nullptr) return;
+    
     unsigned int rows, cols;				/* to store the number of rows and the number of colums of the screen */
     getmaxyx(Log::out().win_right, rows, cols);	    	/* get the number of rows and columns */
     unsigned int row = rows - (_Threads - PId);
@@ -275,7 +277,6 @@ void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double
         mvwprintw(Log::out().win_right, row, 0, RowMsg.str().c_str());
         wrefresh(Log::out().win_right);
     }
-    // endwin();
 }
 
 

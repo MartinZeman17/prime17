@@ -6,7 +6,7 @@ CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarati
 
 # debug version
 # CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -fsanitize=address
-# CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations 
+CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations 
 
 # for debuild packaging
 prefix = /usr/local

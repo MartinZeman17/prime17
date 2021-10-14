@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
         // *********************************************************************************************************************
         //override default settings      
         // bRunAsUsusal = false;
-        // bRunAsUsusal = true;
+        bRunAsUsusal = true;
 
         if (bThread || bThreadTmp) {
             ConfigThread(argc, argv, bThread);

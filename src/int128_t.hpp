@@ -52,7 +52,7 @@ inline std::ostream& operator<<(std::ostream& stream, uint128_t n)
 
   while (n > 0)
   {
-    str += '0' + (char) (n % 10);
+    str += (char) ('0' + (n % 10));
     n /= 10;
   }
 
