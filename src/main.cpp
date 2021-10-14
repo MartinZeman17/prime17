@@ -78,7 +78,9 @@ void check(){
     Log::out().logRight("\n");
     #endif
 
-
+    Log::out().logRight("ncurses version: ");
+    Log::out().logRight(curses_version());
+    
     mpz_t a, b;
     mpz_init(a);
     mpz_ui_pow_ui(a, 2, 64); //ok

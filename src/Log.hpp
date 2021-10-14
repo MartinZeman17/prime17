@@ -148,7 +148,8 @@ class Log final: public Singleton<Log> {
 
     void init(bool LogToFile=true) {
         if (win_right!=nullptr){
-            if (COLS==_winCOLS && LINES == _winLINES) return;        
+            if (COLS==_winCOLS && LINES == _winLINES) return; 
+            endwin(); //??? kdy se vola init?       
         }
 
         initscr();

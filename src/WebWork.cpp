@@ -111,14 +111,19 @@ void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
         Sieve.WorkMT(Offset + GetWork.new_begin, Offset + GetWork.new_end, BSMT);
         // BSMT.SaveFile(); //It does not make sense to save partial files.
 
-        // GetWebNewWorkHTMLPage();
-        const char url[] = "https://prime17.000webhostapp.com/post_work.php";
+
         std::string PostString = PrepareWebPostString(GetWork, BSMT);
         // Log::out() << PostString << "\n";
+
+        #ifdef NDEBUG
+        const char url[] = "https://prime17.000webhostapp.com/post_work.php";
         std::string WebResponse = WebService::out().WebPost(url, PostString);
         // Log::out() << web.HTMLFindOutput(WebResponse) << "\n";
         Log::out().logToFile(WebService::out().HTMLFindOutput(WebResponse));
         Log::out().logToFile("\n");
+        #else
+        Log::out() << "!!!! Debug version does not post results to web !!!! \n";
+        #endif
 
     } else {
         Log::out() << "128 bit integers not ready yet, but it is supposed to be quite an easy task ..." << "\n";

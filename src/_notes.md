@@ -18,7 +18,7 @@ ToDo Cpp:
 - cmake, autoconf?
 - versioning
 - PrimeStorage  - použít config dir
-- prejít na c++20? a nové threads se zastavováním
+- prejít na c++20? a nové threads se zastavováním a moduly
 - use cpp wrapper for ncurses? https://stackoverflow.com/questions/53857540/using-native-c-wrappers-for-ncurses-how-can-i-create-a-menu-submenu-system
 - resize
 - mazat netisknutelne znaky z wizardu - backspace 08h -clean funkce
@@ -27,6 +27,7 @@ ToDo Cpp:
 - ncurses resize bugs: seg fault, malloc(): unsorted double linked list corrupted
 - see - https://invisible-island.net/ncurses/ncurses.faq.html#handle_resize
 - see https://stackoverflow.com/questions/14897157/what-does-corrupted-double-linked-list-mean
+- ncurses resize 0 bug
 
 ToDo Web:
 - FAQ
@@ -41,6 +42,7 @@ ToDo DB:
 - formatovat cisla 000 000??
 - time_zones +2 jen v completed
 - FNj pridat desetinna mista
+- smazat workery a usery bez odevzdane prace a meritu, cross check merrit a work
 
 ToDo:
 - Google cloud
