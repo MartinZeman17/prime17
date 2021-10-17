@@ -25,80 +25,88 @@ namespace Wizard {
 
     WorkerStruct RegisterUserDB(std::string & email){
         // WebService web;
-
-        const char url[] = "https://prime17.000webhostapp.com/register_user.php";
-        std::string PostString ("email=" + email);
-        std::string WebResponse = WebService::out().WebPost(url, PostString);
-        if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-
-        // Log::out() <<WebResponse << "\n";
-        WebResponse=WebService::out().HTMLFindOutput(WebResponse);
-        // Log::out() << WebResponse <<"\n";
-        Json::Value root = utils::parseJsonStr(WebResponse);
-        std::vector<WorkerStruct> workers;
-        WorkerStruct::JsonWorkersToArr(root, workers);
-        
-        std::string UserName("");
-        if (workers.size()==0){
-            constexpr std::string_view C_InputUserName = "\nWow, a new contributor! Nice to meet you.\nI know it is a pure charity so thank you very much.\nWhat is your name?";  
-            Log::out() << C_InputUserName << "\n";
-            // getline(std::cin, UserName);
-            UserName = Log::out().getlineLeft();
-            utils_str::string_replace(UserName, ",", "");
-            utils_str::string_replace(UserName, "\t", "");
-
-            Log::out() << "Nice to meet you, " << UserName << "\n\n";
-        }
-
-        if (workers.size()>0){
-            UserName = workers[0].u_name;
-            constexpr std::string_view C_InputSelectWorker = "Are you reinstalling one of the following computers(s)?\n"
-                "If so, please enter the computer name or its id.\nOr if this is a new machine that I do not know yet, please tell me its name.\n";  
-            Log::out() << C_InputSelectWorker << "\n";
-            Log::out() << "id" << "\t" << "computer" << "\t" << "YYYY-MM-DD HH:MM:SS" << "\n";
-            for (auto &w : workers){
-                Log::out() << w.worker_id << "\t" << w.w_name << "\t" << w.w_registered << "\n";
-            }
-        } else {
-            constexpr std::string_view C_InputNewWorker = "\nLet us measure the performance of different computers (workers). \n"
-                "If you plan to have just one worker (which is perfectly fine) you may leave it blank, \nI will use your id/mail instead. \n"
-                "So how do you call this computer?";        
-            Log::out() << C_InputNewWorker << "\n";
-        }
-        std::string SelectedWorkerInput;
-        // getline(std::cin, SelectedWorkerInput);
-        SelectedWorkerInput = Log::out().getlineLeft();
-        if (SelectedWorkerInput.empty()) SelectedWorkerInput = email;
-        utils_str::string_replace(SelectedWorkerInput, ",", "");  // remove split char just for safety reasons
-        utils_str::string_replace(SelectedWorkerInput, "\t", "");
-
+        bool bSuccess = false;
         WorkerStruct SelectedWorker;
-        SelectedWorker.worker_id="";
-        for (auto &w : workers){
-            if (w.worker_id == SelectedWorkerInput || w.w_name == SelectedWorkerInput) {
-                SelectedWorker = w;
-                SelectedWorker.SaveToConfig();
-                Log::out() << "Welcome back! Registering an old worker: " << w.worker_id << " " << w.u_name << "\n";
-                return SelectedWorker;
+        do {
+            const char url[] = "https://prime17.000webhostapp.com/register_user.php";
+            std::string PostString ("email=" + email);
+            std::string WebResponse = WebService::out().WebPost(url, PostString);
+            if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+            // Log::out() <<WebResponse << "\n";
+            WebResponse=WebService::out().HTMLFindOutput(WebResponse);
+            // Log::out() << WebResponse <<"\n";
+            Json::Value root = utils::parseJsonStr(WebResponse);
+            std::vector<WorkerStruct> workers;
+            WorkerStruct::JsonWorkersToArr(root, workers);
+            
+            std::string UserName("");
+            if (workers.size()==0){
+                constexpr std::string_view C_InputUserName = "\nWow, a new contributor! Nice to meet you.\nI know it is a pure charity so thank you very much.\nWhat is your name?";  
+                Log::out() << C_InputUserName << "\n";
+                // getline(std::cin, UserName);
+                UserName = Log::out().getlineLeft();
+                utils_str::string_replace(UserName, ",", "");
+                utils_str::string_replace(UserName, "\t", "");
+
+                Log::out() << "Nice to meet you, " << UserName << "\n\n";
             }
-        }
 
-        // I have a new worker name, get its seed and id from db
-        // get threads strategy
-        const char url_register_worker[] = "https://prime17.000webhostapp.com/register_worker.php";
-        PostString = "email_worker_name=" + email + "," + SelectedWorkerInput + "," + UserName;
-        WebResponse = WebService::out().WebPost(url_register_worker, PostString);
-        if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        // Log::out() <<WebResponse << "\n";
-        WebResponse=WebService::out().HTMLFindOutput(WebResponse);
-        // Log::out() << WebResponse <<"\n";
+            if (workers.size()>0){
+                UserName = workers[0].u_name;
+                constexpr std::string_view C_InputSelectWorker = "Are you reinstalling one of the following computers(s)?\n"
+                    "If so, please enter the computer name or its id.\nOr if this is a new machine that I do not know yet, please tell me its name.\n";  
+                Log::out() << C_InputSelectWorker << "\n";
+                Log::out() << "id" << "\t" << "computer" << "\t" << "YYYY-MM-DD HH:MM:SS" << "\n";
+                for (auto &w : workers){
+                    Log::out() << w.worker_id << "\t" << w.w_name << "\t" << w.w_registered << "\n";
+                }
+            } else {
+                constexpr std::string_view C_InputNewWorker = "\nLet us measure the performance of different computers (workers). \n"
+                    "If you plan to have just one worker (which is perfectly fine) you may leave it blank, \nI will use your id/mail instead. \n"
+                    "So how do you call this computer?";        
+                Log::out() << C_InputNewWorker << "\n";
+            }
+            std::string SelectedWorkerInput;
+            // getline(std::cin, SelectedWorkerInput);
+            SelectedWorkerInput = Log::out().getlineLeft();
+            if (SelectedWorkerInput.empty()) SelectedWorkerInput = email;
+            utils_str::string_replace(SelectedWorkerInput, ",", "");  // remove split char just for safety reasons
+            utils_str::string_replace(SelectedWorkerInput, "\t", "");
 
-        Json::Value root2 = utils::parseJsonStr(WebResponse);
-        std::vector<WorkerStruct> registered_worker;
-        WorkerStruct::JsonWorkersToArr(root2, registered_worker);
-        SelectedWorker=registered_worker[0];
+            SelectedWorker.worker_id="";
+            for (auto &w : workers){
+                if (w.worker_id == SelectedWorkerInput || w.w_name == SelectedWorkerInput) {
+                    SelectedWorker = w;
+                    SelectedWorker.SaveToConfig();
+                    Log::out() << "Welcome back! Registering an old worker: " << w.worker_id << " " << w.u_name << "\n";
+                    return SelectedWorker;
+                }
+            }
+
+            // I have a new worker name, get its seed and id from db
+            // get threads strategy
+            const char url_register_worker[] = "https://prime17.000webhostapp.com/register_worker.php";
+            PostString = "email_worker_name=" + email + "," + SelectedWorkerInput + "," + UserName;
+            WebResponse = WebService::out().WebPost(url_register_worker, PostString);
+            if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+            // Log::out() <<WebResponse << "\n";
+            WebResponse=WebService::out().HTMLFindOutput(WebResponse);
+            // Log::out() << WebResponse <<"\n";
+
+            Json::Value root2 = utils::parseJsonStr(WebResponse);
+            std::vector<WorkerStruct> registered_worker;
+            WorkerStruct::JsonWorkersToArr(root2, registered_worker);
+            SelectedWorker=registered_worker[0];
+
+            constexpr std::string_view C_Proceed = "\n\nThis is a final check whether everything is ok. If you want to continue just press Enter.\n";                    
+            Log::out() << C_Proceed << "\n";
+            std::string Proceed = Log::out().getlineLeft();
+            if (Proceed == "" || Proceed == "y" || Proceed == "Y" || Proceed == "yes" || Proceed == "Yes") bSuccess =true;
+        } while (bSuccess);
         Log::out() << "What a nice day, a new worker has been registered: " << SelectedWorker.w_name << "\n";
         SelectedWorker.SaveToConfig();
+        
         return SelectedWorker;
     }
 

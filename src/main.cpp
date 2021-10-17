@@ -13,6 +13,12 @@
 
 #include <stdio.h>
 #include <curl/curl.h>
+#include <locale.h>
+
+#include <time.h>
+
+#include <iomanip>
+#include <ctime>
 
 #include "PrimesRangeServiceTest.cpp"
 #include "BitRangeTest.cpp"
@@ -31,6 +37,7 @@
 // #include "Correction.cpp"
 
 
+
 // C code must be used from C++ code using extern in order to disable messing with functions names needed for overloading (allowed only in C++, not in C)
 // Otherwise linking would fail
 // Every decent header (and it is not the case of this one) should contain #ifdef __cplusplus extern "C" { } #endif or macros G_BEGIN_DECLS and G_END_DECLS
@@ -43,12 +50,39 @@ extern "C" {
 using namespace std::chrono;
 
 
+
+// Convert compile time to system time 
+time_t cvt_date(char const *date, char const *time)
+{
+    char s_month[5];
+    int year;
+    struct tm t;
+    static const char month_names[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
+    sscanf(date, "%s %d %d", s_month, &t.tm_mday, &year);
+    sscanf(time, "%2d %*c %2d %*c %2d", &t.tm_hour, &t.tm_min, &t.tm_sec);
+    // Find where is s_month in month_names. Deduce month value.
+    t.tm_mon = (int) (((strstr(month_names, s_month) - month_names) / 3) + 1);    
+    t.tm_year = year - 1900;    
+    return mktime(&t);
+}
+
 void check(){
+
+    Log::out().logRight("Version: ");
+
+    time_t  CompileTime =  cvt_date(__DATE__, __TIME__);    
+    std::tm tm = *std::localtime(&CompileTime);
+    Log::out().logRight (std::put_time(&tm, "%F"));
+    Log::out().logRight("\n");
+
     #ifdef NDEBUG
-    Log::out().logRight("Version: Release \n");
+    Log::out().logRight("Release build \n");
     #else
-    Log::out().logRight("Version: Debug \n");
+    Log::out().logRight("Debug build \n");
     #endif 
+
+
+
     Log::out().logRight("__SIZEOF_LONG__: ");
     Log::out().logRight( __SIZEOF_LONG__ );
     Log::out().logRight("\n");
@@ -80,6 +114,7 @@ void check(){
 
     Log::out().logRight("ncurses version: ");
     Log::out().logRight(curses_version());
+    Log::out().logRight("\n");
     
     mpz_t a, b;
     mpz_init(a);
@@ -166,6 +201,7 @@ void checkWeb(){
 void ShowHelp(){
     std::cout  <<  "Help:" << "\n";
     std::cout  << "\t-h -help\t\t\tHelp. You may also try to visit web pages at prime17.000webhostapp.com" << "\n";
+    std::cout  << "\t-v -ver\t\t\tDisplay Prime17 version, libraries and so on..." << "\n";
     std::cout  << "\t-w -wizard \t\t\tRun wizard - first init or re-register." << "\n";
     std::cout  << "\t-t -thread -cpu \t\tSet number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
     std::cout  << "\t-t_tmp -thread_tmp -cpu_tmp \tTemporarily set number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
@@ -209,7 +245,7 @@ void RunDefaultWork(){
     //check worker and in case of suspicious troubles run wizard
     //TODO: change of user in config file to nonsensical value goes unnoticed by this check    
     while (!Wizard::CheckWorker(w)) {
-        w = Wizard::NewWorker();
+        w = Wizard::NewWorker(); 
     }
 
     WebBitStatistics(w);
@@ -223,11 +259,13 @@ int main(int argc, char* argv[])
     bool bWizard = false;
     bool bThread = false;
     bool bThreadTmp =false;
+    bool bVersion = false;
     if (argc>=2) {
         std::string Arg(argv[1]);
         if (Arg=="-wizard" || Arg=="-w" ) bWizard = true;
         else if (Arg=="-thread" || Arg=="-threads" || Arg=="-t" || Arg=="-CPU" || Arg=="-cpu") bThread = true;
         else if (Arg=="-thread_tmp" || Arg=="-threads_tmp" || Arg=="-t_tmp" || Arg=="-CPU_tmp" || Arg=="-cpu_tmp") bThreadTmp = true;
+        else if (Arg=="-v" || Arg=="-ver" || Arg=="--ver" || Arg=="-V" || Arg=="-Ver") bVersion = true;
         else bHelp = true;
     }
 
@@ -247,6 +285,13 @@ int main(int argc, char* argv[])
         bool bRunAsUsusal = false;
         #endif
 
+        Log::out() << "Input: \n";
+        Log::out() << Log::out().getlineLeft() << "   \n end\n";
+
+        std::string aaa ="ěščřžýáíé";
+        Log::out() << aaa << "\n";
+
+
         // *********************************************************************************************************************
         //override default settings      
         // bRunAsUsusal = false;
@@ -258,6 +303,9 @@ int main(int argc, char* argv[])
             Wizard::NewWorker();
         } else if (bRunAsUsusal) {
             RunDefaultWork();
+        } else if (bVersion) {    
+            Log::out() << "See the version info in the right panel and press Enter to exit. \n\nKind regards from Prime17\n" ;
+            Log::out().getlineLeft();
         } else {
             Log::out() << "Usual run has been passed. Apparently something is being tested.\n";
 

@@ -3,10 +3,11 @@
 
 # release version
 CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3
+CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3 -fsanitize=address
 
 # debug version
 # CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -fsanitize=address
-CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations 
+CPPFLAGS := -g -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -fsanitize=address
 
 # for debuild packaging
 prefix = /usr/local
@@ -86,14 +87,14 @@ CXXFLAGS := -std=c++17
 # C/C++ flags
 
 # linker libs
-LDLIBS := -lgmp -lgmpxx -lstdc++fs -lpthread -lcurl -ljsoncpp -lncurses 
+LDLIBS := -lgmp -lgmpxx -lstdc++fs -lpthread -lcurl -ljsoncpp -lncursesw 
 
 # linker flags
 # static linking improves performance of Miller-Rabin test by ~2%
 # it may be possible to staticaly link only gmp library by linking gmp.a just like ordinary .o file
 # LDFLAGS := -static
-LDFLAGS := 
-# LDFLAGS := -fsanitize=address
+# LDFLAGS := 
+LDFLAGS := -fsanitize=address
 # Bug with combination of static linking and pthread 
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=52590
 
@@ -123,6 +124,7 @@ dist: $(DISTFILES)
 .PHONY: clean
 clean:
 	$(RM) -r $(OBJDIR) $(DEPDIR)
+	$(RM) $(BINDIR)prime17
 
 .PHONY: distclean
 distclean: clean

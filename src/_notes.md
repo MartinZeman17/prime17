@@ -27,7 +27,11 @@ ToDo Cpp:
 - ncurses resize bugs: seg fault, malloc(): unsorted double linked list corrupted
 - see - https://invisible-island.net/ncurses/ncurses.faq.html#handle_resize
 - see https://stackoverflow.com/questions/14897157/what-does-corrupted-double-linked-list-mean
-- ncurses resize 0 bug
+- ncurses resize 0 bug - also in Midnight Commander in WSL
+- ncurses - resize cause reading an input key
+- sanitizer screams various ugly errors when resizing via handle_winch is set 
+- sanitizer options must be set in a enviroment variable: LSAN_OPTION=verbosity=1:log_threads=1
+
 
 ToDo Web:
 - FAQ
@@ -43,6 +47,8 @@ ToDo DB:
 - time_zones +2 jen v completed
 - FNj pridat desetinna mista
 - smazat workery a usery bez odevzdane prace a meritu, cross check merrit a work
+- podporit testy tak, ze nedokoncenou praci vraci stejnemu uzivateli a nenacina zbytecne novou.
+
 
 ToDo:
 - Google cloud

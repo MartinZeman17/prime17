@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string.h>
+#include <locale.h>
 
 
 #include <signal.h>
@@ -21,6 +22,7 @@
 #include <ncurses.h> 
 #endif
 
+namespace fs = std::filesystem;
 
 class DoNotCopy
 {
@@ -71,7 +73,8 @@ class Log final: public Singleton<Log> {
     std::string _LogFileName;
     std::mutex _mutex;
     int _winCOLS  = 0;
-    int _winLINES = 0;    
+    int _winLINES = 0;   
+ 
     
     public:    
     WINDOW *win_left=nullptr;
@@ -92,16 +95,20 @@ class Log final: public Singleton<Log> {
         Log::out() << "resized \n" << COLS << "\n" << LINES << "\n";
     }
 
-    void Resize(){
-        endwin();
-        // refresh();
-        if (win_right!=nullptr) wrefresh(win_right);
-        if (win_middle!=nullptr) wrefresh(win_middle);
-        if (win_left!=nullptr) wrefresh(win_left);
-        // clear();
-        reinit();      
-        _winCOLS = COLS;
-        _winLINES = LINES;
+    void Resize(){ 
+        {
+            const std::lock_guard<std::mutex> lock(_mutex);
+        
+            endwin();
+            // refresh();
+            // if (win_right!=nullptr) wrefresh(win_right);
+            // if (win_middle!=nullptr) wrefresh(win_middle);
+            // if (win_left!=nullptr) wrefresh(win_left);
+            // clear();
+            // reinit();      
+            // _winCOLS = COLS;
+            // _winLINES = LINES;
+        }
     }
 
     void reinit(){
@@ -152,14 +159,17 @@ class Log final: public Singleton<Log> {
             endwin(); //??? kdy se vola init?       
         }
 
+        // call to setlocale (from locale.h) must precede initscr()
+        setlocale(LC_ALL, "");
         initscr();
         
+        // cbreak is inherited and should be set explicitely
         // cbreak();			/* Line buffering disabled, Pass on everything to me 		*/
-        // keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
-
-        // memset(&_sa, 0, sizeof(struct sigaction));
-        // _sa.sa_handler = Log::out().handle_winch;
-        // sigaction(SIGWINCH, &_sa, NULL);
+        nocbreak();
+        
+        memset(&_sa, 0, sizeof(struct sigaction));
+        _sa.sa_handler = Log::out().handle_winch;
+        sigaction(SIGWINCH, &_sa, NULL);
         
         reinit();
 
