@@ -205,6 +205,7 @@ void ShowHelp(){
     std::cout  << "\t-w -wizard \t\t\tRun wizard - first init or re-register." << "\n";
     std::cout  << "\t-t -thread -cpu \t\tSet number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
     std::cout  << "\t-t_tmp -thread_tmp -cpu_tmp \tTemporarily set number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
+    std::cout  << "\t-c -check -ch \tRun testing computation and check results to ensure everything works just fine." << "\n";
     std::cout  << "\n";
     std::cout  << "\tExamples:\n";
     std::cout  << "\tprime17 -t 100 Utilize all available computational power.\n";
@@ -251,6 +252,7 @@ void RunDefaultWork(){
     WebBitStatistics(w);
 }
 
+
 int main(int argc, char* argv[])
 {   
     Log::out().SetLogFileName(utils::ExtractFilename(std::string(argv[0])));
@@ -260,12 +262,15 @@ int main(int argc, char* argv[])
     bool bThread = false;
     bool bThreadTmp =false;
     bool bVersion = false;
+    bool bCheck = false;
     if (argc>=2) {
         std::string Arg(argv[1]);
+        utils_str::string_replace(Arg, "--", "-");
         if (Arg=="-wizard" || Arg=="-w" ) bWizard = true;
-        else if (Arg=="-thread" || Arg=="-threads" || Arg=="-t" || Arg=="-CPU" || Arg=="-cpu") bThread = true;
-        else if (Arg=="-thread_tmp" || Arg=="-threads_tmp" || Arg=="-t_tmp" || Arg=="-CPU_tmp" || Arg=="-cpu_tmp") bThreadTmp = true;
-        else if (Arg=="-v" || Arg=="-ver" || Arg=="--ver" || Arg=="-V" || Arg=="-Ver") bVersion = true;
+        else if (Arg=="-thread" || Arg=="-threads" || Arg=="-Threads" || Arg=="-t" || Arg=="-CPU" || Arg=="-cpu") bThread = true;
+        else if (Arg=="-thread_tmp" || Arg=="-threads_tmp" || Arg=="-Threads_tmp" || Arg=="-t_tmp" || Arg=="-CPU_tmp" || Arg=="-cpu_tmp") bThreadTmp = true;
+        else if (Arg=="-v" || Arg=="-ver" || Arg=="-version" || Arg=="-V" || Arg=="-Ver" || Arg=="-Version" ) bVersion = true;
+        else if (Arg=="-c" || Arg=="-ch" || Arg=="-check" || Arg=="-Check" || Arg=="-C" || Arg=="-Ch" || Arg=="-Chk" || Arg=="-chk") bCheck = true;
         else bHelp = true;
     }
 
@@ -285,22 +290,19 @@ int main(int argc, char* argv[])
         bool bRunAsUsusal = false;
         #endif
 
-        Log::out() << "Input: \n";
-        Log::out() << Log::out().getlineLeft() << "   \n end\n";
-
-        std::string aaa ="ěščřžýáíé";
-        Log::out() << aaa << "\n";
-
-
         // *********************************************************************************************************************
         //override default settings      
         // bRunAsUsusal = false;
-        bRunAsUsusal = true;
+        // bRunAsUsusal = true;
+        bCheck = true;
+
 
         if (bThread || bThreadTmp) {
             ConfigThread(argc, argv, bThread);
         } else if (bWizard) {
             Wizard::NewWorker();
+        } else if (bCheck) {
+            RunCheckComputation();
         } else if (bRunAsUsusal) {
             RunDefaultWork();
         } else if (bVersion) {    

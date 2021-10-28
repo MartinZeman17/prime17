@@ -31,3 +31,5 @@ src/.vscode/configurationCache.log
 .gitignore
 src/.vscode/targets.log
 src/.vscode/dryrun.log
+src/LiCorrectionNew_*.txt
+src/SliceTBalance.txt

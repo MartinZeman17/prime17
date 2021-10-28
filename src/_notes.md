@@ -9,6 +9,27 @@ ToDo Gmp:
 - podivat se na kod posledni verze gmp 6.2 knihovny - optimalizace powm poro base 2
 - zjistit, v cem je leppsi mpfr knihovna a zda neobsahuje lepsi kody
 
+ToDo:
+- zkontrolovat pi dles
+- https://oeis.org/A036378
+
+work id
+34281
+
+beg
+140730000014073
+
+end
+140737488355327
+
+primes
+225 070 932
+
+rn
+14074
+
+
+
 ToDo Cpp: 
 - doplnit const
 - Podívat se na virtuální destruktory a rule of the three or five
