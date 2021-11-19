@@ -97,17 +97,17 @@ WebService::WebService(){
         _Initialized=false;
         const char url[] = "https://prime17.000webhostapp.com/index.html";
         // const char url[] = "http://104.18.108.8/index.html";
-        std::string GetWorkPostString ("");
+        std::string NewWorkPostString ("");
 
         _SpecialCommunication = HTTP_SpecialCommunication::NoSpecialSettings;
-        std::string WebInput = WebPost(url, GetWorkPostString);
+        std::string WebInput = WebPost(url, NewWorkPostString);
         if (!WebInput.empty()) {
             _Initialized=true;
             return;
         }
 
         _SpecialCommunication = HTTP_SpecialCommunication::UseNativeCA;
-        WebInput = WebPost(url, GetWorkPostString);
+        WebInput = WebPost(url, NewWorkPostString);
         if (!WebInput.empty()) {
             Log::out().logRight("libcurl using the operating system's native CA store for certificate verification. Works only on Windows when built to use OpenSSL.\nThis option is experimental and behavior is subject to change.\n");
             _Initialized=true;
@@ -115,7 +115,7 @@ WebService::WebService(){
         }
         
         _SpecialCommunication = HTTP_SpecialCommunication::UseLocalCertificate;
-        WebInput = WebPost(url, GetWorkPostString);
+        WebInput = WebPost(url, NewWorkPostString);
         if (!WebInput.empty()) {
             Log::out().logRight("libcurl using local certificate\n");
             _Initialized=true;
@@ -123,7 +123,7 @@ WebService::WebService(){
         }
 
         _SpecialCommunication = HTTP_SpecialCommunication::TurnOffSSL;
-        WebInput = WebPost(url, GetWorkPostString);
+        WebInput = WebPost(url, NewWorkPostString);
         if (!WebInput.empty()) {
             Log::out().logRight("No certificate available. I feel depply sorry for turnig off SSL...\n");
             _Initialized=true;

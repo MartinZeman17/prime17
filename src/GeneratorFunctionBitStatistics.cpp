@@ -4,6 +4,7 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
+#include <cassert>
 
 using std::endl;
 using std::cout;
@@ -93,26 +94,26 @@ std::vector<std::string> GeneratorFunctionBitStatistics::WebPost_SetFields() con
 
 
 int GeneratorFunctionBitStatistics::GenFunct(const uint128_t & X, const mpz_t & mpz_X) {
-    // Utils::mpz_set_ul128(_mpz_X, X);   
+    // TODO only 64 bit numbers supported so far, be careful with the input.
+    assert(X <= UINT64_MAX);  
+    // Utils::mpz_set_ul128(_mpz_X, X); 
     if(_t.IsPrimeBPSW(mpz_X)) {
         _PrimesCnt++;
-        // std::cout << X << endl;
-        // _pBS->ComputePrimeStats(X); //???
 
-        // TODO only 64 bit numbers supported so far, Be careful with the input.
-        unsigned long long Prime = (unsigned long long) X;
+        uint64_t Prime = (uint64_t) X;
         int CntOfOnes=-1;  // correction in order to count only inner bits, the highest bit defining interval being tested will increase it to 0
-        for(unsigned long long j=0; j<=C_Bits_; j++) {
-            unsigned long long Bit=Prime & 1;
+        for(uint64_t j=0; j<=C_Bits_; j++) {
+            uint64_t Bit=Prime & 1;
             if(Bit==1)
             {
-                _CntPrimesWithOneAtPosition[j]++;
+                // it is not needed for Prime17
+                // _CntPrimesWithOneAtPosition[j]++;
                 CntOfOnes++;
             }
             //std::cout << " Prime: " << Prime << "  " << " Bit: "<< Bit << endl;
             Prime >>= 1;
         }
-        _CntPrimesWithNumOfSetBits[CntOfOnes]++; // 
+        _CntPrimesWithNumOfSetBits[CntOfOnes]++; 
     }                     
 
     return 0;

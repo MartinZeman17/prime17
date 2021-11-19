@@ -37,11 +37,11 @@ void GeneratorFunctionBitStatisticsTestOld(){
             #endif             
 
             // od beg chunks/
-            unsigned long long X = BS.Begin;
-            unsigned long long Y = ((BS.Begin / Sieve.Primorial) + MTChunks) * Sieve.Primorial -1;            
-            if (Y > BS.End) Y = BS.End;
+            unsigned long long X = BS.Begin();
+            unsigned long long Y = ((BS.Begin() / Sieve.Primorial) + MTChunks) * Sieve.Primorial -1;            
+            if (Y > BS.End()) Y = BS.End();
 
-            unsigned long long NoOfChunks = (unsigned long long) ceil ((long double) (BS.End - Y) / (Sieve.Primorial * MTChunks));
+            unsigned long long NoOfChunks = (unsigned long long) ceil ((long double) (BS.End() - Y) / (Sieve.Primorial * MTChunks));
             unsigned long long CurrentChunk = 0; 
 
             while (true) {
@@ -50,20 +50,19 @@ void GeneratorFunctionBitStatisticsTestOld(){
                 Sieve.WorkMT(X, Y, BSMT);
                 BS += BSMT;
                 //Save work
-                if (Y == BS.End) break;
+                if (Y == BS.End()) break;
                 CurrentChunk++;
                 X = Y+1;
                 Y = X + MTChunks * Sieve.Primorial -1;
-                if (Y > BS.End) Y = BS.End;
+                if (Y > BS.End()) Y = BS.End();
             }
     
             // Sieve.Work(BS.Begin, BS.End, BS);            
-            Sieve.WorkMT(BS.Begin, BS.End, BS);
+            Sieve.WorkMT(BS.Begin(), BS.End(), BS);
             
 
             BS.SaveFile();
 
-            cout << endl;
 
         }
 

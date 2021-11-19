@@ -58,10 +58,13 @@ time_t cvt_date(char const *date, char const *time)
     int year;
     struct tm t;
     static const char month_names[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
+    t.tm_yday = 0;
+    t.tm_wday = 0;
+    // Find where is s_month in month_names. Deduce month value.
     sscanf(date, "%s %d %d", s_month, &t.tm_mday, &year);
     sscanf(time, "%2d %*c %2d %*c %2d", &t.tm_hour, &t.tm_min, &t.tm_sec);
-    // Find where is s_month in month_names. Deduce month value.
-    t.tm_mon = (int) (((strstr(month_names, s_month) - month_names) / 3) + 1);    
+    t.tm_mon = (int) (((strstr(month_names, s_month) - month_names) / 3) + 1);  
+    t.tm_mon--; // range for months is 0..11   
     t.tm_year = year - 1900;    
     return mktime(&t);
 }
@@ -72,21 +75,19 @@ void check(){
 
     time_t  CompileTime =  cvt_date(__DATE__, __TIME__);    
     std::tm tm = *std::localtime(&CompileTime);
+
     Log::out().logRight (std::put_time(&tm, "%F"));
     Log::out().logRight("\n");
 
     #ifdef NDEBUG
-    Log::out().logRight("Release build \n");
+    Log::out().logRight("Build: Release\n");
     #else
-    Log::out().logRight("Debug build \n");
+    Log::out().logRight("Build: Debug\n");
     #endif 
-
-
 
     Log::out().logRight("__SIZEOF_LONG__: ");
     Log::out().logRight( __SIZEOF_LONG__ );
     Log::out().logRight("\n");
-
 
     Log::out().logRight("GMP version: ");
     Log::out().logRight(__gmp_version);
@@ -252,6 +253,26 @@ void RunDefaultWork(){
     WebBitStatistics(w);
 }
 
+bool RunCheckComputationEx() {
+
+    if (RunCheckComputation()) {
+        Log::out() << "Checks passed ok. Long and heavy labor ahead :-)\n";
+        return true;
+    } else{
+        
+        constexpr std::string_view C_ChecksFailed = "Checks failed, mission aborted.\n"
+                        "It is either a nasty bug or a naughty hardware ghost is wreaking havoc among digital ones and zeros.\n"
+                        "The cause may be related to a compilation for a specific platform (ARM, 32 bit, ...?) - portability is damn difficult!\n"
+                        "Please contact Martin.Zeman17@gmail.com. Thank you!\n\n"
+                        "Press any key to abort (Prime17 is deeply sorry).\n";
+                         
+        Log::out() << C_ChecksFailed;
+        Log::out().getlineLeft();
+        abort();
+        return false;
+    }        
+}
+
 
 int main(int argc, char* argv[])
 {   
@@ -263,6 +284,7 @@ int main(int argc, char* argv[])
     bool bThreadTmp =false;
     bool bVersion = false;
     bool bCheck = false;
+    bool bCheckPassed = false;
     if (argc>=2) {
         std::string Arg(argv[1]);
         utils_str::string_replace(Arg, "--", "-");
@@ -302,9 +324,14 @@ int main(int argc, char* argv[])
         } else if (bWizard) {
             Wizard::NewWorker();
         } else if (bCheck) {
-            RunCheckComputation();
+            bCheckPassed = RunCheckComputationEx();
+            Log::out().getlineLeft();
+
         } else if (bRunAsUsusal) {
-            RunDefaultWork();
+            bCheckPassed = RunCheckComputationEx();
+            if (bCheckPassed) {
+                RunDefaultWork();
+            };
         } else if (bVersion) {    
             Log::out() << "See the version info in the right panel and press Enter to exit. \n\nKind regards from Prime17\n" ;
             Log::out().getlineLeft();
@@ -312,6 +339,7 @@ int main(int argc, char* argv[])
             Log::out() << "Usual run has been passed. Apparently something is being tested.\n";
 
             SliceTBalanceCorrection();
+            
         // *********************************************************************************************************************
             // SieveGeneratorTestMT();
             // SieveGeneratorTest();

@@ -20,26 +20,26 @@
 
 
 
-std::string WebWork::PrepareWebPostString(WebGetWork &GetWork, GeneratorFunctionBitStatistics & BS){
+std::string WebWork::PrepareWebPostString(clsNewWork &NewWork, GeneratorFunctionBitStatistics & BS){
     std::string post ("work=");
-    post.append(std::to_string(GetWork.new_work_id));
+    post.append(std::to_string(NewWork.new_work_id));
     post.append(",");
-    post.append(std::to_string(GetWork.asking_worker_id));
+    post.append(std::to_string(NewWork.asking_worker_id));
     post.append(",");
-    post.append(std::to_string(GetWork.task_id));
+    post.append(std::to_string(NewWork.task_id));
     post.append(",");
-    post.append(std::to_string(GetWork.c_power2));    
+    post.append(std::to_string(NewWork.c_power2));    
     post.append(",");
-    post.append(std::to_string(GetWork.new_begin));
+    post.append(std::to_string(NewWork.new_begin));
     post.append(",");
-    post.append(std::to_string(GetWork.new_end));
+    post.append(std::to_string(NewWork.new_end));
     post.append(BS.WebPost_Serialize_CntPrimesWithOneAtPosition());
     return post;
 }
 
 
-WebGetWork WebWork::ParseJsonNewWork(const std::string &JSON){
-    WebGetWork ret;
+clsNewWork WebWork::ParseJsonNewWork(const std::string &JSON){
+    clsNewWork ret;
     ret.ParsedOK = false;
     // TODO error handling does not work in the C world
     try{
@@ -64,16 +64,16 @@ WebGetWork WebWork::ParseJsonNewWork(const std::string &JSON){
     // [{"task_id":"1","asking_worker_id":"1","new_begin":"0","new_end":"3","c_power2":"2","new_work_id":"62"}]   
 }
 
-WebGetWork WebWork::GetWebWork(WorkerStruct &w){
+clsNewWork WebWork::GetWebWork(WorkerStruct &w){
     std::string WebInput;
-    WebGetWork GetWork;
-    GetWork.ParsedOK=false;
+    clsNewWork NewWork;
+    NewWork.ParsedOK=false;
     do {
         do {
             const char url[] = "https://prime17.000webhostapp.com/get_work.php";
-            std::string GetWorkPostString ("worker_id=");
-            GetWorkPostString.append(w.worker_id);
-            WebInput = WebService::out().WebPost(url, GetWorkPostString);
+            std::string NewWorkPostString ("worker_id=");
+            NewWorkPostString.append(w.worker_id);
+            WebInput = WebService::out().WebPost(url, NewWorkPostString);
             if (WebInput.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         } while (WebInput.empty());  
         std::string WebOutput = WebService::out().HTMLFindOutput(WebInput);
@@ -81,38 +81,30 @@ WebGetWork WebWork::GetWebWork(WorkerStruct &w){
         Log::out() <<  "WebOutput is missing: " << WebInput << "\n";
         } else {
             try {
-                GetWork = ParseJsonNewWork(WebOutput);
+                NewWork = ParseJsonNewWork(WebOutput);
             } catch (const std::exception& e){
                 Log::out() << "Error parsing JSON" << "\n";
             }
         }
-        if (!GetWork.ParsedOK) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-    } while (!GetWork.ParsedOK);
-    return GetWork;
+        if (!NewWork.ParsedOK) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    } while (!NewWork.ParsedOK);
+    return NewWork;
 }
 
-void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
+void WebWork::ProcessWebWork(clsNewWork &NewWork, WorkerStruct &w){
+    NewWork.LogHeader();
 
-
-    Log::out() << "Started at: " << utils::GetCurrentDateTime() << "\n";
-    Log::out() << "Bit statistics for power: " << GetWork.c_power2 << "\n";
-    Log::out() << "Begin (offset): " << utils_str::FormatUInt(GetWork.new_begin) << "\n";
-    Log::out() << "End (offset):   " << utils_str::FormatUInt(GetWork.new_end) << "\n";
-    if (GetWork.c_power2 <= 63) {
-        GeneratorFunctionBitStatistics BSMT(GetWork.c_power2);
+    if (NewWork.c_power2 <= 63) {        
+        GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
         SieveGenerator<unsigned long long> Sieve(C_SieveGeneratorDefaultMaxPrime);
 
         // w.LoadThreads();
         Sieve.Threads(w.ThreadsPct());
-
-        unsigned long long Offset = static_cast<unsigned long long>(1) << GetWork.c_power2;
-        Log::out() << "Begin in percent: " << utils_str::FormatNumber( ((long double) 100.0 * GetWork.new_begin ) / (long double) Offset, 11,7) << "\n";
-        Log::out() << "End in percent:   " << utils_str::FormatNumber( ((long double) 100.0 * GetWork.new_end ) / (long double) Offset, 11,7) << "\n";
-        Sieve.WorkMT(Offset + GetWork.new_begin, Offset + GetWork.new_end, BSMT);
+        Sieve.WorkMT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
         // BSMT.SaveFile(); //It does not make sense to save partial files.
 
 
-        std::string PostString = PrepareWebPostString(GetWork, BSMT);
+        std::string PostString = PrepareWebPostString(NewWork, BSMT);
         // Log::out() << PostString << "\n";
 
         #ifdef NDEBUG
@@ -127,14 +119,14 @@ void WebWork::ProcessWebWork(WebGetWork &GetWork, WorkerStruct &w){
 
     } else {
         Log::out() << "128 bit integers not ready yet, but it is supposed to be quite an easy task ..." << "\n";
-        // GeneratorFunctionBitStatistics BSMT(GetWork.c_power2);
+        // GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
         // SieveGenerator<uint128_t> Sieve(C_SieveGeneratorDefaultMaxPrime);
     }
 }
 
 void WebWork::WebBitStatisticsWork(WorkerStruct &w) {
     Log::out() << "\n";
-    WebGetWork GetWork = GetWebWork(w);
-    ProcessWebWork(GetWork, w);
+    clsNewWork NewWork = GetWebWork(w);
+    ProcessWebWork(NewWork, w);
     w.LoadThreads();
 }

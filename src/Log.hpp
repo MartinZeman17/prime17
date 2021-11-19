@@ -87,7 +87,7 @@ class Log final: public Singleton<Log> {
         // refresh();
         // clear();
 
-        // mvprintw(0, 0, "COLS = %d, LINES = %d", COLS, LINES);
+        // waddstr(0, 0, "COLS = %d, LINES = %d", COLS, LINES);
         // for (int i = 0; i < COLS; i++)
         //     mvaddch(1, i, '*');
         // refresh();
@@ -200,7 +200,8 @@ class Log final: public Singleton<Log> {
         Msg << Input;
 
         if (win_left!=nullptr){
-            wprintw(win_left, Msg.str().c_str());
+            // wprintw(win_left, Msg.str().c_str());
+            waddstr(win_left, Msg.str().c_str());
             wrefresh(win_left);
         }
         // std::cout << Msg.str();
@@ -222,8 +223,9 @@ class Log final: public Singleton<Log> {
         if (win_right != nullptr){
             int y,x;
             getyx(win_right, y, x);
-            if (x==0) x=0; // to supress an annoing warning
-            mvwprintw(win_right, y, x, Msg.str().c_str());
+            if (x==0) x=0; // to supress an annoing compiler warning
+            // mvwprintw(win_right, y, x, Msg.str().c_str());
+            mvwaddstr(win_right, y, x, Msg.str().c_str());
             wrefresh(win_right); 
         }
         // std::cout << Msg.str();

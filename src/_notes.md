@@ -9,41 +9,18 @@ ToDo Gmp:
 - podivat se na kod posledni verze gmp 6.2 knihovny - optimalizace powm poro base 2
 - zjistit, v cem je leppsi mpfr knihovna a zda neobsahuje lepsi kody
 
-ToDo:
-- zkontrolovat pi dles
-- https://oeis.org/A036378
-
-work id
-34281
-
-beg
-140730000014073
-
-end
-140737488355327
-
-primes
-225 070 932
-
-rn
-14074
-
-
-
 ToDo Cpp: 
+- Todo: nefunční web prime17 při startu spadne do registrace. Testy, zda funguje prime17 web a zda je config file naplnený
+- co je nejrychlesji test na oblast 48-52
+- doplnit asseert
 - doplnit const
 - Podívat se na virtuální destruktory a rule of the three or five
 - vylepšit try catch
-- installer
-- packaging
 - cmake, autoconf?
 - versioning
 - PrimeStorage  - použít config dir
 - prejít na c++20? a nové threads se zastavováním a moduly
 - use cpp wrapper for ncurses? https://stackoverflow.com/questions/53857540/using-native-c-wrappers-for-ncurses-how-can-i-create-a-menu-submenu-system
-- resize
-- mazat netisknutelne znaky z wizardu - backspace 08h -clean funkce
-- sanitizer na web work
 - ARM version - odstranit vsechny long promenne a nahradit je uint64
 - ncurses resize bugs: seg fault, malloc(): unsorted double linked list corrupted
 - see - https://invisible-island.net/ncurses/ncurses.faq.html#handle_resize
@@ -61,6 +38,7 @@ ToDo Web:
 
 ToDo DB:
 - vymyslet tabulky pro testování- druha db?
+- opravit prime pi reconciliation https://oeis.org/A036378
 - vstup jako Json?
 - výpočet super slices
 - work_results_rec  - promazavání
@@ -74,7 +52,6 @@ ToDo DB:
 ToDo:
 - Google cloud
 - last datetime worker was active
-- worker percent for current power
 - rezy U joining TT slices
 
 Tests:

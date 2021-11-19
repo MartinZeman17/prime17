@@ -83,5 +83,6 @@
         "stop_token": "cpp",
         "locale": "cpp",
         "semaphore": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false
 }

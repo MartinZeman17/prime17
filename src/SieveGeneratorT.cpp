@@ -14,6 +14,8 @@
 
 #include <string>  
 #include <sstream>  
+#include <chrono>
+
 
 #ifdef __MINGW64__
 # include <ncurses/ncurses.h>
@@ -27,8 +29,6 @@ using std::cout;
 using std::string;
 using std::to_string;
 using std::vector;
-using namespace std::chrono;
-
 
 // static variable must be defined outside of header, beware: declaration is not a definition
 template <class T> unsigned int SieveGenerator<T>::p_MaxPrime=0;
@@ -38,11 +38,29 @@ template <class T> uint32_t SieveGenerator<T>::p_Primorial=1;
 template <class T> std::mutex SieveGenerator<T>::p_TestArray_mutex;
 
 
+template <class T>
+void SieveGenerator<T>::ResetClock() noexcept {
+        _BeginTime = std::chrono::high_resolution_clock::now(); 
+ }
+
+template <class T>
+long double SieveGenerator<T>::DurationMinutes() const noexcept {
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    return duration.count() / (1000.0l * 60.0l);
+}
+
+template <class T>
+long double SieveGenerator<T>::DurationSeconds() const noexcept {
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    return duration.count() / (1000.0l);
+}
+
 template <class T> 
 void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
     // ToDo: Test with more threads  ??? is it ok with ordinary object and no smart pointers
     // array may be in process of init from other thread???
     const std::lock_guard<std::mutex> lock(p_TestArray_mutex); 
+    ResetClock();
 
     if (p_MaxPrime==0){
         mpz_t mpz_primor;
@@ -50,7 +68,7 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
         mpz_init2(mpz_primor,64);
         mpz_init2(mpz_res,64);
         mpz_primorial_ui(mpz_primor, MaxPrime);  //ok
-        if (mpz_cmp_ui(mpz_primor, UINT32_MAX) > 0 ){ //ok
+        if (mpz_cmp_ui(mpz_primor, UINT32_MAX) > 0 ) { //ok
             const std::string C_Msg("SieveGenerator cannot initialize for primorial exceding 32 bits. Fatal, mission aborted.\n");
             Log::out() << C_Msg;
             throw(C_Msg); //ToDo Memory leak?? How to throw or exit??
@@ -133,7 +151,7 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
 
     Log::out()  << "Sieve Begin: " << Begin << " ";        
     Log::out()  << "Sieve End  : " << End <<  " ";
-    Log::out()  << "Sieve End-Begin: " << End - Begin << "\n";        
+    Log::out()  << "End-Begin  : " << End - Begin << "\n";        
     // Log::out()  << "End - UINT64_MAX: " << (uint128_t) End - (uint128_t) UINT64_MAX << endl;
     // Log::out()  << "End - 2 * UINT64_MAX: " << (uint128_t) End - (uint128_t) UINT64_MAX - (uint128_t) UINT64_MAX << endl;        
     // Log::out()  << "UINT64_MAX: " <<  UINT64_MAX << endl;        
@@ -166,7 +184,7 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
     }
 
     Log::out() << "Primorials skipped: " << k << "\n";
-    Log::out() << "Nearest left multiple of primorial: " << kp << "\n";
+    Log::out() << "Multiple of primorial: " << kp << "\n";
     Log::out() << "... till Begin: " << Begin - kp << "\n";
 
     if (std::is_same_v<T, unsigned long long>) {
@@ -201,6 +219,7 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
 
 
     auto TBegin = high_resolution_clock::now();
+    // ResetClock();  //method is const 
     // i is now a valid index within the array bounds
     while(true)
     {
@@ -238,7 +257,7 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
     auto TEnd = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(TEnd - TBegin);
     // Log::out() << "Sieve duration: " << duration.count() << endl;
-    Log::out() << "Sieve Duration minutes: " << GF.DurationMinutes() << "\n";
+    Log::out() << "Sieve Duration [m]: " << GF.DurationMinutes() << "\n";
     Log::out() << "\n";
 
     RETURN(0);
@@ -268,13 +287,14 @@ void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double
     }
 
     RowMsg << utils_str::FormatNumber(Percent, 4, 1);
-    RowMsg << "%% ";
+    RowMsg << "% ";
     RowMsg << utils_str::FormatNumber(MinTillEnd, 4, 1);
     RowMsg << "m ";
 
     {
         // const std::lock_guard<std::mutex> lock(_cout_mutex);
-        mvwprintw(Log::out().win_right, row, 0, RowMsg.str().c_str());
+        // mvwprintw(Log::out().win_right, row, 0, RowMsg.str().c_str());
+        mvwaddstr(Log::out().win_right, row, 0, RowMsg.str().c_str());
         wrefresh(Log::out().win_right);
     }
 }
@@ -391,12 +411,12 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
         mpz_add_ui(mpz_X, mpz_kp, p_TestArray[i]); //ok
 
         if(X > End) break;            
-
+        
         if (GF->GenFunct(X, mpz_X)!=0) {
             res = X;
             RETURN(res);
         };
-                  
+  
         i++;
         if(i==p_TestArrayCount) 
         {
@@ -474,6 +494,7 @@ unsigned int SieveGenerator<T>::Threads(const unsigned int Percent){
 template <class T>
 T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbstract & GF) {
 
+    ResetClock();
     T res = 0;
     T k = Begin/p_Primorial;
     _kp = k * p_Primorial;  // primorial p multiplied by some integer k
@@ -481,7 +502,7 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
 
     Log::out()  << "Sieve Begin: " << utils_str::FormatUInt(Begin) << "\n";        
     Log::out()  << "Sieve End  : " << utils_str::FormatUInt(End) <<  "\n";
-    Log::out()  << "Sieve End-Begin: " << utils_str::FormatUInt(End - Begin) << "\n";        
+    Log::out()  << "End-Begin  : " << utils_str::FormatUInt(End - Begin) << "\n";        
     // Log::out()  << "End - UINT64_MAX: " << (uint128_t) End - (uint128_t) UINT64_MAX << endl;
     // Log::out()  << "End - 2 * UINT64_MAX: " << (uint128_t) End - (uint128_t) UINT64_MAX - (uint128_t) UINT64_MAX << endl;        
     // Log::out()  << "UINT64_MAX: " <<  UINT64_MAX << endl;        
@@ -496,11 +517,10 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
     const auto processor_count = std::thread::hardware_concurrency();
     // const size_t C_Threads = processor_count;
     // Log::out() << "Processor count detected: " << processor_count << " Threads to spawn: " << _Threads  << "\n";
-    Log::out() << "Using " << (100 * _Threads)/processor_count << "%% CPU = spawning " << _Threads << " thread";
+    Log::out() << "Using " << (unsigned int) (100 * _Threads)/processor_count << "% CPU = spawning " << _Threads << " thread";
     if (_Threads > 1) Log::out() << "s";
     Log::out() << " out of " << processor_count << " available logical CPUs.\n";
     Log::out().ClearRight();
-    
 
     // No two std::thread objects may represent the same thread of execution;
     // std::thread is not CopyConstructible or CopyAssignable, 
@@ -531,7 +551,7 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
         GF+=(*GFClones[i]);
         Log::out() << " = " << GF.PrimesCnt() << "\n";
     }
-    Log::out() << "Multithreading Sieve Duration minutes: " << GF.DurationMinutes() << "\n";
+    Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() << "\n";
  
     if (res!=0) return res; 
     return 0;

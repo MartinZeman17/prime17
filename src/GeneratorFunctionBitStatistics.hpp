@@ -10,6 +10,7 @@ using namespace primecount;
 
 #include <gmp.h>
 #include <vector>
+#include <cassert>
 
 
 
@@ -36,16 +37,15 @@ class GeneratorFunctionBitStatistics : public GeneratorFunction<GeneratorFunctio
     unsigned long long _CntPrimesWithOneAtPosition[C_Bits_ + 1];  
 
     public:
-    // GeneratorFunctionBitStatistics(BitStatistics *pBS);
     GeneratorFunctionBitStatistics(const unsigned int iSliceBitIndex=0) noexcept; //  Slice is than defined as a range from 2^iSliceBitIndex to 2^(iSliceBitIndex+1)-1
     GeneratorFunctionBitStatistics(const GeneratorFunctionBitStatistics & O) noexcept;
 
     virtual ~GeneratorFunctionBitStatistics();
 
-    // unsigned long long Begin() const noexcept {return _Begin;};
-    // unsigned long long End() const noexcept {return _End;};
-    const unsigned long long & Begin = _Begin;
-    const unsigned long long & End = _End;
+    unsigned long long Begin() const noexcept {return _Begin;};
+    unsigned long long End() const noexcept {return _End;};
+    // const unsigned long long * CntPrimesWithNumOfSetBits = &_CntPrimesWithOneAtPosition;
+    unsigned long long CntPrimesWithOneAtPosition[C_Bits_ + 1]; 
     void SaveFile() const;
     std::vector<std::string> WebPost_SetFields() const;
     std::string WebPost_Serialize_CntPrimesWithOneAtPosition() const;
@@ -54,6 +54,11 @@ class GeneratorFunctionBitStatistics : public GeneratorFunction<GeneratorFunctio
     virtual std::string toName() const noexcept override  {return "Bit Statistics";}
     
     virtual GeneratorFunctionBitStatistics& operator+=(const GeneratorFunctionAbstract& rhs) noexcept override;
+
+    unsigned long long CntPrimesWithNumOfSetBits(unsigned int index) const {
+        assert(index <= C_Bits_ + 1);
+        return _CntPrimesWithNumOfSetBits[index];
+    }
     
 };
 

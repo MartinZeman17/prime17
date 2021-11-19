@@ -15,6 +15,7 @@ using namespace primecount;
 
 #include <vector>
 #include <mutex>
+#include <chrono>
 
 // use Eratosthenes sieve with the following primorial
 #ifdef NDEBUG
@@ -43,6 +44,7 @@ class SieveGenerator {
     void Constructor(unsigned int MaxPrime);
     void PrintProgress(const unsigned int &PId, const long double &Percent, const long double &MinTillEnd) const;
     T WorkMT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract> & GF, const std::string PId);
+    std::chrono::time_point<std::chrono::high_resolution_clock> _BeginTime; //  = std::high_resolution_clock::now(); 
 
     T _kp;
     std::mutex _kp_mutex;
@@ -80,6 +82,9 @@ class SieveGenerator {
 
     unsigned int Threads(const unsigned int Percent);
 
+    void ResetClock() noexcept;
+    long double DurationMinutes() const noexcept;
+    long double DurationSeconds() const noexcept;
 };
 
 #include "SieveGeneratorT.cpp"
