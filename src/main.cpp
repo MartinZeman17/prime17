@@ -193,8 +193,9 @@ void checkWeb(){
         if (curl == nullptr) {
             Log::out() << "curl is null\n";
         }
+        Log::out().logRight("\n");
     } catch(...) {
-        Log::out() << "curl exception\n";
+        Log::out() << "curl exception\n\n";
     }
 
 }
@@ -315,8 +316,8 @@ int main(int argc, char* argv[])
         // *********************************************************************************************************************
         //override default settings      
         // bRunAsUsusal = false;
-        // bRunAsUsusal = true;
-        bCheck = true;
+        bRunAsUsusal = true;
+        // bCheck = true;
 
 
         if (bThread || bThreadTmp) {
@@ -329,6 +330,7 @@ int main(int argc, char* argv[])
 
         } else if (bRunAsUsusal) {
             bCheckPassed = RunCheckComputationEx();
+            // bCheckPassed = true;
             if (bCheckPassed) {
                 RunDefaultWork();
             };

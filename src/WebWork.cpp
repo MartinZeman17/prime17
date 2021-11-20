@@ -107,15 +107,20 @@ void WebWork::ProcessWebWork(clsNewWork &NewWork, WorkerStruct &w){
         std::string PostString = PrepareWebPostString(NewWork, BSMT);
         // Log::out() << PostString << "\n";
 
-        #ifdef NDEBUG
-        const char url[] = "https://prime17.000webhostapp.com/post_work.php";
-        std::string WebResponse = WebService::out().WebPost(url, PostString);
-        // Log::out() << web.HTMLFindOutput(WebResponse) << "\n";
-        Log::out().logToFile(WebService::out().HTMLFindOutput(WebResponse));
-        Log::out().logToFile("\n");
-        #else
-        Log::out() << "!!!! Debug version does not post results to web !!!! \n";
-        #endif
+        if (w.worker_id == "97") {
+            Log::out() << "!!!! Yoga WSL worker 97 and Arnold WSL 94 do not post results to web !!!! \n";
+        } else{
+            #ifdef NDEBUG
+            const char url[] = "https://prime17.000webhostapp.com/post_work.php";
+            std::string WebResponse = WebService::out().WebPost(url, PostString);
+            // Log::out() << web.HTMLFindOutput(WebResponse) << "\n";
+            Log::out().logToFile(WebService::out().HTMLFindOutput(WebResponse));
+            Log::out().logToFile("\n");
+            #else
+            Log::out() << "!!!! Debug version does not post results to web !!!! \n";
+            #endif
+        }
+
 
     } else {
         Log::out() << "128 bit integers not ready yet, but it is supposed to be quite an easy task ..." << "\n";

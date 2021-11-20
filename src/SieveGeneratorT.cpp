@@ -110,7 +110,7 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
         Log::out() << "Sieve Prime: " << MaxPrime << " ";
         Log::out() << "Primorial: " << utils_str::FormatUInt(p_Primorial) << "\n";
         Log::out() << "Coprimes #: " << utils_str::FormatUInt(p_TestArrayCount) << " ";
-        Log::out() << "Effectivity %: " << MeasuredEffectivity  << "\n"; 
+        Log::out() << "Effectivity [%]: " << MeasuredEffectivity  << "\n"; 
         // TODO sanitizer complains about % sign in printf
 
         Threads(100);        
@@ -288,8 +288,10 @@ void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double
 
     RowMsg << utils_str::FormatNumber(Percent, 4, 1);
     RowMsg << "% ";
-    RowMsg << utils_str::FormatNumber(MinTillEnd, 4, 1);
-    RowMsg << "m ";
+    if (MinTillEnd>0) {
+        RowMsg << utils_str::FormatNumber(MinTillEnd, 4, 1);
+        RowMsg << "m ";
+    }
 
     {
         // const std::lock_guard<std::mutex> lock(_cout_mutex);
@@ -334,7 +336,7 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
         if (tmp < Begin){
             // Begin is very close to the next multiple of Primorial 
             // so whole TestArray would be exhausted and variable i would out be of bounds
-            // all numbers between kp + last item of TestArrayand the next multiple of primorial must have common divisor (not primes) 
+            // all numbers between kp + last item of TestArray and the next multiple of primorial must have common divisor (not primes) 
             // -> go directly to the next primorial and leave i index at 0
             _kp += p_Primorial;
             {
@@ -347,12 +349,12 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
         _kp += p_Primorial;
     }
 
-    {
+    // {
         // if (kp < End) {
         //     const std::lock_guard<std::mutex> lock(_Log::out()_mutex);
         //     Log::out() << PId << "> " << " k: " <<  kp / p_Primorial << " kp: " << kp  << endl;
         // }
-    }
+    // }
 
 
     unsigned long long i=0;
@@ -366,11 +368,6 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
             ++i;
             tmp = p_TestArray[i]+kp;
         }
-
-        // for(tmp = p_TestArray[i]+kp; tmp < Begin; i++ ){
-        //     tmp = p_TestArray[i]+kp;
-        // };
-
     }
 
     // The branch that fails the constexpr condition will not be compiled for the given template instantiation. Or I hope so...
@@ -451,10 +448,10 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
                 kp = _kp;
                 _kp += p_Primorial;
             }
-            // {
-            //     const std::lock_guard<std::mutex> lock(_cout_mutex);
-            //     Log::out() << PId << "> " << " k: " <<  kp / p_Primorial << " kp: " << kp  << endl;
-            // }
+            {
+                const std::lock_guard<std::mutex> lock(_cout_mutex);
+                Log::out() << PId << "> " << " k: " <<  kp / p_Primorial << " kp: " << kp  << "\n";
+            }
 
 
             if (std::is_same_v<T, unsigned long long>) {
@@ -469,14 +466,11 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
     auto TEnd = high_resolution_clock::now();
     auto duration = duration_cast<seconds>(TEnd - TBegin);
 
-    // if (iPId == 0) endwin();
-    // endwin();
-
-    // if (duration.count()!=0)
-    // {
-    //     const std::lock_guard<std::mutex> lock(_cout_mutex);
-    //     Log::out() << PId << "> Sieve duration: " << duration.count() << " s = " << (float) duration.count() / 60.0f << " m" << "\n";
-    // }
+    if (duration.count()!=0)
+    {
+        const std::lock_guard<std::mutex> lock(_cout_mutex);
+        Log::out() << PId << "> Sieve duration: " << duration.count() << " s = " << (float) duration.count() / 60.0f << " m" << "\n";
+    }
 
     RETURN(0);
 
@@ -547,10 +541,16 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
 
     // consolidate all results into input GF object
     for (unsigned int i = 0; i < _Threads; i++){
-        Log::out() << i << "> " << GF.PrimesCnt() << " + " << GFClones[i]->PrimesCnt();
+        Log::out() << i << "> " << utils_str::FormatUInt(GF.PrimesCnt()) << " + " << utils_str::FormatUInt(GFClones[i]->PrimesCnt());
         GF+=(*GFClones[i]);
-        Log::out() << " = " << GF.PrimesCnt() << "\n";
+        Log::out() << " = " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     }
+    long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( p_TestArrayCount / (long double) p_Primorial) * (End - Begin + 1));
+    Log::out() << "Primes: " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
+    Log::out() << "Primes ratio (from interval): " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (End - Begin + 1), 6,3) << "%\n";
+    Log::out() << "Primes ratio (after sieve)  : " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";
+
+
     Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() << "\n";
  
     if (res!=0) return res; 

@@ -103,7 +103,7 @@ namespace Wizard {
             Log::out() << C_Proceed << "\n";
             std::string Proceed = Log::out().getlineLeft();
             if (Proceed == "" || Proceed == "y" || Proceed == "Y" || Proceed == "yes" || Proceed == "Yes") bSuccess =true;
-        } while (bSuccess);
+        } while (!bSuccess);
         Log::out() << "What a nice day, a new worker has been registered: " << SelectedWorker.w_name << "\n";
         SelectedWorker.SaveToConfig();
         
