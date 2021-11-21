@@ -88,6 +88,7 @@ clsNewWork WebWork::GetWebWork(WorkerStruct &w){
         }
         if (!NewWork.ParsedOK) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
     } while (!NewWork.ParsedOK);
+    // Log::out() << "New work received" << "\n";
     return NewWork;
 }
 
@@ -107,8 +108,8 @@ void WebWork::ProcessWebWork(clsNewWork &NewWork, WorkerStruct &w){
         std::string PostString = PrepareWebPostString(NewWork, BSMT);
         // Log::out() << PostString << "\n";
 
-        if (w.worker_id == "97") {
-            Log::out() << "!!!! Yoga WSL worker 97 and Arnold WSL 94 do not post results to web !!!! \n";
+        if (w.worker_id == "97" || w.worker_id == "95") {
+            Log::out() << "!!!! Yoga WSL worker 97 and Arnold WSL 95 do not post results to web !!!! \n";
         } else{
             #ifdef NDEBUG
             const char url[] = "https://prime17.000webhostapp.com/post_work.php";

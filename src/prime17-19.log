@@ -1,0 +1,131 @@
+Version: 2021-11-21
+Build: Release
+__SIZEOF_LONG__: 8
+GMP version: 6.2.0 GMP_LIMB_BITS: 64
+Compiler: GNUC 9.3.0
+ncurses version: ncurses 6.2.20200212
+curl version: 7.68.0
+
+Running check computation (better safe than sorry).
+Started at: 2021-11-21 11:06:50
+Bit statistics for power: 50
+Begin (offset): 562 948 879 679 488
+End   (offset): 562 951 027 163 136
+Begin [%]:  49.999904633
+End   [%]:  50.000095367
+Sieve Prime: 19 Primorial: 9 699 690
+Coprimes #: 1 658 880 Effectivity [%]: 17.1024
+Sieve Begin: 1 688 848 786 522 112
+Sieve End  : 1 688 850 934 005 760
+End-Begin  : 2 147 483 648
+Primorials skipped: 174 113 686
+Multiple of primorial: 1 688 848 778 957 340 ...till Begin: 7 564 772
+Using 100% CPU = spawning 16 threads out of 16 available logical CPUs.
+14> Sieve duration: 72 s = 1.2 m
+10> Sieve duration: 72 s = 1.2 m
+15> Sieve duration: 73 s = 1.21667 m
+2> Sieve duration: 75 s = 1.25 m
+13> Sieve duration: 76 s = 1.26667 m
+3> Sieve duration: 76 s = 1.26667 m
+11> Sieve duration: 76 s = 1.26667 m
+5> Sieve duration: 76 s = 1.26667 m
+12> Sieve duration: 76 s = 1.26667 m
+0> Sieve duration: 76 s = 1.26667 m
+7> Sieve duration: 76 s = 1.26667 m
+1> Sieve duration: 76 s = 1.26667 m
+8> Sieve duration: 76 s = 1.26667 m
+6> Sieve duration: 76 s = 1.26667 m
+4> Sieve duration: 76 s = 1.26667 m
+9> Sieve duration: 76 s = 1.26667 m
+0> 0 + 3 932 192 = 3 932 192
+1> 3 932 192 + 3 874 105 = 7 806 297
+2> 7 806 297 + 3 873 127 = 11 679 424
+3> 11 679 424 + 3 873 549 = 15 552 973
+4> 15 552 973 + 3 871 341 = 19 424 314
+5> 19 424 314 + 3 871 847 = 23 296 161
+6> 23 296 161 + 3 872 182 = 27 168 343
+7> 27 168 343 + 3 873 528 = 31 041 871
+8> 31 041 871 + 3 872 429 = 34 914 300
+9> 34 914 300 + 3 871 515 = 38 785 815
+10> 38 785 815 + 3 597 260 = 42 383 075
+11> 42 383 075 + 3 869 701 = 46 252 776
+12> 46 252 776 + 3 871 780 = 50 124 556
+13> 50 124 556 + 3 872 873 = 53 997 429
+14> 53 997 429 + 3 596 464 = 57 593 893
+15> 57 593 893 + 3 644 701 = 61 238 594
+Primes: 61 238 594
+Primes ratio (from interval):  2.852%
+Primes ratio (after sieve)  : 16.674%
+Multithreading Sieve Duration [m]: 1.27915
+Duration [s]:       76.6 	~25.8% 
+Checks passed ok. Long and heavy labor ahead :-)
+Worker check start
+worker=95,b5c24292-2ddc-11ec-b856-4e2be9139fe6,Arnold WSL,Martin Zeman
+[{"status":"OK"}]
+Worker has been checked against Prime 17 web
+
+libcurl: 28: Connection timed out after 300002 milliseconds
+Internet connection is not available, however my creator wishes me to be be resilient and versatile. If I'm bothering you, just kill me. Ouch :-(
+
+Started at: 2021-11-21 11:13:17
+Bit statistics for power: 48
+Begin (offset): 46 010 000 004 601
+End   (offset): 46 020 000 004 601
+Begin [%]:  16.346035638
+End   [%]:  16.349588351
+Sieve Begin: 327 484 976 715 257
+Sieve End  : 327 494 976 715 257
+End-Begin  : 10 000 000 000
+Primorials skipped: 33 762 416
+Multiple of primorial: 327 484 968 851 040 ...till Begin: 7 864 217
+Using 100% CPU = spawning 16 threads out of 16 available logical CPUs.
+13> Sieve duration: 358 s = 5.96667 m
+4> Sieve duration: 358 s = 5.96667 m
+7> Sieve duration: 358 s = 5.96667 m
+3> Sieve duration: 358 s = 5.96667 m
+8> Sieve duration: 358 s = 5.96667 m
+0> Sieve duration: 358 s = 5.96667 m
+11> Sieve duration: 358 s = 5.96667 m
+6> Sieve duration: 358 s = 5.96667 m
+9> Sieve duration: 359 s = 5.98333 m
+2> Sieve duration: 360 s = 6 m
+12> Sieve duration: 360 s = 6 m
+15> Sieve duration: 361 s = 6.01667 m
+14> Sieve duration: 361 s = 6.01667 m
+5> Sieve duration: 361 s = 6.01667 m
+10> Sieve duration: 361 s = 6.01667 m
+1> Sieve duration: 361 s = 6.01667 m
+0> 0 + 18 624 008 = 18 624 008
+1> 18 624 008 + 18 859 903 = 37 483 911
+2> 37 483 911 + 18 799 219 = 56 283 130
+3> 56 283 130 + 18 574 425 = 74 857 555
+4> 74 857 555 + 18 577 016 = 93 434 571
+5> 93 434 571 + 18 870 732 = 112 305 303
+6> 112 305 303 + 18 569 743 = 130 875 046
+7> 130 875 046 + 18 571 584 = 149 446 630
+8> 149 446 630 + 18 573 540 = 168 020 170
+9> 168 020 170 + 18 569 894 = 186 590 064
+10> 186 590 064 + 18 863 870 = 205 453 934
+11> 205 453 934 + 18 575 281 = 224 029 215
+12> 224 029 215 + 18 858 903 = 242 888 118
+13> 242 888 118 + 18 571 464 = 261 459 582
+14> 261 459 582 + 18 862 320 = 280 321 902
+15> 280 321 902 + 18 859 881 = 299 181 783
+Primes: 299 181 783
+Primes ratio (from interval):  2.992%
+Primes ratio (after sieve)  : 17.494%
+Multithreading Sieve Duration [m]: 6.02603
+!!!! Yoga WSL worker 97 and Arnold WSL 95 do not post results to web !!!! 
+
+Started at: 2021-11-21 11:19:20
+Bit statistics for power: 48
+Begin (offset): 46 020 000 004 602
+End   (offset): 46 030 000 004 602
+Begin [%]:  16.349588351
+End   [%]:  16.353141065
+Sieve Begin: 327 494 976 715 258
+Sieve End  : 327 504 976 715 258
+End-Begin  : 10 000 000 000
+Primorials skipped: 33 763 447
+Multiple of primorial: 327 494 969 231 430 ...till Begin: 7 483 828
+Using 100% CPU = spawning 16 threads out of 16 available logical CPUs.

@@ -142,14 +142,19 @@ namespace Wizard {
     
 
     bool CheckWorker(WorkerStruct &w){
+        // Log::out() << "Worker check start\n" ;
         const char url[] = "https://prime17.000webhostapp.com/check_worker.php";
         std::string PostString(w.PrepareCheckWorkerPost());
+        // Log::out() << PostString << "\n";
         std::string WebResponse = WebService::out().WebPost(url, PostString);
         utils_str::trim(WebResponse);
         if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         WebResponse=WebService::out().HTMLFindOutput(WebResponse);
-        // Log::out() << WebResponse <<"\n";
-        if (WebResponse=="[{\"status\":\"OK\"}]") return true;
+        Log::out() << WebResponse <<"\n";
+        if (WebResponse=="[{\"status\":\"OK\"}]") {
+            Log::out() << "Worker has been checked against Prime 17 web\n" ;
+            return true;
+        }
         Log::out().logRight("Worker check failed. It could be lack of internet connection or may be someone was toying with the configuration file.\n");
         Log::out().logRight(WebResponse);
         Log::out().logRight("\n");

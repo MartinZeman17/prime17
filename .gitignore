@@ -33,3 +33,5 @@ src/.vscode/targets.log
 src/.vscode/dryrun.log
 src/LiCorrectionNew_*.txt
 src/SliceTBalance.txt
+bin/prime17-19
+bin/prime17-23

@@ -20,11 +20,11 @@ using namespace primecount;
 // use Eratosthenes sieve with the following primorial
 #ifdef NDEBUG
 //for final release, leads to not so frequent update and better efficiency
-const unsigned int C_SieveGeneratorDefaultMaxPrime=23; 
-// const unsigned int C_SieveGeneratorDefaultMaxPrime=19;
+// const unsigned int C_SieveGeneratorDefaultMaxPrime=23; 
+const unsigned int C_SieveGeneratorDefaultMaxPrime=19;
 #else
-// const unsigned int C_SieveGeneratorDefaultMaxPrime=19;
-const unsigned int C_SieveGeneratorDefaultMaxPrime=23;
+const unsigned int C_SieveGeneratorDefaultMaxPrime=19;
+// const unsigned int C_SieveGeneratorDefaultMaxPrime=23;
 #endif 
 
 // 23# fits into uint_32 datatype (36 495 360 coprimes to primorial 223 092 870)
