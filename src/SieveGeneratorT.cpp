@@ -356,10 +356,12 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
         // }
     // }
 
-
     unsigned long long i=0;
     if (kp < Begin) {
         T tmp;
+        
+        auto TTArrayBegin = high_resolution_clock::now();
+
         // search where to start with testing and set index i
         // for(; p_TestArray[i]+kp < Begin; i++);  // this for cycle works only for 64bit variables
 
@@ -368,7 +370,17 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
             ++i;
             tmp = p_TestArray[i]+kp;
         }
+
+        auto TTArrayDuration = duration_cast<seconds>(high_resolution_clock::now() - TTArrayBegin);
+        if (TTArrayDuration.count()> 0)
+        {
+            const std::lock_guard<std::mutex> lock(_cout_mutex);
+            Log::out() << "Coprimes array seek: " << TTArrayDuration.count() << " ms\n";
+        }
     }
+ 
+
+
 
     // The branch that fails the constexpr condition will not be compiled for the given template instantiation. Or I hope so...
     // But it looks like constexpr is not needed, both binaries are identical.
@@ -448,11 +460,6 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
                 kp = _kp;
                 _kp += p_Primorial;
             }
-            {
-                const std::lock_guard<std::mutex> lock(_cout_mutex);
-                Log::out() << PId << "> " << " k: " <<  kp / p_Primorial << " kp: " << kp  << "\n";
-            }
-
 
             if (std::is_same_v<T, unsigned long long>) {
                 utils_mpz::mpz_set_ull(mpz_kp, kp);
