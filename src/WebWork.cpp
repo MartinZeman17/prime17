@@ -68,17 +68,25 @@ clsNewWork WebWork::GetWebWork(WorkerStruct &w){
     std::string WebInput;
     clsNewWork NewWork;
     NewWork.ParsedOK=false;
+    bool bSleep=false;
+    bool bSleep2=false;
     do {
         do {
             const char url[] = "https://prime17.000webhostapp.com/get_work.php";
             std::string NewWorkPostString ("worker_id=");
             NewWorkPostString.append(w.worker_id);
             WebInput = WebService::out().WebPost(url, NewWorkPostString);
-            if (WebInput.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+            if (WebInput.empty()) {
+                if (!bSleep){
+                    Log::out() <<  "Internet outage. I am going to doze off for a moment...\n";
+                    bSleep=true;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+            }
         } while (WebInput.empty());  
         std::string WebOutput = WebService::out().HTMLFindOutput(WebInput);
         if (WebOutput.empty()) {
-        Log::out() <<  "WebOutput is missing: " << WebInput << "\n";
+        // Log::out() <<  "WebOutput is missing: " << WebInput << "\n";
         } else {
             try {
                 NewWork = ParseJsonNewWork(WebOutput);
@@ -86,7 +94,13 @@ clsNewWork WebWork::GetWebWork(WorkerStruct &w){
                 Log::out() << "Error parsing JSON" << "\n";
             }
         }
-        if (!NewWork.ParsedOK) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        if (!NewWork.ParsedOK) {
+            if (!bSleep2){
+                Log::out() <<  "There is something wrong with an internet connection. I am going to doze off for a moment...\n";
+                bSleep2=true;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        }
     } while (!NewWork.ParsedOK);
     // Log::out() << "New work received" << "\n";
     return NewWork;

@@ -25,14 +25,21 @@ namespace Wizard {
 
     WorkerStruct RegisterUserDB(std::string & email){
         // WebService web;
+        bool bSleep1=false;
+        bool bSleep2=false;
         bool bSuccess = false;
         WorkerStruct SelectedWorker;
         do {
             const char url[] = "https://prime17.000webhostapp.com/register_user.php";
             std::string PostString ("email=" + email);
             std::string WebResponse = WebService::out().WebPost(url, PostString);
-            if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-
+            if (WebResponse.empty()) {
+                if (!bSleep1) {
+                    Log::out() << "Look like a wrong time to connect to internet. Wait a bit please.\n";     
+                    bSleep1=true;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+            }
             // Log::out() <<WebResponse << "\n";
             WebResponse=WebService::out().HTMLFindOutput(WebResponse);
             // Log::out() << WebResponse <<"\n";
@@ -89,7 +96,13 @@ namespace Wizard {
             const char url_register_worker[] = "https://prime17.000webhostapp.com/register_worker.php";
             PostString = "email_worker_name=" + email + "," + SelectedWorkerInput + "," + UserName;
             WebResponse = WebService::out().WebPost(url_register_worker, PostString);
-            if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+            if (WebResponse.empty()) {
+                if (!bSleep2) {
+                    Log::out() << "We need an internet connection desperately. Please sip a cup of coffee first.\n";     
+                    bSleep2=true;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+            }
             // Log::out() <<WebResponse << "\n";
             WebResponse=WebService::out().HTMLFindOutput(WebResponse);
             // Log::out() << WebResponse <<"\n";
@@ -143,12 +156,19 @@ namespace Wizard {
 
     bool CheckWorker(WorkerStruct &w){
         // Log::out() << "Worker check start\n" ;
+        bool bSleep1 = false;
         const char url[] = "https://prime17.000webhostapp.com/check_worker.php";
         std::string PostString(w.PrepareCheckWorkerPost());
         // Log::out() << PostString << "\n";
         std::string WebResponse = WebService::out().WebPost(url, PostString);
         utils_str::trim(WebResponse);
-        if (WebResponse.empty()) std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        if (WebResponse.empty()) {
+            if (!bSleep1) {
+                Log::out() << "Internet is crucial to check the worker. Please sip a cup of tea first. \n";     
+                bSleep1=true;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        } 
         WebResponse=WebService::out().HTMLFindOutput(WebResponse);
         Log::out() << WebResponse <<"\n";
         if (WebResponse=="[{\"status\":\"OK\"}]") {

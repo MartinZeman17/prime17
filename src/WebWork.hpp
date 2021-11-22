@@ -14,6 +14,8 @@
 
 #include "GeneratorFunctionBitStatistics.hpp"
 #include "SieveGenerator.hpp"
+#include "Sieve2Generator.hpp"
+
 #include "WebService.hpp"
 #include "WorkerStruct.hpp"
 

@@ -311,14 +311,14 @@ int main(int argc, char* argv[])
         bool bRunAsUsusal = true;
         #else
         bool bRunAsUsusal = false;
+        bCheck = true;
         #endif
 
         // *********************************************************************************************************************
         //override default settings      
         // bRunAsUsusal = false;
-        bRunAsUsusal = true;
-        // bCheck = true;
-
+        // bRunAsUsusal = true;
+        bCheck = true;
 
         if (bThread || bThreadTmp) {
             ConfigThread(argc, argv, bThread);

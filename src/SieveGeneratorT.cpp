@@ -1,4 +1,4 @@
-#include "SieveGenerator.hpp"  //ToDo: This is a bit of an enigma here, if hpp is not included, VSCode reports strange issues, nevertheless  the code compiles
+#include "SieveGenerator.hpp"  //ToDo: This is a bit of an enigma here, if hpp is not included, VSCode reports strange issues, nevertheless the code compiles
 #include "utils_mpz.hpp"
 #include "Log.hpp"
 #include "utils_str.hpp"
@@ -344,6 +344,7 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
                 Log::out() << PId << "> " << "Begin after last TestArray item. Wow !!!" << "\n";
             }
         }
+        // local copy
         kp = _kp;
         // prepare _kp for another thread to process 
         _kp += p_Primorial;
@@ -371,7 +372,7 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
             tmp = p_TestArray[i]+kp;
         }
 
-        auto TTArrayDuration = duration_cast<seconds>(high_resolution_clock::now() - TTArrayBegin);
+        auto TTArrayDuration = duration_cast<milliseconds>(high_resolution_clock::now() - TTArrayBegin);
         if (TTArrayDuration.count()> 0)
         {
             const std::lock_guard<std::mutex> lock(_cout_mutex);
@@ -430,7 +431,7 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
         if(i==p_TestArrayCount) 
         {
             // first print progress 
-            long double NewPerc = (100.0L*(long double)((kp+p_Primorial)-Begin)/(long double)(End-Begin));
+            long double NewPerc = (100.0L*(long double)((kp+p_TestArray[i-1])-Begin)/(long double)(End-Begin));
             NewPerc = (std::floor(NewPerc*10.0L))/10.0L;
             {
                 const std::lock_guard<std::mutex> lock(_Percent_mutex);
@@ -476,12 +477,14 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
     if (duration.count()!=0)
     {
         const std::lock_guard<std::mutex> lock(_cout_mutex);
-        Log::out() << PId << "> Sieve duration: " << duration.count() << " s = " << (float) duration.count() / 60.0f << " m" << "\n";
+        Log::out() << PId << "> Sieve duration: " << duration.count() << " s = " << utils_str::FormatNumber((float) duration.count() / 60.0f, 1 ,1) << " m" << "\n";
     }
 
     RETURN(0);
 
 }
+
+
 
 template <class T>
 unsigned int SieveGenerator<T>::Threads(const unsigned int Percent){
@@ -556,7 +559,6 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
     Log::out() << "Primes: " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     Log::out() << "Primes ratio (from interval): " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (End - Begin + 1), 6,3) << "%\n";
     Log::out() << "Primes ratio (after sieve)  : " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";
-
 
     Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() << "\n";
  

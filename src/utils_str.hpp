@@ -50,13 +50,13 @@ namespace utils_str{
 
   // ToDo use std::fixed << std::setprecision(2) << std::setfill('0')
   template <typename T>
-  std::string FormatNumber(const T &Input, const unsigned int &StrLen, const unsigned int &Precision){
+  std::string FormatNumber(const T &Input, const unsigned int &MinStrLen, const unsigned int &Precision){
     std::stringstream Aux;
     Aux.precision(Precision);
     Aux << std::fixed;
     Aux << Input;
 
-    long long filler = StrLen-Aux.tellp();
+    long long filler = MinStrLen-Aux.tellp();
     if (filler<0) filler = 0;
     std::string res(filler, ' ');
     res.append(Aux.str());

@@ -1,5 +1,6 @@
 #include "WebWork.hpp"
 #include "WorkerStruct.hpp"
+// #include "Sieve2Generator.hpp"
 
 
 #include <chrono>
@@ -46,12 +47,16 @@ bool RunCheckComputation(){
     NewWork.LogHeader();
 
     GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
-    SieveGenerator<unsigned long long> Sieve(C_SieveGeneratorDefaultMaxPrime);
+    // SieveGenerator<unsigned long long> Sieve(C_SieveGeneratorDefaultMaxPrime);
+    Sieve2Generator<unsigned long long> Sieve;
     Sieve.Threads(100);
+    // Sieve.Threads(12);
+
 
     // auto BeginTime = high_resolution_clock::now();
     Sieve.ResetClock();
-    Sieve.WorkMT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
+    // Sieve.WorkMT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
+    Sieve.Work2MT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
     // auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime);
 
     long double duration = Sieve.DurationSeconds();
