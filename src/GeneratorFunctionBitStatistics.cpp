@@ -98,7 +98,7 @@ std::vector<std::string> GeneratorFunctionBitStatistics::WebPost_SetFields() con
 }
 
 
-
+// #include "Log.hpp"
 int GeneratorFunctionBitStatistics::GenFunct(const uint128_t & X, const mpz_t & mpz_X) {
     // TODO only 64 bit numbers supported so far, be careful with the input.
     assert(X <= UINT64_MAX);  
@@ -128,6 +128,13 @@ int GeneratorFunctionBitStatistics::GenFunct(const uint128_t & X, const mpz_t & 
     
     // power 50 : 309s, 96.4%s
     if(_t.IsPrimeBPSW(mpz_X)) {
+        // if (gPush) {
+        //     gT1.push_back(X);
+        // } else {
+        //     gT2.push_back(X);
+        // }
+
+
         _PrimesCnt++;
 
         // uint64_t Prime = (uint64_t) X;
@@ -145,6 +152,7 @@ int GeneratorFunctionBitStatistics::GenFunct(const uint128_t & X, const mpz_t & 
             Prime >>= 1;
         }
         _CntPrimesWithNumOfSetBits[CntOfOnes]++; 
+        // if (CntOfOnes == 47) Log::out() << "+++ "<< X << "+++\n";
     }                     
 
     return 0;

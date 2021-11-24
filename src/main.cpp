@@ -275,6 +275,11 @@ bool RunCheckComputationEx() {
 }
 
 
+// bool gPush;
+// std::vector<uint64_t> gT1;
+// std::vector<uint64_t> gT2;
+
+
 int main(int argc, char* argv[])
 {   
     Log::out().SetLogFileName(utils::ExtractFilename(std::string(argv[0])));

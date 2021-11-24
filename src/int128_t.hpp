@@ -14,6 +14,12 @@
 #include <limits>
 #include <type_traits>
 
+// #include <vector>
+// extern bool gPush;
+// extern std::vector<uint64_t> gT1;
+// extern std::vector<uint64_t> gT2;
+
+
 /// If INT128_MAX is defined we know that int128_t and
 /// uint128_t are available in stdint.h.
 ///
