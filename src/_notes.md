@@ -54,7 +54,6 @@ ToDo DB:
 
 ToDo:
 - Google cloud
-- last datetime worker was active
 - rezy U joining TT slices
 
 Tests:

@@ -65,6 +65,7 @@ class Sieve2Generator {
     uint32_t _Primorial=0;
     uint32_t _MaxPrime=0;
     T _SwitchPointOffset = 0; // 0 no switch point = start with shorter sieve since the beginning
+    T _SwitchPoint = 0;
     T SetSwitchPoint(const T & Begin, const T & End, unsigned int processor_count);
 
 
@@ -154,8 +155,8 @@ Sieve2Generator<T>::Sieve2Generator(){
     _TestArray1 = SieveInit(C_Prime1, _MaxPrime1, _Primorial1, _TestArrayCount1);
     SetSieveLength(Sieve2Generator<T>::enSieveLength::SieveShort);
 
-    // _TestArray2 = SieveInit(C_Prime2, _MaxPrime2, _Primorial2, _TestArrayCount2);
-    // SetSieveLength(Sieve2Generator<T>::enSieveLength::SieveLong);
+    _TestArray2 = SieveInit(C_Prime2, _MaxPrime2, _Primorial2, _TestArrayCount2);
+    SetSieveLength(Sieve2Generator<T>::enSieveLength::SieveLong);
 
     assert(_SieveLength != enSieveLength::SieveNotInitialized);
 }
@@ -248,6 +249,8 @@ long double Sieve2Generator<T>::DurationSeconds() const noexcept {
 
 template <class T>
 void Sieve2Generator<T>::PrintProgress(const unsigned int &PId, const long double &Percent, const long double &MinTillEnd) const{
+    assert(Percent>=0.0);
+    assert(Percent<=100.0);
     if (Log::out().win_right == nullptr) return;
     
     unsigned int rows, cols;				/* to store the number of rows and the number of colums of the screen */
@@ -308,6 +311,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
 
         // local thread copies. _Untouched is locked, so is used directly (main purpose is to update _Untouched).  
         uint32_t * TestArray;
+        uint32_t * pTestArrayBeyondEnd;  // Pointer to an invalid memory beyond last array item!!! This memory must not be read.
         size_t TestArrayCount;
         uint32_t Primorial;
         uint32_t MaxPrime;
@@ -332,13 +336,17 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
                     SieveLength = SetSieveLength(enSieveLength::SieveShort);
                     {
                         const std::lock_guard<std::mutex> lock(_cout_mutex);
-                        Log::out() << PId << "> " <<"Switching sieve to: " << (unsigned int) SieveLength << " Untouched: " <<  utils_str::FormatUInt(_Untouched)  << " SwitchPoint: " << utils_str::FormatUInt(SwitchPoint) << "\n";
+                        long double Perc = 100.0L*(long double)((_Untouched-Begin)/(long double)(End-Begin));
+                        Perc = (std::floor(Perc*10.0L))/10.0L;
+                        Log::out() << PId << "> " <<"Switching sieve to: " << (unsigned int) SieveLength << " at: " <<  utils_str::FormatUInt(_Untouched)  << " =~" << utils_str::FormatNumber(Perc, 4, 1) <<"%\n";
+                        // << " SwitchPoint: " << utils_str::FormatUInt(SwitchPoint) << "\n";
                     }
                 }
             }
             //fill in local thread copies of Sieve params
             TestArray = _TestArray;
             TestArrayCount = _TestArrayCount;
+            pTestArrayBeyondEnd = &TestArray[TestArrayCount];  
             Primorial = _Primorial;
             MaxPrime = _MaxPrime;
             // SwitchPointOffset = _SwitchPointOffset;
@@ -372,44 +380,14 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
                 _Untouched = End+1;  // todo test, overflow???, break flag???
             }
 
-        {
-            const std::lock_guard<std::mutex> lock(_cout_mutex);
-            Log::out() << PId << "> " << " Sieve: " << (unsigned int) SieveLength << " k: " << utils_str::FormatUInt(k) << " kp: " << utils_str::FormatUInt(kp) << " Untouched: " << utils_str::FormatUInt(Untouched) << "\n";
-        }
+            // {
+            //     const std::lock_guard<std::mutex> lock(_cout_mutex);
+            //     Log::out() << PId << "> " << "Sieve: " << (unsigned int) SieveLength << " k: " << utils_str::FormatUInt(k) << " kp: " << utils_str::FormatUInt(kp) << " Untouched: " << utils_str::FormatUInt(Untouched) << "\n";
+            // }
 
-        } // _Untouched and Sieve is updated, having local copies to work on
+        } // End of lock. _Untouched is updated, Untouched, kp and Sieve are set (having local copies to work on)
 
-
-
-//1 688 848 778 957 401
-
-
-// 1 688 848 786 522 141  
-// 1 688 848 778 957 401
-        unsigned long long i=0;
-        if (kp < Untouched) {
-            T tmp;            
-            auto TTArrayBegin = high_resolution_clock::now();
-            // search where to start with testing and set index i
-            // for(; p_TestArray[i]+kp < Begin; i++);  // this for cycle works only for 64bit variables
-
-            // todo use pointer ??
-            // Beware of endless loop: 1. kp < Untouched 2. kp + Primorial > Untouched
-            tmp = TestArray[i]+kp;  
-            while (tmp < Untouched){
-                ++i;
-                tmp = TestArray[i]+kp;
-            }
-
-            auto TTArrayDuration = duration_cast<milliseconds>(high_resolution_clock::now() - TTArrayBegin);
-            if (TTArrayDuration.count()> 0)
-            {
-                const std::lock_guard<std::mutex> lock(_cout_mutex);
-                Log::out() << PId << "> Coprimes array seek: " << TTArrayDuration.count() << " ms\n";
-            }
-        }
-
-
+        // set mpz_kp
         // The branch that fails the constexpr condition will not be compiled for the given template instantiation. Or I hope so...
         // But it looks like constexpr is not needed, both binaries are identical.
         // if (std::is_same_v<T, unsigned long long>) {
@@ -422,7 +400,6 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         // MaxPrime = 2, Primorial = 2, TestArray = [1] -> ??? ToDo test
         // Beg = 0, k=0 - should test 0+1, k=1, should test 1*2+1, k=3  
         assert(Primorial>MaxPrime);
-
         // ToDo c++20 constexpr vector
         assert(MaxPrime<=43);
         static const std::vector <unsigned long long> C_Primorial2Primes({2,3,5,7,11,13,17,19,23,29,31,37,41,43});
@@ -447,10 +424,80 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
             }
         }
 
+        // unsigned long long i=0;
+        // if (kp < Untouched) {
+        //     // seek in TestArray if Untouched is not a multiple of Primorial
+        //     T tmp;            
+        //     auto TTArrayBegin = high_resolution_clock::now();
+        //     // search where to start with testing and set index i
+        //     // for(; p_TestArray[i]+kp < Begin; i++);  // this for cycle works only for 64bit variables
+
+        //     // todo use pointer ??
+        //     // Beware of endless loop: 1. kp < Untouched 2. kp + Primorial > Untouched
+        //     // ??? co kdyz je to posleni prvek??? and nevyjedu z pole???
+        //     assert(TestArray[TestArrayCount-1]+kp >= Untouched);
+        //     tmp = TestArray[i]+kp;  
+        //     while (tmp < Untouched){
+        //         ++i;
+        //         tmp = TestArray[i]+kp;
+        //     }
+
+        //     auto TTArrayDuration = duration_cast<milliseconds>(high_resolution_clock::now() - TTArrayBegin);
+        //     if (TTArrayDuration.count()> 0)
+        //     {
+        //         const std::lock_guard<std::mutex> lock(_cout_mutex);
+        //         Log::out() << PId << "> Coprimes array seek: " << TTArrayDuration.count() << " ms\n";
+        //     }
+        // }
+
+        // embedded binary search searching for value equal to or greater than BinarySearchValue 
+        uint32_t *pCoprime;
+        {
+            if (kp == Untouched) {
+                pCoprime = TestArray;
+            } else {
+                auto TTArrayBegin2 = high_resolution_clock::now();
+                uint32_t BinarySearchValue = (uint32_t) (Untouched - kp);
+                size_t B=0;
+                size_t E=TestArrayCount-1;
+                size_t M; 
+
+                // BinarySearchValue = TestArray[E];
+                assert(BinarySearchValue >= TestArray[B]);
+                assert(BinarySearchValue <= TestArray[E]);
+
+                do {
+                    //M = B + (E - B) / 2; // safer code with respect to possible integer overflow in binary search, not needed here
+                    M = (E + B) / 2;  // no overflow can happen for the coprimes number is ~1.7 mio for 19# and ~36.5 mio for 23#
+                    if (TestArray[M] < BinarySearchValue){
+                        B=M;
+                    } else {
+                        E=M;
+                    }
+                } while (B + 1 < E);
+                // cycle was optimized as much as possible with cost of an extra step outside of a loop
+                // for correct inputs == operator should be ok, but if value beeing searched is smaller than the first item, the first item is returned
+                if (TestArray[B] >= BinarySearchValue) { 
+                    pCoprime = &TestArray[B];            
+                } else {
+                    pCoprime = &TestArray[E];
+                }
+
+                auto TTArrayDuration2 = duration_cast<milliseconds>(high_resolution_clock::now() - TTArrayBegin2);
+                if (TTArrayDuration2.count()>= 0)
+                {
+                    const std::lock_guard<std::mutex> lock(_cout_mutex);
+                    Log::out() << PId << "> Coprimes array binary seek: " << TTArrayDuration2.count() << " ms\n";
+                }
+            }
+        }
+
+        // i is now a valid index within the array bounds
+        // pCoprime = &TestArray[i];
+        // assert(pCoprime == &TestArray[i]); 
+
 
         // this is the core functionality consuming resources, be carefull
-        // i is now a valid index within the array bounds
-        uint32_t *pCoprime = TestArray; 
         while(true)
         {   
             uint32_t Coprime = *pCoprime; //TestArray[i];
@@ -465,15 +512,24 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
                 RETURN(res);
             };
     
-            i++;
-            if(i == TestArrayCount) {
+            // i++;
+            // if(i == TestArrayCount) {
+            //     // primorial range is done, return to outer cycle to read new primorial
+            //     break;
+            // }
+
+            if(pCoprime == pTestArrayBeyondEnd) {
                 // primorial range is done, return to outer cycle to read new primorial
                 break;
             }
+
+
         }
 
         // print progress 
-        long double NewPerc = (100.0L*(long double)((kp + TestArray[i-1])-Begin)/(long double)(End-Begin));
+        // long double NewPerc = (100.0L*(long double)((kp + TestArray[i-1])-Begin)/(long double)(End-Begin));
+        long double NewPerc = (100.0L*(long double)((kp + *(pCoprime-1))-Begin)/(long double)(End-Begin));
+        if (NewPerc > 100.0) NewPerc = 100.0; // break on exceeding End leads greater value than 100%
         NewPerc = (std::floor(NewPerc*10.0L))/10.0L;
         {
             const std::lock_guard<std::mutex> lock(_Percent_mutex);
@@ -510,16 +566,18 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
 
 
 template <class T>
-T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned int processor_count){
-
-    if (processor_count <= 1 or _Primorial1 == 0 || _Primorial2 == 0) {
+T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned int threads){
+    // ???
+    // if (threads <= 1 || _Primorial1 == 0 || _Primorial2 == 0) {
+    if (_Primorial1 == 0 || _Primorial2 == 0) {
         // no competition, use large sieve as it is more effective
         // however for old and slow CPUs short sieve might be preferable due to more frequent updates
-        _SwitchPointOffset=0;    
+        _SwitchPointOffset=0;   
+        _SwitchPoint=0; 
     } else {
         T Primorials2 = Begin / _Primorial2;
         if (Primorials2 * _Primorial2 < Begin )  Primorials2++;
-        T BeginOffset2 = Primorials2 * _Primorial2;
+        T BeginOffset2 = Primorials2 * _Primorial2;  // overflow ???
         
         T Len = 0;
         if (BeginOffset2 < End) {
@@ -528,10 +586,11 @@ T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned in
         BeginOffset2 -= Begin; // make it an offset from the Beginning 
 
         uint64_t Cnt2 =  Len / _Primorial2;
-        assert(processor_count>0);
-        uint64_t Cnt2perCPU = Cnt2 / processor_count;
+        assert(threads>0);
+        uint64_t Cnt2perCPU = Cnt2 / threads;
 
-        T SPOffset =  Cnt2perCPU * _Primorial2 * processor_count;
+        T SPOffset =  Cnt2perCPU * _Primorial2 * threads;
+        
         
         // if BeginOffset2 is too close to Primorial, may be harmful
         // todo finetuning for very small BeginOffset2 ??? compare with ending part
@@ -542,12 +601,13 @@ T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned in
             SetSieveLength(Sieve2Generator<T>::enSieveLength::SieveShort);
         }
 
-        long double SmallPrimorials = ((((End - (SPOffset + Begin) + 1)) / (long double) _Primorial1) ) /  (long double) processor_count; 
-        Log::out() << "Each core is supposed to process " << Cnt2perCPU << " whole large primorial(s) and ~" << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorials.\n";
+        long double SmallPrimorials = ((((End - (SPOffset + Begin) + 1)) / (long double) _Primorial1) ) /  (long double) threads; 
+        Log::out() << "Each core is supposed to process " << Cnt2perCPU << " large primorial(s) and ~" << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorials.\n";
 
         _SwitchPointOffset = SPOffset; 
+        _SwitchPoint =  SPOffset + Begin;
     }
-    Log::out() << "Sieve-switch offset at: " << _SwitchPointOffset << "\n";
+    Log::out() << "Sieve switch at: " << utils_str::FormatUInt(_SwitchPoint) << " offset: " << utils_str::FormatUInt(_SwitchPointOffset) << "\n";
     return _SwitchPointOffset;
 }
 
@@ -562,7 +622,7 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
     if (_Threads > 1) Log::out() << "s";
     Log::out() << " out of " << processor_count << " available logical CPUs.\n";
     
-    SetSwitchPoint(Begin, End, processor_count);
+    SetSwitchPoint(Begin, End, _Threads);
 
     _Untouched = Begin;
 

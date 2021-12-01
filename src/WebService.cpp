@@ -21,7 +21,7 @@ std::string WebService::WebPost(const char url[], std::string &PostString){
     CURLcode res;
     // endwin();
     std::string readBuffer("");
-    do{
+    do {
         CURL *curl;
         curl_global_init(CURL_GLOBAL_ALL);
         curl = curl_easy_init();

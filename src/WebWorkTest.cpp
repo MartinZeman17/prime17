@@ -217,7 +217,7 @@ bool RunCheckComputationOk(){
 }
 
 
-bool RunCheckComputationNotOk(){
+bool RunCheckComputationNew(){
     constexpr unsigned int C_TestPower2 = 30;
     constexpr long double C_StandardCheckDuration = 297.0;  //power 50;
     // constexpr long double C_StandardCheckDurationDebug = 560.0;
@@ -413,20 +413,68 @@ bool RunCheckComputationNotOk(){
     // #endif
 }
 
-bool RunCheckComputation(){
-    // gPush =true;
-    // // RunCheckComputationOk();
-    // gPush = false;
-    RunCheckComputationNotOk();
+GeneratorFunctionBitStatistics RunOld(clsNewWork NewWork){
+    GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
+    SieveGenerator<unsigned long long> Sieve;
+    Sieve.Threads(100);
+    Sieve.Threads(12);
 
-    // // gT1.sort
-    // sort(gT1.begin(), gT1.end(), less<uint64_t>());
-    // sort(gT2.begin(), gT2.end(), less<uint64_t>());
-    // for (size_t i = 0; i<10000000;i++){
-    //     if (gT1[i]!=gT2[i]){
-    //         Log::out() << i << "  " << gT1[i] << "  "<< gT2[i]<< "\n";
-    //     }
-    // }
-    // 0  1688848786522141  1688848778957401
-    // 1688848786522141 is skipped
+    Sieve.ResetClock();
+    Sieve.WorkMT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
+    // Sieve.WorkMT( NewWork.new_begin,  NewWork.new_end, BSMT);
+    
+    Log::out() << "Duration old [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 10, 1) << "\n";
+    return BSMT;
+}
+
+GeneratorFunctionBitStatistics RunNew(clsNewWork NewWork){
+    GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
+    Sieve2Generator<unsigned long long> Sieve;
+    Sieve.Threads(100);
+    Sieve.Threads(12);
+
+    Sieve.ResetClock();
+    Sieve.Work2MT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
+    // Sieve.Work2MT( NewWork.new_begin,  NewWork.new_end, BSMT);
+    
+    Log::out() << "Duration new [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 10, 1) << "\n";
+    return BSMT;
+}
+
+
+// ToDo odstinit sito od mereni, pocitat v cyklu
+// generovat nahodne ulohy a porovnavat casy a vysledky
+// test sita od 0 do 2
+// test sita u 2 na 64
+void CompareOldNew(clsNewWork NewWork){
+    NewWork.LogHeader();
+    auto O = RunOld(NewWork);
+    Log::out() <<"\n";
+    auto N = RunNew(NewWork);
+
+    for(unsigned int i=0; i<=64; i++){
+        if (O.CntPrimesWithNumOfSetBits(i) != N.CntPrimesWithNumOfSetBits(i)) {
+            Log::out() << "Difference old new: " << i << " " << O.CntPrimesWithNumOfSetBits(i) << "!=    " << N.CntPrimesWithNumOfSetBits(i) << "\n";
+        }
+    } 
+
+}
+
+bool RunCheckComputation(){
+    // RunCheckComputationNew();
+    clsNewWork NewWork;
+    NewWork.c_power2=63;
+    NewWork.new_begin = NewWork.Offset()-10;
+    NewWork.new_end = NewWork.Offset()-1;
+    
+    // NewWork.c_power2=31;
+    // NewWork.new_begin = 20;
+    // NewWork.new_end = 3000000031;
+    
+    // CompareOldNew(NewWork);
+    RunNew(NewWork);
+    
+
+    return true; //???
+
 }
