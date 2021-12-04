@@ -29,6 +29,7 @@ class GeneratorFunctionAbstract{
     unsigned long long PrimesCnt() const noexcept;
     unsigned long long ProbablePrimesCnt() const noexcept;
     long double DurationMinutes() const noexcept;
+    long double DurationSeconds() const noexcept;
     void PrintResult() const noexcept;
 
     virtual GeneratorFunctionAbstract& operator+=(const GeneratorFunctionAbstract& rhs) noexcept;

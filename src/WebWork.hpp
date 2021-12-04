@@ -28,6 +28,7 @@
 using std::endl;
 using std::cout;
 
+// template <class T>
 class clsNewWork {
     public:
     unsigned int task_id=0;
@@ -51,8 +52,8 @@ class clsNewWork {
         Log::out() << "End   (offset): " << utils_str::FormatUInt(new_end) << "\n";
 
         // unsigned long long Offset = static_cast<unsigned long long>(1) << c_power2;
-        Log::out() << "Begin [%]: " << utils_str::FormatNumber( ((long double) 100.0 * new_begin ) / (long double) Offset(), 13,9) << "\n";
-        Log::out() << "End   [%]: " << utils_str::FormatNumber( ((long double) 100.0 * new_end ) / (long double) Offset(), 13,9) << "\n";
+        Log::out() << "Begin [%]:     " << utils_str::FormatNumber( ((long double) 100.0 * new_begin ) / (long double) Offset(), 13,9) << "\n";
+        Log::out() << "End   [%]:     " << utils_str::FormatNumber( ((long double) 100.0 * new_end ) / (long double) Offset(), 13,9) << "\n";
     }
 };
 

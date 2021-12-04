@@ -254,25 +254,25 @@ void RunDefaultWork(){
     WebBitStatistics(w);
 }
 
-bool RunCheckComputationEx() {
+// bool RunCheckComputationEx() {
 
-    if (RunCheckComputation()) {
-        Log::out() << "Checks passed ok. Long and heavy labor ahead :-)\n";
-        return true;
-    } else{
+//     if (RunCheckComputation()) {
+//         Log::out() << "Checks passed ok. Long and heavy labor ahead :-)\n";
+//         return true;
+//     } else{
         
-        constexpr std::string_view C_ChecksFailed = "Checks failed, mission aborted.\n"
-                        "It is either a nasty bug or a naughty hardware ghost is wreaking havoc among digital ones and zeros.\n"
-                        "The cause may be related to a compilation for a specific platform (ARM, 32 bit, ...?) - portability is damn difficult!\n"
-                        "Please contact Martin.Zeman17@gmail.com. Thank you!\n\n"
-                        "Press any key to abort (Prime17 is deeply sorry).\n";
+//         constexpr std::string_view C_ChecksFailed = "Checks failed, mission aborted.\n"
+//                         "It is either a nasty bug or a naughty hardware ghost is wreaking havoc among digital ones and zeros.\n"
+//                         "The cause may be related to a compilation for a specific platform (ARM, 32 bit, ...?) - portability is damn difficult!\n"
+//                         "Please contact Martin.Zeman17@gmail.com. Thank you!\n\n"
+//                         "Press any key to abort (Prime17 is deeply sorry).\n";
                          
-        Log::out() << C_ChecksFailed;
-        Log::out().getlineLeft();
-        abort();
-        return false;
-    }        
-}
+//         Log::out() << C_ChecksFailed;
+//         Log::out().getlineLeft();
+//         abort();
+//         return false;
+//     }        
+// }
 
 
 // bool gPush;
@@ -330,11 +330,11 @@ int main(int argc, char* argv[])
         } else if (bWizard) {
             Wizard::NewWorker();
         } else if (bCheck) {
-            bCheckPassed = RunCheckComputationEx();
+            bCheckPassed = RunCheckComputation();
             Log::out().getlineLeft();
 
         } else if (bRunAsUsusal) {
-            bCheckPassed = RunCheckComputationEx();
+            bCheckPassed = RunCheckComputation();
             // bCheckPassed = true;
             if (bCheckPassed) {
                 RunDefaultWork();

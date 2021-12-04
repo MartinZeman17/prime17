@@ -109,7 +109,7 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
 
         Log::out() << "Sieve Prime: " << MaxPrime << " ";
         Log::out() << "Primorial: " << utils_str::FormatUInt(p_Primorial) << "\n";
-        Log::out() << "Coprimes #: " << utils_str::FormatUInt(p_TestArrayCount) << " ";
+        Log::out() << "Coprimes #:  " << utils_str::FormatUInt(p_TestArrayCount) << " ";
         Log::out() << "Effectivity [%]: " << MeasuredEffectivity  << "\n"; 
         // TODO sanitizer complains about % sign in printf
 

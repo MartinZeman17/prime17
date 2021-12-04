@@ -63,26 +63,24 @@ namespace utils_str{
     return res;
   }
 
-struct separate_thousands : std::numpunct<char> {
-    char_type do_thousands_sep() const override { return ' '; }  // separate with commas
-    string_type do_grouping() const override { return "\3"; } // groups of 3 digit
-};
+  struct separate_thousands : std::numpunct<char> {
+      char_type do_thousands_sep() const override { return ' '; }  // separate with commas
+      string_type do_grouping() const override { return "\3"; } // groups of 3 digit
+  };
 
-template <typename T>
-std::string FormatUInt(const T &Input){
-    auto thousands = std::make_unique<separate_thousands>();
+  template <typename T>
+  std::string FormatUInt(const T &Input){
+      auto thousands = std::make_unique<separate_thousands>();
 
-    std::stringstream Aux;
-    Aux.imbue(std::locale(std::cout.getloc(), thousands.release()));
-    Aux << Input;
-    return Aux.str();
-}
+      std::stringstream Aux;
+      // ToDo: does not work for uint128_t and large inputs
+      Aux.imbue(std::locale(std::cout.getloc(), thousands.release()));
+      Aux << Input;
+      return Aux.str();
+  }
   
 
   string string_replace(string src, string const& target, string const& repl);
-
-
-
 
   // trim from start (in place)
   static inline void ltrim(std::string &s) {

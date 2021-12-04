@@ -16,6 +16,7 @@ using namespace primecount;
 #include <vector>
 #include <mutex>
 #include <chrono>
+#include <algorithm>
 
 // 23# fits into uint_32 datatype (36 495 360 coprimes to primorial 223 092 870)
 // const std::vector<unsigned long long> C_Primorials({2,6,30, 210, 2310, 30030, 510510, 9699690, 223092870, 6469693230, 200560490130});
@@ -212,10 +213,10 @@ uint32_t * Sieve2Generator<T>::SieveInit(const unsigned int SieveMaxPrime, uint3
 
     long double MeasuredEffectivity = 100.0L * (long double) TACount / (long double) Primorial;
 
-    Log::out() << "Sieve Prime: " << MaxPrime << " ";
-    Log::out() << "Primorial: " << utils_str::FormatUInt(Primorial) << "\n";
-    Log::out() << "Coprimes #: " << utils_str::FormatUInt(TACount) << " ";
-    Log::out() << "Effectivity [%]: " << MeasuredEffectivity  << "\n"; 
+    Log::out() << "Sieve Prime:    " << MaxPrime << "\n";
+    Log::out() << "Primorial:      " << utils_str::FormatUInt(Primorial) << "\n";
+    Log::out() << "Coprimes #:     " << utils_str::FormatUInt(TACount) << " ";
+    Log::out() << "Effectivity [%]:" << MeasuredEffectivity  << "\n"; 
 
     return DestArr;
 }
@@ -305,6 +306,18 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
     mpz_init2(mpz_X, 65);
     T res = 0;
 
+    // perform an overflow test 
+    {
+        T OverflowTest1 = std::max(_Primorial1, _Primorial2); 
+        T OverflowTest2 = OverflowTest1 + End;
+        // prevent overflow in End + 1, End + _Primorial     
+        if (!(OverflowTest2 > End && OverflowTest2 > OverflowTest1 && End + 1 > End)) {
+            Log::out() << "Input parameters would lead to overflow in a sieve algorithm. Use template with bigger data type if possible (e.g. uint128_t). Mission aborted.\n";
+            abort();
+        }
+    }
+
+
     while(true) {
 
         T kp;
@@ -336,9 +349,9 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
                     SieveLength = SetSieveLength(enSieveLength::SieveShort);
                     {
                         const std::lock_guard<std::mutex> lock(_cout_mutex);
-                        long double Perc = 100.0L*(long double)((_Untouched-Begin)/(long double)(End-Begin));
+                        long double Perc = 100.0L* ( (long double)(_Untouched-Begin) / (long double)(End-Begin) );                        
                         Perc = (std::floor(Perc*10.0L))/10.0L;
-                        Log::out() << PId << "> " <<"Switching sieve to: " << (unsigned int) SieveLength << " at: " <<  utils_str::FormatUInt(_Untouched)  << " =~" << utils_str::FormatNumber(Perc, 4, 1) <<"%\n";
+                        Log::out() << PId << "> " <<"Switching sieve to: " << (unsigned int) SieveLength << " at: " <<  utils_str::FormatUInt(_Untouched)  << " = ~" << utils_str::FormatNumber(Perc, 4, 1) <<"%\n";
                         // << " SwitchPoint: " << utils_str::FormatUInt(SwitchPoint) << "\n";
                     }
                 }
@@ -377,7 +390,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
             _Untouched = kp + Primorial; // by the way it is not a prime
             // overflow test
             if (_Untouched < Untouched) {
-                _Untouched = End+1;  // todo test, overflow???, break flag???
+                _Untouched = End+1;  // overflow test has been performed at the beginning
             }
 
             // {
@@ -484,7 +497,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
                 }
 
                 auto TTArrayDuration2 = duration_cast<milliseconds>(high_resolution_clock::now() - TTArrayBegin2);
-                if (TTArrayDuration2.count()>= 0)
+                if (TTArrayDuration2.count() > 0)
                 {
                     const std::lock_guard<std::mutex> lock(_cout_mutex);
                     Log::out() << PId << "> Coprimes array binary seek: " << TTArrayDuration2.count() << " ms\n";
@@ -567,47 +580,56 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
 
 template <class T>
 T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned int threads){
-    // ???
+    
+    _SwitchPointOffset=0;   
+    _SwitchPoint=0; 
+    
     // if (threads <= 1 || _Primorial1 == 0 || _Primorial2 == 0) {
-    if (_Primorial1 == 0 || _Primorial2 == 0) {
-        // no competition, use large sieve as it is more effective
-        // however for old and slow CPUs short sieve might be preferable due to more frequent updates
-        _SwitchPointOffset=0;   
-        _SwitchPoint=0; 
-    } else {
+    // no competition, use large sieve as it is more effective
+    // however for old and slow CPUs short sieve might be preferable due to more frequent updates
+
+    if (_Primorial1 != 0 && _Primorial2 != 0) {
+        T SPOffset;
+        T Cnt2perCPU;
         T Primorials2 = Begin / _Primorial2;
         if (Primorials2 * _Primorial2 < Begin )  Primorials2++;
         T BeginOffset2 = Primorials2 * _Primorial2;  // overflow ???
-        
-        T Len = 0;
-        if (BeginOffset2 < End) {
-            Len = (End - BeginOffset2 + 1);
+
+        // overflow, Begin is near TMax barrier
+        if (BeginOffset2 >= Begin) {
+            T Len = 0;
+            if (BeginOffset2 < End) {
+                Len = ((End - BeginOffset2) + 1);
+            }
+            BeginOffset2 -= Begin; // make it an offset from the Beginning 
+
+            T Cnt2 =  Len / _Primorial2;
+            assert(threads>0);
+            Cnt2perCPU = Cnt2 / threads;
+
+            SPOffset =  Cnt2perCPU * _Primorial2 * threads;
+            
+            
+            // if BeginOffset2 is too close to Primorial, may be harmful
+            // todo finetuning for very small BeginOffset2 ??? compare with ending part
+            // if (SPOffset > 0) SPOffset += BeginOffset2; 
+            if (SPOffset>0) {
+                SetSieveLength(Sieve2Generator<T>::enSieveLength::SieveLong);
+            } else {
+                SetSieveLength(Sieve2Generator<T>::enSieveLength::SieveShort);
+            }
+
+            // long double SmallPrimorials = ((((End - (SPOffset + Begin) + 1)) / (long double) _Primorial1) ) /  (long double) threads; 
+            long double SmallPrimorials = ((  (long double) ((End - (SPOffset + Begin) + 1)) / (long double) _Primorial1) ) /  (long double) threads; 
+            Log::out() << "Each core is supposed to process " << Cnt2perCPU << " large primorial(s) and ~" << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorials.\n";
+
+            _SwitchPointOffset = SPOffset; 
+            _SwitchPoint =  SPOffset + Begin;
         }
-        BeginOffset2 -= Begin; // make it an offset from the Beginning 
+       
 
-        uint64_t Cnt2 =  Len / _Primorial2;
-        assert(threads>0);
-        uint64_t Cnt2perCPU = Cnt2 / threads;
-
-        T SPOffset =  Cnt2perCPU * _Primorial2 * threads;
-        
-        
-        // if BeginOffset2 is too close to Primorial, may be harmful
-        // todo finetuning for very small BeginOffset2 ??? compare with ending part
-        // if (SPOffset > 0) SPOffset += BeginOffset2; 
-        if (SPOffset>0) {
-            SetSieveLength(Sieve2Generator<T>::enSieveLength::SieveLong);
-        } else {
-            SetSieveLength(Sieve2Generator<T>::enSieveLength::SieveShort);
-        }
-
-        long double SmallPrimorials = ((((End - (SPOffset + Begin) + 1)) / (long double) _Primorial1) ) /  (long double) threads; 
-        Log::out() << "Each core is supposed to process " << Cnt2perCPU << " large primorial(s) and ~" << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorials.\n";
-
-        _SwitchPointOffset = SPOffset; 
-        _SwitchPoint =  SPOffset + Begin;
     }
-    Log::out() << "Sieve switch at: " << utils_str::FormatUInt(_SwitchPoint) << " offset: " << utils_str::FormatUInt(_SwitchPointOffset) << "\n";
+    Log::out() << "Sieve switch: " << utils_str::FormatUInt(_SwitchPoint) << " offset: " << utils_str::FormatUInt(_SwitchPointOffset) << "\n";
     return _SwitchPointOffset;
 }
 
@@ -631,9 +653,9 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
     // T _kp = k * _Primorial1;  // primorial p multiplied by some integer k
     _Percent=-1.0;
 
-    Log::out()  << "Sieve Begin: " << utils_str::FormatUInt(Begin) << "\n";        
-    Log::out()  << "Sieve End  : " << utils_str::FormatUInt(End) <<  "\n";
-    Log::out()  << "End-Begin  : " << utils_str::FormatUInt(End - Begin) << "\n";        
+    Log::out()  << "Sieve Begin:    " << utils_str::FormatUInt(Begin) << "\n";        
+    Log::out()  << "Sieve End  :    " << utils_str::FormatUInt(End) <<  "\n";
+    Log::out()  << "End-Begin  :    " << utils_str::FormatUInt(End - Begin) << "\n";        
     if ((uint128_t) End / ( (uint128_t) UINT64_MAX+  (uint128_t)1) >1) {
         Log::out() << "A serious warning!!! End looks too big." << "\n";
     }    
@@ -652,7 +674,7 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
     for (unsigned int i = 0; i<_Threads; i++){
         GFClones.emplace_back(GF.clone());
     }
-
+    // GF.ResetClock();
     if (_Threads == 1) {
         Work2MT_Thread(Begin, End, std::ref(GFClones[0]), "0");
     } else {    
@@ -681,13 +703,15 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
         Log::out() << " = " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     }
 
-    long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( _TestArrayCount / (long double) _Primorial1) * (End - Begin + 1));
+    // long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( _TestArrayCount / (long double) _Primorial1) * (End - Begin + 1));
+    long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( (long double) _TestArrayCount / (long double) _Primorial1) * (long double)(End - Begin + 1));
     Log::out() << "Primes: " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
-    Log::out() << "Primes ratio (from interval): " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (End - Begin + 1), 6,3) << "%\n";
+    // Log::out() << "Primes ratio (from interval): " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (End - Begin + 1), 6,3) << "%\n";
+    Log::out() << "Primes ratio (from interval): " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (long double)(End - Begin + 1), 6,3) << "%\n";
     Log::out() << "Primes ratio (after sieve)  : " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";
 
 
-    Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() << "\n";
+    Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() <<  " [s]:" << GF.DurationSeconds() <<"\n";
  
     if (res!=0) return res; 
     return 0;

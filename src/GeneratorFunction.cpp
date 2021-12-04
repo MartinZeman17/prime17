@@ -34,6 +34,12 @@ long double GeneratorFunctionAbstract::DurationMinutes() const noexcept {
     return duration.count() / (1000.0l * 60.0l);
 }
 
+long double GeneratorFunctionAbstract::DurationSeconds() const noexcept {
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    return duration.count() / (1000.0l);
+}
+
+
 unsigned long long GeneratorFunctionAbstract::ProbablePrimesCnt() const noexcept {
     return _ProbablePrimesCnt;
 }
