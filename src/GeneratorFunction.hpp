@@ -10,17 +10,17 @@ using namespace primecount;
 
 
 using namespace std::chrono;
-
+// template <class T>
 class GeneratorFunctionAbstract{
     protected:
     unsigned long long _PrimesCnt = 0;
-    unsigned long long _ProbablePrimesCnt = 0;   
+    unsigned long long _ProbablePrimesCnt = 0;
 
     std::chrono::time_point<std::chrono::high_resolution_clock> _BeginTime; //  = std::high_resolution_clock::now(); 
-    void ResetClock() noexcept;
 
 
     public:
+    void ResetClock() noexcept;
     GeneratorFunctionAbstract () noexcept;
     // polymorphic class (declares or inherits at least one virtual function), and its destructor is not virtual, deleting it is undefined behavior
     virtual ~GeneratorFunctionAbstract()= default;
@@ -36,6 +36,7 @@ class GeneratorFunctionAbstract{
     virtual std::unique_ptr<GeneratorFunctionAbstract> clone() const = 0;
 
     virtual int GenFunct(const __uint128_t & N, const mpz_t & mpz_X) = 0; //pure virtual function leads to an abstract class
+    // virtual int GenFunct(const T & N, const mpz_t & mpz_X) = 0; //pure virtual function leads to an abstract class
 
 };
 

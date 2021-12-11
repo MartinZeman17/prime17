@@ -215,8 +215,8 @@ uint32_t * Sieve2Generator<T>::SieveInit(const unsigned int SieveMaxPrime, uint3
 
     Log::out() << "Sieve Prime:    " << MaxPrime << "\n";
     Log::out() << "Primorial:      " << utils_str::FormatUInt(Primorial) << "\n";
-    Log::out() << "Coprimes #:     " << utils_str::FormatUInt(TACount) << " ";
-    Log::out() << "Effectivity [%]:" << MeasuredEffectivity  << "\n"; 
+    Log::out() << "Coprimes #:     " << utils_str::FormatUInt(TACount) << "\n";
+    Log::out() << "Effectivity:    " << MeasuredEffectivity  << "%\n"; 
 
     return DestArr;
 }
@@ -621,7 +621,9 @@ T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned in
 
             // long double SmallPrimorials = ((((End - (SPOffset + Begin) + 1)) / (long double) _Primorial1) ) /  (long double) threads; 
             long double SmallPrimorials = ((  (long double) ((End - (SPOffset + Begin) + 1)) / (long double) _Primorial1) ) /  (long double) threads; 
-            Log::out() << "Each core is supposed to process " << Cnt2perCPU << " large primorial(s) and ~" << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorials.\n";
+            // Log::out() << "Each core is supposed to process " << Cnt2perCPU << " large primorial(s) and ~" << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorials.\n";
+            Log::out() << "Each core:      " << Cnt2perCPU << " large + ~" << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorial(s)\n";
+
 
             _SwitchPointOffset = SPOffset; 
             _SwitchPoint =  SPOffset + Begin;
@@ -629,7 +631,7 @@ T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned in
        
 
     }
-    Log::out() << "Sieve switch: " << utils_str::FormatUInt(_SwitchPoint) << " offset: " << utils_str::FormatUInt(_SwitchPointOffset) << "\n";
+    Log::out() << "Sieve switch:   " << utils_str::FormatUInt(_SwitchPoint) << " offset: " << utils_str::FormatUInt(_SwitchPointOffset) << "\n";
     return _SwitchPointOffset;
 }
 
@@ -640,10 +642,14 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
     T res = 0;
 
     const auto processor_count = std::thread::hardware_concurrency();
-    Log::out() << "Using " << (unsigned int) (100 * _Threads)/processor_count << "% CPU = spawning " << _Threads << " thread";
-    if (_Threads > 1) Log::out() << "s";
-    Log::out() << " out of " << processor_count << " available logical CPUs.\n";
+    // Log::out() << "Using " << (unsigned int) (100 * _Threads)/processor_count << "% CPU = spawning " << _Threads << " thread";    
+    // if (_Threads > 1) Log::out() << "s";
+    // Log::out() << " out of " << processor_count << " available logical CPUs.\n";
     
+    Log::out() << "Cores usage:    " << _Threads << " / " << processor_count << " = " << (unsigned int) (100 * _Threads)/processor_count << "% CPU\n";
+
+
+
     SetSwitchPoint(Begin, End, _Threads);
 
     _Untouched = Begin;
@@ -675,6 +681,8 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
         GFClones.emplace_back(GF.clone());
     }
     // GF.ResetClock();
+    // auto aaa = std::ref(GFClones[0]);
+    
     if (_Threads == 1) {
         Work2MT_Thread(Begin, End, std::ref(GFClones[0]), "0");
     } else {    

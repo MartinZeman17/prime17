@@ -110,7 +110,7 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
         Log::out() << "Sieve Prime: " << MaxPrime << " ";
         Log::out() << "Primorial: " << utils_str::FormatUInt(p_Primorial) << "\n";
         Log::out() << "Coprimes #:  " << utils_str::FormatUInt(p_TestArrayCount) << " ";
-        Log::out() << "Effectivity [%]: " << MeasuredEffectivity  << "\n"; 
+        Log::out() << "Effectivity    : " << MeasuredEffectivity  << "[%]\n"; 
         // TODO sanitizer complains about % sign in printf
 
         Threads(100);        
@@ -150,8 +150,8 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
     T kp = k * p_Primorial;  // primorial p multiplied by some integer k
 
     Log::out()  << "Sieve Begin: " << Begin << " ";        
-    Log::out()  << "Sieve End  : " << End <<  " ";
-    Log::out()  << "End-Begin  : " << End - Begin << "\n";        
+    Log::out()  << "Sieve End:   " << End <<  " ";
+    Log::out()  << "End-Begin:   " << End - Begin << "\n";        
     // Log::out()  << "End - UINT64_MAX: " << (uint128_t) End - (uint128_t) UINT64_MAX << endl;
     // Log::out()  << "End - 2 * UINT64_MAX: " << (uint128_t) End - (uint128_t) UINT64_MAX - (uint128_t) UINT64_MAX << endl;        
     // Log::out()  << "UINT64_MAX: " <<  UINT64_MAX << endl;        
@@ -505,8 +505,8 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
     _Percent=-1.0;
 
     Log::out()  << "Sieve Begin: " << utils_str::FormatUInt(Begin) << "\n";        
-    Log::out()  << "Sieve End  : " << utils_str::FormatUInt(End) <<  "\n";
-    Log::out()  << "End-Begin  : " << utils_str::FormatUInt(End - Begin) << "\n";        
+    Log::out()  << "Sieve End:   " << utils_str::FormatUInt(End) <<  "\n";
+    Log::out()  << "End-Begin:   " << utils_str::FormatUInt(End - Begin) << "\n";        
     // Log::out()  << "End - UINT64_MAX: " << (uint128_t) End - (uint128_t) UINT64_MAX << endl;
     // Log::out()  << "End - 2 * UINT64_MAX: " << (uint128_t) End - (uint128_t) UINT64_MAX - (uint128_t) UINT64_MAX << endl;        
     // Log::out()  << "UINT64_MAX: " <<  UINT64_MAX << endl;        
@@ -556,9 +556,9 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
         Log::out() << " = " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     }
     long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( p_TestArrayCount / (long double) p_Primorial) * (End - Begin + 1));
-    Log::out() << "Primes: " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
+    Log::out() << "Primes:       " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     Log::out() << "Primes ratio (from interval): " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (End - Begin + 1), 6,3) << "%\n";
-    Log::out() << "Primes ratio (after sieve)  : " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";
+    Log::out() << "Primes ratio (after sieve):   " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";
 
     Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() << "\n";
  

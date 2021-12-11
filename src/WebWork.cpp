@@ -19,8 +19,8 @@
 #include <string>
 
 
-
-std::string WebWork::PrepareWebPostString(clsNewWork &NewWork, GeneratorFunctionBitStatistics & BS){
+// template <class T>
+std::string WebWork::PrepareWebPostString(clsNewWork<uint64_t> &NewWork, GeneratorFunctionBitStatistics & BS){
     std::string post ("work=");
     post.append(std::to_string(NewWork.new_work_id));
     post.append(",");
@@ -37,11 +37,11 @@ std::string WebWork::PrepareWebPostString(clsNewWork &NewWork, GeneratorFunction
     return post;
 }
 
-
-clsNewWork WebWork::ParseJsonNewWork(const std::string &JSON){
-    clsNewWork ret;
+// template <class T>
+clsNewWork<uint64_t> WebWork::ParseJsonNewWork(const std::string &JSON){
+    clsNewWork<uint64_t> ret;
     ret.ParsedOK = false;
-    // TODO error handling does not work in the C world
+    // TODO error handling does not work in> the C world
     try{
         Json::Value obj = utils::parseJsonStr(JSON);
         // Json::Reader reader;
@@ -64,9 +64,10 @@ clsNewWork WebWork::ParseJsonNewWork(const std::string &JSON){
     // [{"task_id":"1","asking_worker_id":"1","new_begin":"0","new_end":"3","c_power2":"2","new_work_id":"62"}]   
 }
 
-clsNewWork WebWork::GetWebWork(WorkerStruct &w){
+// template <class T>
+clsNewWork<uint64_t> WebWork::GetWebWork(WorkerStruct &w){
     std::string WebInput;
-    clsNewWork NewWork;
+    clsNewWork<uint64_t> NewWork;
     NewWork.ParsedOK=false;
     bool bSleep=false;
     bool bSleep2=false;
@@ -106,7 +107,8 @@ clsNewWork WebWork::GetWebWork(WorkerStruct &w){
     return NewWork;
 }
 
-void WebWork::ProcessWebWork(clsNewWork &NewWork, WorkerStruct &w){
+// template <class T>
+void WebWork::ProcessWebWork(clsNewWork<uint64_t> &NewWork, WorkerStruct &w){
     NewWork.LogHeader();
 
     if (NewWork.c_power2 <= 63) {        
@@ -144,9 +146,10 @@ void WebWork::ProcessWebWork(clsNewWork &NewWork, WorkerStruct &w){
     }
 }
 
+// template <class T>
 void WebWork::WebBitStatisticsWork(WorkerStruct &w) {
     Log::out() << "\n";
-    clsNewWork NewWork = GetWebWork(w);
+    clsNewWork<uint64_t> NewWork = GetWebWork(w);
     ProcessWebWork(NewWork, w);
     w.LoadThreads();
 }

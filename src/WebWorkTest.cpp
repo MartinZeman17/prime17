@@ -19,7 +19,8 @@ void WebBitStatistics(WorkerStruct &w){
     } 
 }
 
-bool CheckReferenceResults(clsNewWork & NewWork, GeneratorFunctionBitStatistics & BSMT){
+template <class T>
+bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatistics & BSMT){
     bool res;
     // #if NDEBUG
 
@@ -183,8 +184,8 @@ bool CheckReferenceResults(clsNewWork & NewWork, GeneratorFunctionBitStatistics 
     return res;
 }
 
-
-GeneratorFunctionBitStatistics RunOld(clsNewWork NewWork){
+template <class T>
+GeneratorFunctionBitStatistics RunOld(clsNewWork<T> NewWork){
     GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
     SieveGenerator<unsigned long long> Sieve;
     Sieve.Threads(100);
@@ -198,15 +199,17 @@ GeneratorFunctionBitStatistics RunOld(clsNewWork NewWork){
     return BSMT;
 }
 
-GeneratorFunctionBitStatistics RunNew(clsNewWork NewWork){
+template <class T>
+GeneratorFunctionBitStatistics RunNew(clsNewWork<T> NewWork){
     NewWork.LogHeader();
-    GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
     // Sieve2Generator<unsigned long long> Sieve;
     Sieve2Generator<uint128_t> Sieve;
     Sieve.Threads(100);
-    // Sieve.Threads(12);
+    Sieve.Threads(12);
 
+    GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
     Sieve.ResetClock();
+    BSMT.ResetClock(); //???
     Sieve.Work2MT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
     // Sieve.Work2MT( NewWork.new_begin,  NewWork.new_end, BSMT);
     
@@ -214,6 +217,7 @@ GeneratorFunctionBitStatistics RunNew(clsNewWork NewWork){
     return BSMT;
 }
 
+template <class T>
 bool RunCheckComputationNew(){
     constexpr unsigned int C_TestPower2 = 30;
     constexpr long double C_StandardCheckDuration = 297.0;  //power 50;
@@ -228,7 +232,7 @@ bool RunCheckComputationNew(){
 
     Log::out() << "Running check computation (better safe than sorry).\n";
         
-    clsNewWork NewWork;    
+    clsNewWork<T> NewWork;    
     NewWork.c_power2 = 63;
     // NewWork.c_power2 = 50;    
     NewWork.new_begin = static_cast<unsigned long long>(1) << (NewWork.c_power2-1) ;
@@ -252,12 +256,8 @@ bool RunCheckComputationNew(){
     return CheckReferenceResults(NewWork, BSMT);
 }
 
-
-// ToDo odstinit sito od mereni, pocitat v cyklu
-// generovat nahodne ulohy a porovnavat casy a vysledky
-// test sita od 0 do 2
-// test sita u 2 na 64
-void CompareOldNew(clsNewWork NewWork){
+template <class T>
+void CompareOldNew(clsNewWork<T> NewWork){
     NewWork.LogHeader();
     auto O = RunOld(NewWork);
     Log::out() <<"\n";
@@ -272,18 +272,28 @@ void CompareOldNew(clsNewWork NewWork){
 }
 
 bool RunCheckComputation(){
-    return RunCheckComputationNew();
-    // clsNewWork NewWork;
-    // NewWork.c_power2=63;
-    // NewWork.new_begin = NewWork.Offset()-1;
-    // NewWork.new_end = NewWork.Offset()-1;
+    // return RunCheckComputationNew<uint64_t>();
+    clsNewWork<uint128_t> NewWork;
+    NewWork.c_power2=63;
+    NewWork.new_begin = NewWork.Offset()-1;
+    NewWork.new_end = NewWork.Offset()+100;
     
     // NewWork.c_power2=31;
     // NewWork.new_begin = 20;
     // NewWork.new_end = 3000000031;
     
-    // // CompareOldNew(NewWork);
-    // RunNew(NewWork);  
-    // return true; //???
+    // CompareOldNew(NewWork);
+    RunNew(NewWork);  
+    return true; //???
 
 }
+
+
+// ToDo odstinit sito od mereni, pocitat v cyklu ??
+// generovat nahodne ulohy a porovnavat casy a vysledky
+// test sita od 0 do 2
+// test sita u 2 na 64
+// test 128 pres 2 na 64 a u konce - new work template
+// print ext progress - vypocet casu dl zpracovane casti vlaknem
+// nacitani threads a prdcasny exit nekterych vlaken, co hodnota 0?
+// lepsi vypocet switch pointu simulaci obdelnika a koef 23
