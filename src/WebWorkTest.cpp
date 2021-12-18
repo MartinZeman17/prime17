@@ -20,7 +20,7 @@ void WebBitStatistics(WorkerStruct &w){
 }
 
 template <class T>
-bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatistics & BSMT){
+bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatistics<T> & BSMT){
     bool res;
     // #if NDEBUG
 
@@ -185,9 +185,9 @@ bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatisti
 }
 
 template <class T>
-GeneratorFunctionBitStatistics RunOld(clsNewWork<T> NewWork){
-    GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
-    SieveGenerator<unsigned long long> Sieve;
+GeneratorFunctionBitStatistics<T> RunOld(clsNewWork<T> NewWork){
+    GeneratorFunctionBitStatistics<T> BSMT(NewWork.c_power2);
+    SieveGenerator<uint64_t> Sieve;
     Sieve.Threads(100);
     // Sieve.Threads(12);
 
@@ -200,20 +200,19 @@ GeneratorFunctionBitStatistics RunOld(clsNewWork<T> NewWork){
 }
 
 template <class T>
-GeneratorFunctionBitStatistics RunNew(clsNewWork<T> NewWork){
+GeneratorFunctionBitStatistics<T> RunNew(clsNewWork<T> NewWork){
     NewWork.LogHeader();
-    // Sieve2Generator<unsigned long long> Sieve;
-    Sieve2Generator<uint128_t> Sieve;
+    Sieve2Generator<T> Sieve;
     Sieve.Threads(100);
-    Sieve.Threads(12);
+    // Sieve.Threads(12);
 
-    GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
+    GeneratorFunctionBitStatistics<T> BSMT(NewWork.c_power2);
     Sieve.ResetClock();
     BSMT.ResetClock(); //???
     Sieve.Work2MT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
     // Sieve.Work2MT( NewWork.new_begin,  NewWork.new_end, BSMT);
     
-    Log::out() << "Duration new [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 10, 1) << "\n";
+    Log::out() << "Duration new [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 1, 1) << "\n";
     return BSMT;
 }
 
@@ -272,19 +271,19 @@ void CompareOldNew(clsNewWork<T> NewWork){
 }
 
 bool RunCheckComputation(){
-    // return RunCheckComputationNew<uint64_t>();
-    clsNewWork<uint128_t> NewWork;
-    NewWork.c_power2=63;
-    NewWork.new_begin = NewWork.Offset()-1;
-    NewWork.new_end = NewWork.Offset()+100;
+    return RunCheckComputationNew<uint64_t>();
+    // clsNewWork<uint128_t> NewWork;
+    // NewWork.c_power2=63;
+    // NewWork.new_begin = NewWork.Offset()-1;
+    // NewWork.new_end = NewWork.Offset()+100000000;
     
     // NewWork.c_power2=31;
     // NewWork.new_begin = 20;
     // NewWork.new_end = 3000000031;
     
     // CompareOldNew(NewWork);
-    RunNew(NewWork);  
-    return true; //???
+    // RunNew(NewWork);  
+    // return true; //???
 
 }
 

@@ -23,12 +23,12 @@ void GeneratorFunctionBitStatisticsTestOld(){
     {
         {
             cout << "Bit statistics for power: " << i << endl;
-            GeneratorFunctionBitStatistics BS(i);
+            GeneratorFunctionBitStatistics<uint64_t> BS(i);
             // GeneratorFunctionBPSW BS;
             // GeneratorFunctionAPRCL BS;
             // GeneratorFunctionTT BS;
 
-            SieveGenerator<unsigned long long> Sieve(C_SieveGeneratorDefaultMaxPrime);
+            SieveGenerator<uint64_t> Sieve(C_SieveGeneratorDefaultMaxPrime);
 
             #ifdef NDEBUG
             const unsigned int MTChunks = 200; //at least number of cores

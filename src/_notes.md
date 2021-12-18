@@ -10,7 +10,13 @@ ToDo Gmp:
 - zjistit, v cem je leppsi mpfr knihovna a zda neobsahuje lepsi kody
 
 ToDo Cpp: 
-- test na sieve u konce hranice 2 na 64  a testy overflow
+- CLang warnings a performance
+- test kde beg > end
+- kontrola bits 64 65 128
+- projit ??? a overflow
+- dev param do make
+- optimalizovane testy BPSW ??
+- test na sieve u konce hranice 2 na 128  a testy overflow
 - test n sieve delky 2
 - test na sieve, kde je end = (k * primorial) -1
 - Todo: nefunční web prime17 při startu spadne do registrace. Testy, zda funguje prime17 web a zda je config file naplnený

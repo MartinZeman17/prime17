@@ -44,7 +44,7 @@ class SieveGenerator {
 
     void Constructor(unsigned int MaxPrime);
     void PrintProgress(const unsigned int &PId, const long double &Percent, const long double &MinTillEnd) const;
-    T WorkMT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract> & GF, const std::string PId);
+    T WorkMT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract<T>> & GF, const std::string PId);
     std::chrono::time_point<std::chrono::high_resolution_clock> _BeginTime; //  = std::high_resolution_clock::now(); 
 
     T _kp;
@@ -65,9 +65,9 @@ class SieveGenerator {
     public:
     // ToDo can be static??? Class must be initialized first and work function must be ready for reentrancy. I will let it be for the time being
 
-    T Work(const T & Begin, const T & End, GeneratorFunctionAbstract & GF) const;
+    T Work(const T & Begin, const T & End, GeneratorFunctionAbstract<T> & GF) const;
     // multithreading version
-    T WorkMT(const T & Begin, const T & End, GeneratorFunctionAbstract & GF);
+    T WorkMT(const T & Begin, const T & End, GeneratorFunctionAbstract<T> & GF);
 
 
     SieveGenerator();

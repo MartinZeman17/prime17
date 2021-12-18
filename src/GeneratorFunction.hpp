@@ -8,9 +8,15 @@
 #include "int128_t.hpp"
 using namespace primecount;
 
+#include <iostream>
+#include <chrono>
 
 using namespace std::chrono;
-// template <class T>
+using std::endl;
+using std::cout;
+
+
+template <typename T>
 class GeneratorFunctionAbstract{
     protected:
     unsigned long long _PrimesCnt = 0;
@@ -35,17 +41,17 @@ class GeneratorFunctionAbstract{
     virtual GeneratorFunctionAbstract& operator+=(const GeneratorFunctionAbstract& rhs) noexcept;
     virtual std::unique_ptr<GeneratorFunctionAbstract> clone() const = 0;
 
-    virtual int GenFunct(const __uint128_t & N, const mpz_t & mpz_X) = 0; //pure virtual function leads to an abstract class
-    // virtual int GenFunct(const T & N, const mpz_t & mpz_X) = 0; //pure virtual function leads to an abstract class
+    // virtual int GenFunct(const __uint128_t & N, const mpz_t & mpz_X) = 0; //pure virtual function leads to an abstract class
+    virtual int GenFunct(const T & N, const mpz_t & mpz_X) = 0; //pure virtual function leads to an abstract class
 
 };
 
 
 // This CRTP class implements clone() for Derived
-template <typename Derived>
-class GeneratorFunction : public GeneratorFunctionAbstract {
+template <typename Derived, typename T>
+class GeneratorFunction : public GeneratorFunctionAbstract<T> {
 public:
-    std::unique_ptr<GeneratorFunctionAbstract> clone() const override {
+    std::unique_ptr<GeneratorFunctionAbstract<T>> clone() const override {
         return std::make_unique<Derived>(static_cast<Derived const&>(*this));
     }
 
@@ -55,6 +61,60 @@ protected:
    GeneratorFunction(const GeneratorFunction&) = default;
    GeneratorFunction(GeneratorFunction&&) = default;
 };
+
+
+
+template <class T>
+void GeneratorFunctionAbstract<T>::ResetClock() noexcept {
+    _BeginTime = high_resolution_clock::now();
+}
+
+template <class T>
+GeneratorFunctionAbstract<T>::GeneratorFunctionAbstract() noexcept:  _PrimesCnt{0}, _ProbablePrimesCnt{0}  {
+    ResetClock();
+}
+
+template <class T>
+GeneratorFunctionAbstract<T>& GeneratorFunctionAbstract<T>::operator+=(const GeneratorFunctionAbstract& rhs) noexcept {
+    _PrimesCnt += rhs._PrimesCnt;
+    _ProbablePrimesCnt += rhs._ProbablePrimesCnt;   
+    return *this;
+}
+
+// GeneratorFunction GeneratorFunction::operator+(const GeneratorFunction& rhs) {
+//     GeneratorFunction result;
+//     result._PrimesCnt = _PrimesCnt + rhs._PrimesCnt;
+//     result._ProbablePrimesCnt = _ProbablePrimesCnt + rhs._ProbablePrimesCnt;
+//     return result;
+// }
+
+template <class T>
+long double GeneratorFunctionAbstract<T>::DurationMinutes() const noexcept {
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    return duration.count() / (1000.0l * 60.0l);
+}
+
+template <class T>
+long double GeneratorFunctionAbstract<T>::DurationSeconds() const noexcept {
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    return duration.count() / (1000.0l);
+}
+
+
+template <class T>
+unsigned long long GeneratorFunctionAbstract<T>::ProbablePrimesCnt() const noexcept {
+    return _ProbablePrimesCnt;
+}
+
+template <class T>
+unsigned long long GeneratorFunctionAbstract<T>::PrimesCnt() const noexcept {
+    return _PrimesCnt;
+}
+
+template <class T>
+void GeneratorFunctionAbstract<T>::PrintResult() const noexcept {
+    cout << toName() << " Primes Cnt: " << _PrimesCnt << " Probable Primes Cnt: " << _ProbablePrimesCnt << " Duration minutes: " << DurationMinutes() << endl;
+}
 
 
 #endif

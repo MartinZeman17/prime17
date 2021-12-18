@@ -27,22 +27,10 @@ SRCS := \
 	BitRange.cpp \
 	PrimesRange.cpp \
 	PrimesRangeService.cpp \
-	GeneratorFunction.cpp \
 	mpz_aprcl.c \
 	SliceTBalance.cpp \
-	GeneratorFunctionBPSW.cpp \
-	GeneratorFunctionAPRCL.cpp \
-	GeneratorFunctionMR.cpp \
-	GeneratorFunctionLS.cpp \
-	GeneratorFunctionLS_D.cpp \
-	GeneratorFunctionLS_DHistogram.cpp \
-	GeneratorFunctionPrimeCreator.cpp \
-	GeneratorFunctionBPSW2.cpp \
-	GeneratorFunctionBitStatistics.cpp \
-	GeneratorFunctionTT.cpp \
 	WebService.cpp \
 	utils_str.cpp \
-	WebWork.cpp \
 	utils.cpp \
 	Binomials.cpp
 	
@@ -71,10 +59,13 @@ $(shell mkdir -p $(dir $(BINDIR)) >/dev/null)
 # C compiler
 # ToDo Is this ok? check original configuration on internet
 CC := gcc
+# CC := clang
 # C++ compiler
 CXX := g++
+# CXX := clang
 # linker
 LD := g++
+# LD := clang
 # tar
 TAR := tar
 
@@ -84,6 +75,8 @@ CFLAGS := -std=c18
 
 # C++ flags
 CXXFLAGS := -std=c++17
+# CXXFLAGS := -std=c++20
+
 # C/C++ flags
 
 # linker libs

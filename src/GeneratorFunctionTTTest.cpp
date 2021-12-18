@@ -18,7 +18,7 @@ const unsigned int C_Shifts = 25;
 
 // Generator Function Template Test
 void GFTTest(){
-    const SieveGenerator<unsigned long long> Sieve(C_SieveGeneratorDefaultMaxPrime);
+    const SieveGenerator<uint64_t> Sieve(C_SieveGeneratorDefaultMaxPrime);
     
     unsigned long long Begin = static_cast<uint64_t>(1) << C_Shifts;
     unsigned long long End = Begin -1;
@@ -27,11 +27,11 @@ void GFTTest(){
     
     PrimeTest _t(65, false, false);
 
-    GeneratorFunctionTT GF;
+    GeneratorFunctionTT<uint64_t> GF;
     Sieve.Work(Begin, End, GF);
     GF.PrintResult();
 
-    GeneratorFunctionBPSW GF_BPSW;
+    GeneratorFunctionBPSW<uint64_t> GF_BPSW;
     Sieve.Work(Begin, End, GF_BPSW);
     GF_BPSW.PrintResult();
 }
@@ -40,7 +40,7 @@ void GFTTest(){
 
 // Generator Function Template Test MultiThreading
 void GFTTestMT(){
-    SieveGenerator<unsigned long long> Sieve(C_SieveGeneratorDefaultMaxPrime);
+    SieveGenerator<uint64_t> Sieve(C_SieveGeneratorDefaultMaxPrime);
     
     unsigned long long Begin = static_cast<uint64_t>(1) << C_Shifts;
     unsigned long long End = Begin -1;
@@ -49,11 +49,11 @@ void GFTTestMT(){
     
     PrimeTest _t(65, false, false);
       
-    GeneratorFunctionTT GFTT;
+    GeneratorFunctionTT<uint64_t> GFTT;
     Sieve.Work(Begin, End, GFTT);
     GFTT.PrintResult();
 
-    GeneratorFunctionTT GFTT_;
+    GeneratorFunctionTT<uint64_t> GFTT_;
     Sieve.WorkMT(Begin, End, GFTT_);
     GFTT_.PrintResult();
 

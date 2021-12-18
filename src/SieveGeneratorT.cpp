@@ -132,7 +132,7 @@ SieveGenerator<T>::SieveGenerator(unsigned int MaxPrime){
 
 /************************************************************* single thread version *************************************************************/
 template <class T>
-T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstract & GF) const {
+T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstract<T> & GF) const {
     mpz_t mpz_kp, mpz_X;
 
     #undef RETURN
@@ -303,7 +303,7 @@ void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double
 
 
 template <class T>
-T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract> & GF, const std::string PId) {
+T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract<T>> & GF, const std::string PId) {
     auto TBegin = high_resolution_clock::now();
 
     mpz_t mpz_kp, mpz_X;
@@ -386,10 +386,14 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
     // The branch that fails the constexpr condition will not be compiled for the given template instantiation. Or I hope so...
     // But it looks like constexpr is not needed, both binaries are identical.
     // if (std::is_same_v<T, unsigned long long>) {
-    if constexpr(std::is_same_v<T, unsigned long long>) {
+
+    if constexpr(std::is_same_v<T, uint64_t>) {
         utils_mpz::mpz_set_ull(mpz_kp, kp);
-    } else {
+    } else if constexpr(std::is_same_v<T, uint128_t>){
         utils_mpz::mpz_set_ul128(mpz_kp, kp);
+    } else {
+        assert(false);
+        abort();
     }
     
     if (Begin <=p_MaxPrime && iPId == 0) {
@@ -496,7 +500,7 @@ unsigned int SieveGenerator<T>::Threads(const unsigned int Percent){
 }
 
 template <class T>
-T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbstract & GF) {
+T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbstract<T> & GF) {
 
     ResetClock();
     T res = 0;
@@ -534,7 +538,7 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
     Threads.reserve(_Threads);
 
     // prepare all clones of GeneratorFunction before starting any thread
-    std::vector<std::unique_ptr<GeneratorFunctionAbstract>> GFClones;
+    std::vector<std::unique_ptr<GeneratorFunctionAbstract<T>>> GFClones;
     GFClones.reserve(_Threads);
     for (unsigned int i = 0; i<_Threads; i++){
         GFClones.emplace_back(GF.clone());

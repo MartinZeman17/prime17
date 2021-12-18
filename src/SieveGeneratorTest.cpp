@@ -16,7 +16,7 @@ using std::cout;
 
 void SieveGeneratorTest(){
     const SieveGenerator<uint128_t> A(C_SieveGeneratorDefaultMaxPrime);
-    GeneratorFunctionBitStatistics GF;
+    GeneratorFunctionBitStatistics<uint128_t> GF;
 
     uint128_t Begin = UINT64_MAX; // UINT64_MAX + 1 is evaluated at compile time as 0 !!!  
     Begin++;
@@ -29,8 +29,8 @@ void SieveGeneratorTest(){
 }
 
 void SieveGeneratorTestMT(){
-    SieveGenerator<unsigned long long> A(C_SieveGeneratorDefaultMaxPrime);
-    GeneratorFunctionBitStatistics GF;
+    SieveGenerator<uint64_t> A(C_SieveGeneratorDefaultMaxPrime);
+    GeneratorFunctionBitStatistics<uint64_t> GF;
 
     unsigned long long Begin = static_cast<uint64_t>(1) << 28;
     unsigned long long End = Begin + (Begin -1);

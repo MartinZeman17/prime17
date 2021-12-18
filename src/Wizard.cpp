@@ -172,7 +172,7 @@ namespace Wizard {
         WebResponse=WebService::out().HTMLFindOutput(WebResponse);
         Log::out() << WebResponse <<"\n";
         if (WebResponse=="[{\"status\":\"OK\"}]") {
-            Log::out() << "Worker has been checked against Prime 17 web\n" ;
+            Log::out() << "Worker has been checked against Prime 17 web.\n" ;
             return true;
         }
         Log::out().logRight("Worker check failed. It could be lack of internet connection or may be someone was toying with the configuration file.\n");

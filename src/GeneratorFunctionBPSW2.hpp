@@ -5,14 +5,31 @@
 #include "PrimeTest.hpp"
 
 
+#include <gmp.h>
 
-class GeneratorFunctionBPSW2 : public GeneratorFunction<GeneratorFunctionBPSW2> {
+extern "C" {
+#include "mpz_aprcl.h"
+}
+
+template <class T>
+class GeneratorFunctionBPSW2 : public GeneratorFunction<GeneratorFunctionBPSW2<T>, T> {
     private:
 
     public:
     
-    int GenFunct(const __uint128_t & N, const mpz_t & mpz_X) override;
+    int GenFunct(const T & N, const mpz_t & mpz_X) override;
     virtual std::string toName() const noexcept override  {return "BPSW 2";}
 };
+
+
+template <class T>
+int GeneratorFunctionBPSW2<T>::GenFunct(const T & X __attribute__((unused)), const mpz_t & mpz_X) {
+    
+    if (mpz_bpsw_prp(const_cast<mpz_t&>(mpz_X))) {
+        GeneratorFunctionAbstract<T>::_PrimesCnt++;
+    }
+
+    return 0;
+}
 
 #endif

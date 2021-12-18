@@ -78,9 +78,9 @@ void MethodTestsOnPrime(){
 
     const SieveGenerator<uint128_t> Sieve(C_SieveGeneratorDefaultMaxPrime);
 
-    GeneratorFunctionPrimeCreator GF_Creator(NumberOfPrimes);
+    GeneratorFunctionPrimeCreator<uint128_t> GF_Creator(NumberOfPrimes);
     Sieve.Work(Begin, prt::numeric_limits<uint128_t>::max(), GF_Creator);
-    GeneratorFunctionAbstract &res= GF_Creator;
+    GeneratorFunctionAbstract<uint128_t> &res= GF_Creator;
     cout << "BPSW Primes Created: " << res.PrimesCnt() << " ProbablePrimesCnt: " << res.ProbablePrimesCnt() << " Duration minutes: " << res.DurationMinutes() << endl << endl;
     myfile << "BPSW Primes Created: " << res.PrimesCnt() << " ProbablePrimesCnt: " << res.ProbablePrimesCnt() << " Duration minutes: " << res.DurationMinutes() << endl << endl;
     
@@ -227,9 +227,9 @@ void MethodTests(const uint128_t Begin, const uint128_t End){
 
     const SieveGenerator<uint128_t> Sieve(C_SieveGeneratorDefaultMaxPrime);
 
-    GeneratorFunctionMR GF_MR;
+    GeneratorFunctionMR<uint128_t> GF_MR;
     Sieve.Work(Begin, End, GF_MR);
-    GeneratorFunctionAbstract & res=GF_MR;
+    GeneratorFunctionAbstract<uint128_t> & res=GF_MR;
     cout << "MR PrimesCount: " << res.PrimesCnt() << " ProbablePrimesCnt: " << res.ProbablePrimesCnt() << " Duration minutes: " << res.DurationMinutes() << endl << endl;
     myfile << "MR PrimesCount: " << res.PrimesCnt() << " ProbablePrimesCnt: " << res.ProbablePrimesCnt() << " Duration minutes: " << res.DurationMinutes() << endl << endl;
 
@@ -256,7 +256,7 @@ void MethodTests(const uint128_t Begin, const uint128_t End){
     // myfile << "LS_D PrimesCount: " << res.PrimesCnt() << " ProbablePrimesCnt: " << res.ProbablePrimesCnt() << " Duration minutes: " << res.DurationMinutes() << endl << endl;
 
 
-    GeneratorFunctionLS_DHistogram GF_LS_DHistogram;
+    GeneratorFunctionLS_DHistogram<uint128_t> GF_LS_DHistogram;
     Sieve.Work(Begin, End, GF_LS_DHistogram);
     res= GF_LS_DHistogram;
     cout << "LS_DHistogram: " << " Duration minutes: " << res.DurationMinutes() << endl << endl;

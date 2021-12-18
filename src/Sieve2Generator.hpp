@@ -73,7 +73,10 @@ class Sieve2Generator {
 
     uint32_t * SieveInit(const unsigned int SieveMaxPrime, uint32_t & MaxPrime, uint32_t & Primorial, size_t & CoprimesCount);    
     void PrintProgress(const unsigned int &PId, const long double &Percent, const long double &MinTillEnd) const;
-    T Work2MT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract> & GF, const std::string PId);
+
+    uint32_t* BinarySearch(uint32_t BinarySearchValue, uint32_t * Array, size_t ArrayCount) const noexcept;
+
+    T Work2MT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract<T>> & GF, const std::string PId);
     std::chrono::time_point<std::chrono::high_resolution_clock> _BeginTime; //  = std::high_resolution_clock::now(); 
 
     
@@ -98,7 +101,7 @@ class Sieve2Generator {
 
     // T Work(const T & Begin, const T & End, GeneratorFunctionAbstract & GF) const;
     // multithreading version
-    T Work2MT(const T & Begin, const T & End, GeneratorFunctionAbstract & GF);
+    T Work2MT(const T & Begin, const T & End, GeneratorFunctionAbstract<T> & GF);
 
 
     // const unsigned int & MaxPrime = p_MaxPrime;
@@ -285,9 +288,49 @@ void Sieve2Generator<T>::PrintProgress(const unsigned int &PId, const long doubl
     }
 }
 
+// returns pointer to an item which is equal to or greater than the value beeing searched
+template <class T>
+uint32_t* Sieve2Generator<T>::BinarySearch(uint32_t BinarySearchValue, uint32_t * Array, size_t ArrayCount) const noexcept {
+
+    // auto TTArrayBegin2 = high_resolution_clock::now();
+    uint32_t *pCoprime;
+    size_t B=0;
+    size_t E=ArrayCount-1;
+    size_t M; 
+
+    assert(BinarySearchValue >= Array[B]);
+    assert(BinarySearchValue <= Array[E]);
+
+    do {
+        //M = B + (E - B) / 2; // safer code with respect to possible integer overflow in binary search, not needed here
+        M = (E + B) / 2;  // no overflow can happen for the coprimes number is ~1.7 mio for 19# and ~36.5 mio for 23#
+        if (Array[M] < BinarySearchValue){
+            B=M;
+        } else {
+            E=M;
+        }
+    } while (B + 1 < E);
+    // cycle was optimized as much as possible with cost of an extra step outside of a loop
+    // for correct inputs == operator should be ok, but if value beeing searched is smaller than the first item, the first item is returned
+    if (Array[B] >= BinarySearchValue) { 
+        pCoprime = &Array[B];            
+    } else {
+        pCoprime = &Array[E];
+    }
+
+    // auto TTArrayDuration2 = duration_cast<milliseconds>(high_resolution_clock::now() - TTArrayBegin2);
+    // if (TTArrayDuration2.count() > 0)
+    // {
+    //     // method cannot be const
+    //     const std::lock_guard<std::mutex> lock4(_cout_mutex);
+    //     Log::out() << "> Coprimes array binary seek: " << TTArrayDuration2.count() << " ms\n";
+    // }
+    return pCoprime;
+}
+
 
 template <class T>
-T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract> & GF, const std::string PId) {
+T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract<T>> & GF, const std::string PId) {
     auto TBegin = high_resolution_clock::now();
 
     mpz_t mpz_kp, mpz_X;
@@ -312,7 +355,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         T OverflowTest2 = OverflowTest1 + End;
         // prevent overflow in End + 1, End + _Primorial     
         if (!(OverflowTest2 > End && OverflowTest2 > OverflowTest1 && End + 1 > End)) {
-            Log::out() << "Input parameters would lead to overflow in a sieve algorithm. Use template with bigger data type if possible (e.g. uint128_t). Mission aborted.\n";
+            Log::out() << "Input parameters would lead to an overflow in a sieve algorithm. Use template with bigger data type if possible (e.g. uint128_t). Mission aborted.\n";
             abort();
         }
     }
@@ -328,6 +371,8 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         size_t TestArrayCount;
         uint32_t Primorial;
         uint32_t MaxPrime;
+        uint32_t LastTestArrayItem;
+        uint32_t * pCoprimeDoNotTest;
         enSieveLength SieveLength;
         T Untouched=0;
         
@@ -362,13 +407,15 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
             pTestArrayBeyondEnd = &TestArray[TestArrayCount];  
             Primorial = _Primorial;
             MaxPrime = _MaxPrime;
+            LastTestArrayItem = TestArray[TestArrayCount-1];
             // SwitchPointOffset = _SwitchPointOffset;
             
             T k = _Untouched / Primorial;
             kp = k * Primorial;
 
-            T tmp = TestArray[TestArrayCount-1];
-            tmp += kp; 
+            T tmp = kp + LastTestArrayItem;
+            // T tmp = TestArray[TestArrayCount-1];
+            // tmp += kp; 
             if (tmp < _Untouched){
                 // Untouched are is very close to the next multiple of Primorial 
                 // so whole TestArray would be exhausted and variable i would out be of bounds
@@ -403,11 +450,13 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         // set mpz_kp
         // The branch that fails the constexpr condition will not be compiled for the given template instantiation. Or I hope so...
         // But it looks like constexpr is not needed, both binaries are identical.
-        // if (std::is_same_v<T, unsigned long long>) {
-        if constexpr(std::is_same_v<T, unsigned long long>) {
+        if constexpr(std::is_same_v<T, uint64_t>) {
             utils_mpz::mpz_set_ull(mpz_kp, kp);
-        } else {
+        } else if constexpr(std::is_same_v<T, uint128_t>){
             utils_mpz::mpz_set_ul128(mpz_kp, kp);
+        } else {
+            assert(false);
+            abort();
         }
         
         // MaxPrime = 2, Primorial = 2, TestArray = [1] -> ??? ToDo test
@@ -435,35 +484,9 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
                 const std::lock_guard<std::mutex> lock(_cout_mutex);
                 Log::out() << PId << "> " << "Primorial primes tested" << "\n";
             }
-        }
+        } 
 
-        // unsigned long long i=0;
-        // if (kp < Untouched) {
-        //     // seek in TestArray if Untouched is not a multiple of Primorial
-        //     T tmp;            
-        //     auto TTArrayBegin = high_resolution_clock::now();
-        //     // search where to start with testing and set index i
-        //     // for(; p_TestArray[i]+kp < Begin; i++);  // this for cycle works only for 64bit variables
-
-        //     // todo use pointer ??
-        //     // Beware of endless loop: 1. kp < Untouched 2. kp + Primorial > Untouched
-        //     // ??? co kdyz je to posleni prvek??? and nevyjedu z pole???
-        //     assert(TestArray[TestArrayCount-1]+kp >= Untouched);
-        //     tmp = TestArray[i]+kp;  
-        //     while (tmp < Untouched){
-        //         ++i;
-        //         tmp = TestArray[i]+kp;
-        //     }
-
-        //     auto TTArrayDuration = duration_cast<milliseconds>(high_resolution_clock::now() - TTArrayBegin);
-        //     if (TTArrayDuration.count()> 0)
-        //     {
-        //         const std::lock_guard<std::mutex> lock(_cout_mutex);
-        //         Log::out() << PId << "> Coprimes array seek: " << TTArrayDuration.count() << " ms\n";
-        //     }
-        // }
-
-        // embedded binary search searching for value equal to or greater than BinarySearchValue 
+        //  binary search searching for value equal to or greater than BinarySearchValue 
         uint32_t *pCoprime;
         {
             if (kp == Untouched) {
@@ -471,33 +494,10 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
             } else {
                 auto TTArrayBegin2 = high_resolution_clock::now();
                 uint32_t BinarySearchValue = (uint32_t) (Untouched - kp);
-                size_t B=0;
-                size_t E=TestArrayCount-1;
-                size_t M; 
-
-                // BinarySearchValue = TestArray[E];
-                assert(BinarySearchValue >= TestArray[B]);
-                assert(BinarySearchValue <= TestArray[E]);
-
-                do {
-                    //M = B + (E - B) / 2; // safer code with respect to possible integer overflow in binary search, not needed here
-                    M = (E + B) / 2;  // no overflow can happen for the coprimes number is ~1.7 mio for 19# and ~36.5 mio for 23#
-                    if (TestArray[M] < BinarySearchValue){
-                        B=M;
-                    } else {
-                        E=M;
-                    }
-                } while (B + 1 < E);
-                // cycle was optimized as much as possible with cost of an extra step outside of a loop
-                // for correct inputs == operator should be ok, but if value beeing searched is smaller than the first item, the first item is returned
-                if (TestArray[B] >= BinarySearchValue) { 
-                    pCoprime = &TestArray[B];            
-                } else {
-                    pCoprime = &TestArray[E];
-                }
+                pCoprime = BinarySearch(BinarySearchValue, TestArray, TestArrayCount);
 
                 auto TTArrayDuration2 = duration_cast<milliseconds>(high_resolution_clock::now() - TTArrayBegin2);
-                if (TTArrayDuration2.count() > 0)
+                // if (TTArrayDuration2.count() > 0)
                 {
                     const std::lock_guard<std::mutex> lock(_cout_mutex);
                     Log::out() << PId << "> Coprimes array binary seek: " << TTArrayDuration2.count() << " ms\n";
@@ -505,39 +505,61 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
             }
         }
 
-        // i is now a valid index within the array bounds
-        // pCoprime = &TestArray[i];
-        // assert(pCoprime == &TestArray[i]); 
+        // set an end condition
+        // 
+        T X =  kp + TestArray[TestArrayCount-1];
+        if (X <= End) {
+            pCoprimeDoNotTest = pTestArrayBeyondEnd;
+        } else {
+            // last coprime + kp sharply exceeds End
+            uint32_t BinarySearchValue = (uint32_t) (End - kp);
+            // End may be before kp + 1 (first coprime), in such a case while loop must not test any coprime
+            if (BinarySearchValue < *TestArray) {
+                pCoprimeDoNotTest = TestArray;
+            } else {
+                // find first greater (or equal) coprime
+                pCoprimeDoNotTest = BinarySearch(BinarySearchValue, TestArray, TestArrayCount);
+                // if End matches some coprime exactly, move to next in order to ensure such coprime will be tested
+                if (*pCoprimeDoNotTest == BinarySearchValue) {
+                    pCoprimeDoNotTest++;
+                }
+            }
+        }
 
-
-        // this is the core functionality consuming resources, be carefull
-        while(true)
-        {   
+        while (pCoprime != pCoprimeDoNotTest){
             uint32_t Coprime = *pCoprime; //TestArray[i];
             pCoprime++;
             T X = kp + Coprime;  // ??? overflow ???
             mpz_add_ui(mpz_X, mpz_kp, Coprime); //ok
 
-            if(X > End) break;            
-            
             if (GF->GenFunct(X, mpz_X)!=0) {
                 res = X;
                 RETURN(res);
             };
-    
-            // i++;
-            // if(i == TestArrayCount) {
-            //     // primorial range is done, return to outer cycle to read new primorial
-            //     break;
-            // }
-
-            if(pCoprime == pTestArrayBeyondEnd) {
-                // primorial range is done, return to outer cycle to read new primorial
-                break;
-            }
-
-
         }
+
+
+        // // this is the core functionality consuming almost all of the resources, be carefull
+        // while (true)
+        // {   
+        //     uint32_t Coprime = *pCoprime; //TestArray[i];
+        //     pCoprime++;
+        //     T X = kp + Coprime;  // ??? overflow ???
+        //     mpz_add_ui(mpz_X, mpz_kp, Coprime); //ok
+
+        //     if(X > End) break;            
+            
+        //     if (GF->GenFunct(X, mpz_X)!=0) {
+        //         res = X;
+        //         RETURN(res);
+        //     };
+    
+        //     if(pCoprime == pTestArrayBeyondEnd) {
+        //         // primorial range is done, return to outer cycle to read new primorial
+        //         break;
+        //     }
+        // }
+
 
         // print progress 
         // long double NewPerc = (100.0L*(long double)((kp + TestArray[i-1])-Begin)/(long double)(End-Begin));
@@ -569,7 +591,16 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
     if (duration.count()!=0)
     {
         const std::lock_guard<std::mutex> lock(_cout_mutex);
-        Log::out() << PId << "> Sieve duration: " << duration.count() << " s = " << utils_str::FormatNumber( (float) duration.count() / 60.0f, 1,1) << " m" << "\n";
+        Log::out() << PId << "> Sieve (";
+        if constexpr(std::is_same_v<T, uint64_t>) {
+            Log::out() << "64";
+        } else if constexpr(std::is_same_v<T, uint128_t>){
+            Log::out() << "128";
+        } else {
+            assert(false);
+            abort();
+        }
+        Log::out() << "-bit) duration: " << duration.count() << " s = " << utils_str::FormatNumber( (float) duration.count() / 60.0f, 1,1) << " m" << "\n";
     }
 
     RETURN(0);
@@ -637,7 +668,7 @@ T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned in
 
 
 template <class T>
-T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionAbstract & GF) {
+T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionAbstract<T> & GF) {
     ResetClock();
     T res = 0;
 
@@ -675,7 +706,7 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
 
 
     // prepare all clones of GeneratorFunction before starting any thread
-    std::vector<std::unique_ptr<GeneratorFunctionAbstract>> GFClones;
+    std::vector<std::unique_ptr<GeneratorFunctionAbstract<T>>> GFClones;
     GFClones.reserve(_Threads);
     for (unsigned int i = 0; i<_Threads; i++){
         GFClones.emplace_back(GF.clone());
@@ -719,7 +750,7 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
     Log::out() << "Primes ratio (after sieve)  : " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";
 
 
-    Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() <<  " [s]:" << GF.DurationSeconds() <<"\n";
+    Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() <<  " [s]: " << GF.DurationSeconds() <<"\n";
  
     if (res!=0) return res; 
     return 0;

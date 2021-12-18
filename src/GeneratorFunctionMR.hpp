@@ -6,13 +6,14 @@
 
 
 
-class GeneratorFunctionMR : public GeneratorFunction<GeneratorFunctionMR> {
+template <class T>
+class GeneratorFunctionMR : public GeneratorFunction<GeneratorFunctionMR<T>, T> {
     private:
     PrimeTest _t;
 
     public:
     GeneratorFunctionMR() noexcept;
-    GeneratorFunctionMR(const GeneratorFunctionMR & O) noexcept;
+    GeneratorFunctionMR(const GeneratorFunctionMR<T> & O) noexcept;
     
     // no need for this code as += operator works fine automatically on a base class
     // GeneratorFunctionMR operator+(const GeneratorFunctionMR& rhs) {
@@ -23,8 +24,28 @@ class GeneratorFunctionMR : public GeneratorFunction<GeneratorFunctionMR> {
     // };
 
 
-    int GenFunct(const __uint128_t & N, const mpz_t & mpz_X) override;
+    int GenFunct(const T & N, const mpz_t & mpz_X) override;
     virtual std::string toName() const noexcept override  {return "MR";}
 };
+
+
+
+
+
+template <class T>
+GeneratorFunctionMR<T>::GeneratorFunctionMR() noexcept :_t(65) {}
+
+template <class T>
+GeneratorFunctionMR<T>::GeneratorFunctionMR(const GeneratorFunctionMR<T> & O __attribute__((unused))) noexcept: _t(65) {}
+
+
+template <class T>
+int GeneratorFunctionMR<T>::GenFunct(const T & X __attribute__((unused)), const mpz_t & mpz_X) {
+    
+    if(_t.iMillerRabinBase2(mpz_X)) {
+        GeneratorFunctionAbstract<T>::_PrimesCnt++;
+    }                  
+    return 0;
+}
 
 #endif
