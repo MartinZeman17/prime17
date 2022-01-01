@@ -28,39 +28,39 @@ const unsigned int C_SieveGeneratorDefaultMaxPrime=19;
 #endif 
 
 // 23# fits into uint_32 datatype (36 495 360 coprimes to primorial 223 092 870)
-const std::vector <unsigned long long> C_PrimorialPrimes({2,3,5,7,11,13,17,19,23,29,31,37,41,43});
-const std::vector<unsigned long long> C_Primorials({2,6,30, 210, 2310, 30030, 510510, 9699690, 223092870, 6469693230, 200560490130});
-const std::vector<unsigned long long> C_TestArraySizes({1,2,8,48, 480, 5760, 92160, 1658880, 36495360, 1021870080, 30656102400});
+const std::vector <unsigned long long> CPrimorial_Primes({2,3,5,7,11,13,17,19,23,29,31,37,41,43});
+const std::vector<unsigned long long> CPrimorial_s({2,6,30, 210, 2310, 30030, 510510, 9699690, 223092870, 6469693230, 200560490130});
+const std::vector<unsigned long long> CTestArray_Sizes({1,2,8,48, 480, 5760, 92160, 1658880, 36495360, 1021870080, 30656102400});
 // const std::vector <long double> C_Effectivity({0.5, 0.333333, 0.266667, 0.228571, 0.207792,  0.191808, 0.180525, 0.171024, 0.163588, 0.157947, 0.152852});
 
 template <class T> 
 class SieveGenerator {
     private:
-    static unsigned int p_MaxPrime;  // why can not be const??
-    static std::vector<uint32_t> p_TestArray;
-    static unsigned long long p_TestArrayCount;
-    static uint32_t p_Primorial;  
-    static std::mutex p_TestArray_mutex;
+    static unsigned int pMaxPrime_;  // why can not be const??
+    static std::vector<uint32_t> pTestArray_;
+    static unsigned long long pTestArrayCount_;
+    static uint32_t pPrimorial_;  
+    static std::mutex pTestArray_mutex_;
 
     void Constructor(unsigned int MaxPrime);
     void PrintProgress(const unsigned int &PId, const long double &Percent, const long double &MinTillEnd) const;
     T WorkMT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract<T>> & GF, const std::string PId);
-    std::chrono::time_point<std::chrono::high_resolution_clock> _BeginTime; //  = std::high_resolution_clock::now(); 
+    std::chrono::time_point<std::chrono::high_resolution_clock> BeginTime_; //  = std::high_resolution_clock::now(); 
 
-    T _kp;
-    std::mutex _kp_mutex;
+    T kp_;
+    std::mutex kp_mutex_;
     
-    long double _Percent;
-    std::mutex _Percent_mutex;
+    long double Percent_;
+    std::mutex Percent_mutex_;
     
-    std::mutex _cout_mutex;
+    std::mutex cout_mutex_;
 
-    std::chrono::time_point<std::chrono::high_resolution_clock> _StartTime;
-    // std::mutex _StartTime_mutex;
+    std::chrono::time_point<std::chrono::high_resolution_clock> StartTime_;
+    // std::mutex StartTime_mutex_;
 
-    unsigned int _Threads;
-    unsigned int _ncursesY;
-    unsigned int _ncursesX;
+    unsigned int Threads_;
+    unsigned int ncursesY_;
+    unsigned int ncursesX_;
 
     public:
     // ToDo can be static??? Class must be initialized first and work function must be ready for reentrancy. I will let it be for the time being
@@ -74,9 +74,9 @@ class SieveGenerator {
     // constructor, parameter may be set to C_SieveGeneratorDefaultMaxPrime
     // SieveGenerator(unsigned int MaxPrime = C_SieveGeneratorDefaultMaxPrime); 
     SieveGenerator(unsigned int MaxPrime ); 
-    const unsigned int & MaxPrime = p_MaxPrime;
-    // unsigned long long Primorial() const {return p_Primorial;};  
-    const uint32_t & Primorial = p_Primorial;
+    const unsigned int & MaxPrime = pMaxPrime_;
+    // unsigned long long Primorial() const {return pPrimorial_;};  
+    const uint32_t & Primorial = pPrimorial_;
 
     unsigned int Threads(const unsigned int Percent);
 

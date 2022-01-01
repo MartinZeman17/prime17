@@ -10,10 +10,10 @@ using std::string;
 class PrimesRange{
 
     private:
-    unsigned long long p_Begin=0;
-    unsigned long long p_End=0;
+    unsigned long long pBegin_=0;
+    unsigned long long pEnd_=0;
     unsigned long long p_MinPrime=0;
-    unsigned long long p_MaxPrime=0;
+    unsigned long long pMaxPrime_=0;
     unsigned long long p_PrimesCount=0;
     uint32_t * p_PrimesArray32=nullptr;
     uint64_t * p_PrimesArray64=nullptr;
@@ -30,10 +30,10 @@ class PrimesRange{
 
     ~PrimesRange();
 
-    const unsigned long long & Begin = p_Begin;
-    const unsigned long long & End = p_End;
+    const unsigned long long & Begin = pBegin_;
+    const unsigned long long & End = pEnd_;
     const unsigned long long & MinPrime = p_MinPrime;
-    const unsigned long long & MaxPrime = p_MaxPrime;
+    const unsigned long long & MaxPrime = pMaxPrime_;
     const unsigned long long & PrimesCount = p_PrimesCount;
     
 

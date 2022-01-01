@@ -40,7 +40,7 @@
 
 // C code must be used from C++ code using extern in order to disable messing with functions names needed for overloading (allowed only in C++, not in C)
 // Otherwise linking would fail
-// Every decent header (and it is not the case of this one) should contain #ifdef __cplusplus extern "C" { } #endif or macros G_BEGIN_DECLS and G_END_DECLS
+// Every decent header (and it is not the case of this one) should contain #ifdef __cplusplus extern "C" { } #endif or macros GBegin__DECLS and GEnd__DECLS
 extern "C" {
 #include "mpz_aprcl.h"
 }
@@ -291,6 +291,7 @@ int main(int argc, char* argv[])
     bool bVersion = false;
     bool bCheck = false;
     bool bCheckPassed = false;
+    bool bCornerCases = false;
     if (argc>=2) {
         std::string Arg(argv[1]);
         utils_str::string_replace(Arg, "--", "-");
@@ -299,6 +300,7 @@ int main(int argc, char* argv[])
         else if (Arg=="-thread_tmp" || Arg=="-threads_tmp" || Arg=="-Threads_tmp" || Arg=="-t_tmp" || Arg=="-CPU_tmp" || Arg=="-cpu_tmp") bThreadTmp = true;
         else if (Arg=="-v" || Arg=="-ver" || Arg=="-version" || Arg=="-V" || Arg=="-Ver" || Arg=="-Version" ) bVersion = true;
         else if (Arg=="-c" || Arg=="-ch" || Arg=="-check" || Arg=="-Check" || Arg=="-C" || Arg=="-Ch" || Arg=="-Chk" || Arg=="-chk") bCheck = true;
+        else if (Arg=="-cornercases" || Arg=="-corner-cases" || Arg=="-Corner" || Arg=="-corner" || Arg=="-Cornercases" || Arg=="-Corner-cases") bCornerCases = true;
         else bHelp = true;
     }
 
@@ -316,14 +318,15 @@ int main(int argc, char* argv[])
         bool bRunAsUsusal = true;
         #else
         bool bRunAsUsusal = false;
-        bCheck = true;
+        // bCheck = true;
         #endif
 
         // *********************************************************************************************************************
         //override default settings      
         // bRunAsUsusal = false;
         // bRunAsUsusal = true;
-        bCheck = true;
+        // bCheck = true;
+        bCornerCases = true;
 
         if (bThread || bThreadTmp) {
             ConfigThread(argc, argv, bThread);
@@ -342,6 +345,11 @@ int main(int argc, char* argv[])
         } else if (bVersion) {    
             Log::out() << "See the version info in the right panel and press Enter to exit. \n\nKind regards from Prime17\n" ;
             Log::out().getlineLeft();
+
+        } else if (bCornerCases) {
+            Log::out() << "Running corner-cases checks.\n";
+            RunCornerCases();
+
         } else {
             Log::out() << "Usual run has been passed. Apparently something is being tested.\n";
 

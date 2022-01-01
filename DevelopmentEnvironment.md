@@ -18,6 +18,9 @@ Compiler
 - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 50
 - sudo update-alternatives --config g++ 
 
+Linter
+- specify extra param in settings of a plugin: clang-tidy -extra-arg=-std=c++17
+
 Building, Compiling
 - just cd to Src dir and run make (no config, no install in make)
 - Linking: -lgmp -lstdc++fs -lpthread -lcurl -ljsoncpp

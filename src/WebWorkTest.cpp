@@ -11,7 +11,6 @@ using namespace std::chrono;
 void WebBitStatistics(WorkerStruct &w){
 
     WebWork WW;
-    // todo break ??
     
     while(w.ThreadsPct()>0) {
         Log::out().init();
@@ -24,7 +23,7 @@ bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatisti
     bool res;
     // #if NDEBUG
 
-    if ( NewWork.c_power2==50 && NewWork.new_begin == 562948879679488 && NewWork.new_end == 562951027163136 ) {        
+    if ( NewWork.c_power2==50 && NewWork.newBegin_ == 562948879679488 && NewWork.newEnd_ == 562951027163136 ) {        
         res = (    
             BSMT.CntPrimesWithNumOfSetBits(0)==    0 &&
             BSMT.CntPrimesWithNumOfSetBits(1)==    0 &&
@@ -93,7 +92,7 @@ bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatisti
             BSMT.CntPrimesWithNumOfSetBits(64)==    0
             );
     }
-    else if ( NewWork.c_power2==63 && NewWork.new_begin == 4611686017353646080 && NewWork.new_end == 4611686019501129728 ) {
+    else if ( NewWork.c_power2==63 && NewWork.newBegin_ == 4611686017353646080 && NewWork.newEnd_ == 4611686019501129728 ) {
         res = (    
             BSMT.CntPrimesWithNumOfSetBits(0)==    0 &&
             BSMT.CntPrimesWithNumOfSetBits(1)==    0 &&
@@ -192,8 +191,8 @@ GeneratorFunctionBitStatistics<T> RunOld(clsNewWork<T> NewWork){
     // Sieve.Threads(12);
 
     Sieve.ResetClock();
-    Sieve.WorkMT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
-    // Sieve.WorkMT( NewWork.new_begin,  NewWork.new_end, BSMT);
+    Sieve.WorkMT(NewWork.Offset() + NewWork.newBegin_, NewWork.Offset() + NewWork.newEnd_, BSMT);
+    // Sieve.WorkMT( NewWork.newBegin_,  NewWork.newEnd_, BSMT);
     
     Log::out() << "Duration old [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 10, 1) << "\n";
     return BSMT;
@@ -209,8 +208,8 @@ GeneratorFunctionBitStatistics<T> RunNew(clsNewWork<T> NewWork){
     GeneratorFunctionBitStatistics<T> BSMT(NewWork.c_power2);
     Sieve.ResetClock();
     BSMT.ResetClock(); //???
-    Sieve.Work2MT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
-    // Sieve.Work2MT( NewWork.new_begin,  NewWork.new_end, BSMT);
+    Sieve.Work2MT(NewWork.Offset() + NewWork.newBegin_, NewWork.Offset() + NewWork.newEnd_, BSMT);
+    // Sieve.Work2MT( NewWork.newBegin_,  NewWork.newEnd_, BSMT);
     
     Log::out() << "Duration new [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 1, 1) << "\n";
     return BSMT;
@@ -234,15 +233,15 @@ bool RunCheckComputationNew(){
     clsNewWork<T> NewWork;    
     NewWork.c_power2 = 63;
     // NewWork.c_power2 = 50;    
-    NewWork.new_begin = static_cast<unsigned long long>(1) << (NewWork.c_power2-1) ;
-    // NewWork.new_end =   NewWork.new_begin ;
-    NewWork.new_end   = NewWork.new_begin + C_CheckLength;
-    NewWork.new_begin = NewWork.new_begin - C_CheckLength;
+    NewWork.newBegin_ = static_cast<unsigned long long>(1) << (NewWork.c_power2-1) ;
+    // NewWork.newEnd_ =   NewWork.newBegin_ ;
+    NewWork.newEnd_   = NewWork.newBegin_ + C_CheckLength;
+    NewWork.newBegin_ = NewWork.newBegin_ - C_CheckLength;
     
     GeneratorFunctionBitStatistics BSMT = RunNew(NewWork);
 
-    // Sieve.WorkMT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
-    // Sieve.Work2MT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
+    // Sieve.WorkMT(NewWork.Offset() + NewWork.newBegin_, NewWork.Offset() + NewWork.newEnd_, BSMT);
+    // Sieve.Work2MT(NewWork.Offset() + NewWork.newBegin_, NewWork.Offset() + NewWork.newEnd_, BSMT);
 
     long double duration = BSMT.DurationSeconds();
     Log::out() << "Duration [s]: " <<  utils_str::FormatNumber(duration, 10, 1) << " \t~" << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDuration, 4,1)  << "% \n";
@@ -274,12 +273,12 @@ bool RunCheckComputation(){
     return RunCheckComputationNew<uint64_t>();
     // clsNewWork<uint128_t> NewWork;
     // NewWork.c_power2=63;
-    // NewWork.new_begin = NewWork.Offset()-1;
-    // NewWork.new_end = NewWork.Offset()+100000000;
+    // NewWork.newBegin_ = NewWork.Offset()-1;
+    // NewWork.newEnd_ = NewWork.Offset()+100000000;
     
     // NewWork.c_power2=31;
-    // NewWork.new_begin = 20;
-    // NewWork.new_end = 3000000031;
+    // NewWork.newBegin_ = 20;
+    // NewWork.newEnd_ = 3000000031;
     
     // CompareOldNew(NewWork);
     // RunNew(NewWork);  
@@ -287,12 +286,28 @@ bool RunCheckComputation(){
 
 }
 
+bool RunCornerCases(){
+    clsNewWork<uint64_t> NewWork;
+    
+    // // test the position of a primorial start, similar to 0
+    // // check FullyCompleted == 0
+    NewWork.c_power2 = 0;
+    NewWork.newBegin_ = 9699690 - NewWork.Offset();
+    NewWork.newEnd_ = NewWork.newBegin_ + 0;
 
-// ToDo odstinit sito od mereni, pocitat v cyklu ??
-// generovat nahodne ulohy a porovnavat casy a vysledky
-// test sita od 0 do 2
-// test sita u 2 na 64
-// test 128 pres 2 na 64 a u konce - new work template
-// print ext progress - vypocet casu dl zpracovane casti vlaknem
-// nacitani threads a prdcasny exit nekterych vlaken, co hodnota 0?
-// lepsi vypocet switch pointu simulaci obdelnika a koef 23
+    NewWork.c_power2 = 0;
+    NewWork.newBegin_ = 9699690 + 10 - NewWork.Offset();
+    NewWork.newEnd_ = NewWork.newBegin_ + 1000000000;
+
+
+
+    // NewWork.c_power2=0;
+    // NewWork.newBegin_ = 9699690 - 1 - NewWork.Offset();
+    // NewWork.newEnd_ = NewWork.newBegin_ + 1;
+
+
+    CompareOldNew(NewWork);
+    // RunNew(NewWork);  
+    return true; //???
+
+}

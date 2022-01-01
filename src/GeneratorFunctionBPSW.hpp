@@ -8,7 +8,7 @@
 template <class T>
 class GeneratorFunctionBPSW : public GeneratorFunction<GeneratorFunctionBPSW<T>, T> {
     private:
-    PrimeTest _t;
+    PrimeTest t_;
 
     public:
     GeneratorFunctionBPSW() noexcept;
@@ -22,21 +22,21 @@ class GeneratorFunctionBPSW : public GeneratorFunction<GeneratorFunctionBPSW<T>,
 
 
 template <class T>
-GeneratorFunctionBPSW<T>::GeneratorFunctionBPSW() noexcept:_t(65) {}
+GeneratorFunctionBPSW<T>::GeneratorFunctionBPSW() noexcept: t_(65) {}
 
 template <class T>
-GeneratorFunctionBPSW<T>::GeneratorFunctionBPSW(const GeneratorFunctionBPSW<T> & O __attribute__((unused))) noexcept: _t(65) {}
+GeneratorFunctionBPSW<T>::GeneratorFunctionBPSW(const GeneratorFunctionBPSW<T> & O __attribute__((unused))) noexcept: t_(65) {}
     
 
 template <class T>
 int GeneratorFunctionBPSW<T>::GenFunct(const T & X __attribute__((unused)), const mpz_t & mpz_X) {
     // if (mpz_bpsw_prp(const_cast<mpz_t&>(mpz_X))) {
-    //     _PrimesCnt++;
+    //     PrimesCnt_++;
     // }
     
-    if(_t.IsPrimeBPSW(mpz_X)) {
-        // it seems that in first phase of template compiling _PrimeCnt is a dependant name and so qualifier is required
-        GeneratorFunctionAbstract<T>::_PrimesCnt++;
+    if( t_.IsPrimeBPSW(mpz_X)) {
+        // it seems that in first phase of template compiling PrimeCnt_ is a dependant name and so qualifier is required
+        GeneratorFunctionAbstract<T>::PrimesCnt_++;
     }                  
     return 0;
 } 

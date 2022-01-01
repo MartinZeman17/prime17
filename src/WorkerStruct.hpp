@@ -17,7 +17,7 @@
    
 class WorkerStruct{
     private:
-    int _ThreadsPct;
+    int ThreadsPct_;
 
     public:
     std::string worker_id;
@@ -27,17 +27,17 @@ class WorkerStruct{
     std::string w_registered;
     std::string u_registered;
 
-    // const int &ThreadsPct = _ThreadsPct;
+    // const int &ThreadsPct = ThreadsPct_;
     
-    const int& ThreadsPct() const { return _ThreadsPct; } 
+    const int& ThreadsPct() const { return ThreadsPct_; } 
 
     void ThreadsPct(const int& in) {
         if (in<=0) {
-            _ThreadsPct=0;
+            ThreadsPct_=0;
         } else if (in>100) {
-            _ThreadsPct=100;
+            ThreadsPct_=100;
         } else {
-            _ThreadsPct = in; 
+            ThreadsPct_ = in; 
         }
     } 
 

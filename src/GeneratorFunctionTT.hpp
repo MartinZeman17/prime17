@@ -20,7 +20,7 @@ using std::cout;
 template <class T>
 class GeneratorFunctionTT : public GeneratorFunction<GeneratorFunctionTT<T>, T> {
     private:
-    PrimeTest _t;
+    PrimeTest t_;
 
     protected:    
 
@@ -34,12 +34,12 @@ class GeneratorFunctionTT : public GeneratorFunction<GeneratorFunctionTT<T>, T> 
 
 
 template <class T>
-GeneratorFunctionTT<T>::GeneratorFunctionTT() noexcept:_t(65, false, false) {}
+GeneratorFunctionTT<T>::GeneratorFunctionTT() noexcept: t_(65, false, false) {}
 
-// copy constructor which does not copy mutex nor _t, 
+// copy constructor which does not copy mutex nor t_, 
 // new mutex will be created using default constructor, prime test does not have default constructor
 template <class T>
-GeneratorFunctionTT<T>::GeneratorFunctionTT(const GeneratorFunctionTT<T> & O __attribute__((unused))) noexcept:_t(65, false, false) {
+GeneratorFunctionTT<T>::GeneratorFunctionTT(const GeneratorFunctionTT<T> & O __attribute__((unused))) noexcept: t_(65, false, false) {
 }
 
 template <class T>
@@ -47,21 +47,21 @@ int GeneratorFunctionTT<T>::GenFunct(const T & X __attribute__((unused)), const 
     // change constructor and copy constructor to load precomputed primes
     // if (_t.IsPrimeDivByPrime(X)) {
     //     {
-    //         const std::lock_guard<std::mutex> lock(_Cnt_mutex);
-    //         _PrimesCnt++;
+    //         const std::lock_guard<std::mutex> lock(Cntmutex__);
+    //         PrimesCnt_++;
     //     }
     // }
 
 //     if(_t.iMillerRabinBase2(mpz_X)) {
 //         {
-//   //          const std::lock_guard<std::mutex> lock(_Cnt_mutex);
-//             _PrimesCnt++;
+//   //          const std::lock_guard<std::mutex> lock(Cntmutex__);
+//             PrimesCnt_++;
 //         }
 //     }
 
 
-    if(_t.IsPrimeBPSW(mpz_X)) {
-        GeneratorFunctionAbstract<T>::_PrimesCnt++;
+    if( t_.IsPrimeBPSW(mpz_X)) {
+        GeneratorFunctionAbstract<T>::PrimesCnt_++;
     }                  
     return 0;
 }

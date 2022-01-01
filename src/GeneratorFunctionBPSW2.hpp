@@ -26,7 +26,7 @@ template <class T>
 int GeneratorFunctionBPSW2<T>::GenFunct(const T & X __attribute__((unused)), const mpz_t & mpz_X) {
     
     if (mpz_bpsw_prp(const_cast<mpz_t&>(mpz_X))) {
-        GeneratorFunctionAbstract<T>::_PrimesCnt++;
+        GeneratorFunctionAbstract<T>::PrimesCnt_++;
     }
 
     return 0;

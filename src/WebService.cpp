@@ -38,7 +38,7 @@ std::string WebService::WebPost(const char url[], std::string &PostString){
 
             // curl_easy_setopt(curl, CURsLOPT_VERBOSE, 1L);
 
-            if (_SpecialCommunication==HTTP_SpecialCommunication::UseNativeCA) {
+            if (SpecialCommunication_==HTTPSpecialCommunication_::UseNativeCA) {
                 #ifdef __MINGW64__
                 // curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
                 // https://blog.usejournal.com/how-to-manually-update-curl-on-ubuntu-server-899476062ad6
@@ -46,10 +46,10 @@ std::string WebService::WebPost(const char url[], std::string &PostString){
                 // Added in 7.71.0)
                 #endif
             }
-            else if (_SpecialCommunication==HTTP_SpecialCommunication::UseLocalCertificate) {
+            else if (SpecialCommunication_==HTTPSpecialCommunication_::UseLocalCertificate) {
                 curl_easy_setopt(curl, CURLOPT_CAINFO, "ca-bundle.trust.crt");
             }
-            else if (_SpecialCommunication==HTTP_SpecialCommunication::TurnOffSSL) {
+            else if (SpecialCommunication_==HTTPSpecialCommunication_::TurnOffSSL) {
                 curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0); //FALSE
             }
             // https://curl.se/docs/sslcerts.html
@@ -74,7 +74,7 @@ std::string WebService::WebPost(const char url[], std::string &PostString){
                 readBuffer = "";
                 unsigned long long Sleep=0;
                 
-                if (res != CURLE_SSL_CACERT_BADFILE || _SpecialCommunication==HTTP_SpecialCommunication::TurnOffSSL) {
+                if (res != CURLE_SSL_CACERT_BADFILE || SpecialCommunication_==HTTPSpecialCommunication_::TurnOffSSL) {
                     Log::out() << "libcurl: " << res << ": " << errbuf << "\n";            
                     Log::out() << C_NoInternet << "\n";
                     Sleep = 5000;
@@ -94,51 +94,51 @@ std::string WebService::WebPost(const char url[], std::string &PostString){
 
 WebService::WebService(){
     do {
-        _Initialized=false;
+        Initialized_=false;
         const char url[] = "https://prime17.000webhostapp.com/index.html";
         // const char url[] = "http://104.18.108.8/index.html";
         std::string NewWorkPostString ("");
 
-        _SpecialCommunication = HTTP_SpecialCommunication::NoSpecialSettings;
+        SpecialCommunication_ = HTTPSpecialCommunication_::NoSpecialSettings;
         std::string WebInput = WebPost(url, NewWorkPostString);
         if (!WebInput.empty()) {
-            _Initialized=true;
+            Initialized_=true;
             return;
         }
 
-        _SpecialCommunication = HTTP_SpecialCommunication::UseNativeCA;
+        SpecialCommunication_ = HTTPSpecialCommunication_::UseNativeCA;
         WebInput = WebPost(url, NewWorkPostString);
         if (!WebInput.empty()) {
             Log::out().logRight("libcurl using the operating system's native CA store for certificate verification. Works only on Windows when built to use OpenSSL.\nThis option is experimental and behavior is subject to change.\n");
-            _Initialized=true;
+            Initialized_=true;
             return;
         }
         
-        _SpecialCommunication = HTTP_SpecialCommunication::UseLocalCertificate;
+        SpecialCommunication_ = HTTPSpecialCommunication_::UseLocalCertificate;
         WebInput = WebPost(url, NewWorkPostString);
         if (!WebInput.empty()) {
             Log::out().logRight("libcurl using local certificate\n");
-            _Initialized=true;
+            Initialized_=true;
             return;
         }
 
-        _SpecialCommunication = HTTP_SpecialCommunication::TurnOffSSL;
+        SpecialCommunication_ = HTTPSpecialCommunication_::TurnOffSSL;
         WebInput = WebPost(url, NewWorkPostString);
         if (!WebInput.empty()) {
             Log::out().logRight("No certificate available. I feel depply sorry for turnig off SSL...\n");
-            _Initialized=true;
+            Initialized_=true;
             return;
         }
-        _SpecialCommunication = HTTP_SpecialCommunication::Failure;
+        SpecialCommunication_ = HTTPSpecialCommunication_::Failure;
         Log::out() << C_NoInternet << "\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-    } while (_SpecialCommunication == HTTP_SpecialCommunication::Failure);
+    } while (SpecialCommunication_ == HTTPSpecialCommunication_::Failure);
 }
 
 
 std::string WebService::HTMLFindOutput(std::string &HTMLPage){
-    constexpr std::string_view strB ("OUTPUT_BEGIN");
-    constexpr std::string_view strE ("OUTPUT_END");  //ToDo const strings in cpp20
+    constexpr std::string_view strB ("OUTPUTBegin_");
+    constexpr std::string_view strE ("OUTPUTEnd_");  //ToDo const strings in cpp20
 
     std::size_t foundB = HTMLPage.find(strB);
     if (foundB==std::string::npos) return "";

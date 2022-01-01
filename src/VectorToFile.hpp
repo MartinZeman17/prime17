@@ -7,13 +7,13 @@
 #include <fstream>
 
 
-template <typename T> void VectorToFile(const std::vector<T> &Vec, std::ofstream & _myfile) { 
+template <typename T> void VectorToFile(const std::vector<T> &Vec, std::ofstream & myfile_) { 
     for (auto i : Vec){
         std::cout << " " << i;
-        _myfile << " " << i;
+        myfile_ << " " << i;
     }
     cout << endl;
-    _myfile << endl;
+    myfile_ << endl;
 }
 
 

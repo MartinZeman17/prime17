@@ -303,7 +303,7 @@ PrimesRange::PrimesRange(unsigned long long Begin, unsigned long long End){
             SaveArray32(Begin, End, p_PrimesCount, p_PrimesArray32);
         }        
         p_MinPrime = p_PrimesArray32[0];
-        p_MaxPrime = p_PrimesArray32[p_PrimesCount-1];
+        pMaxPrime_ = p_PrimesArray32[p_PrimesCount-1];
         
     } else {
         if (!p_PrimesArray64){
@@ -311,14 +311,14 @@ PrimesRange::PrimesRange(unsigned long long Begin, unsigned long long End){
             SaveArray64(Begin, End, p_PrimesCount, p_PrimesArray64);
         }
         p_MinPrime = p_PrimesArray64[0];
-        p_MaxPrime = p_PrimesArray64[p_PrimesCount-1];
+        pMaxPrime_ = p_PrimesArray64[p_PrimesCount-1];
     }
 
     // fill rest of the class variables
-    p_Begin = Begin;
-    p_End = End;
+    pBegin_ = Begin;
+    pEnd_ = End;
 
-    cout << "Primes ready: " << p_MinPrime  << " ... " <<  p_MaxPrime << endl;
+    cout << "Primes ready: " << p_MinPrime  << " ... " <<  pMaxPrime_ << endl;
     cout << "Begin: " << Begin << endl; 
     cout << "End: " << End << endl; 
     cout << "Count: " << p_PrimesCount << endl; 

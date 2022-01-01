@@ -10,7 +10,7 @@ class GeneratorFunctionLS_DHistogram : public GeneratorFunction<GeneratorFunctio
     private:
 
     public:
-    PrimeTest _t;
+    PrimeTest t_;
     GeneratorFunctionLS_DHistogram() noexcept;
     GeneratorFunctionLS_DHistogram(const GeneratorFunctionLS_DHistogram<T> & O) noexcept;
     
@@ -21,16 +21,16 @@ class GeneratorFunctionLS_DHistogram : public GeneratorFunction<GeneratorFunctio
 
 
 template <class T>
-GeneratorFunctionLS_DHistogram<T>::GeneratorFunctionLS_DHistogram() noexcept: _t(65) {}
+GeneratorFunctionLS_DHistogram<T>::GeneratorFunctionLS_DHistogram() noexcept: t_(65) {}
 
 template <class T>
-GeneratorFunctionLS_DHistogram<T>::GeneratorFunctionLS_DHistogram(const GeneratorFunctionLS_DHistogram<T> & O __attribute__((unused))) noexcept: _t(65) {}
+GeneratorFunctionLS_DHistogram<T>::GeneratorFunctionLS_DHistogram(const GeneratorFunctionLS_DHistogram<T> & O __attribute__((unused))) noexcept: t_(65) {}
 
 template <class T>
 int GeneratorFunctionLS_DHistogram<T>::GenFunct(const T & X __attribute__((unused)), const mpz_t & mpz_X) {
     
 
-    _t.iLucasSelfridge_DHistogram(mpz_X);
+    t_.iLucasSelfridge_DHistogram(mpz_X);
     return 0;
 }
 

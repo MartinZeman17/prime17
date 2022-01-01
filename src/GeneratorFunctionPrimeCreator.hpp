@@ -10,8 +10,8 @@
 template <class T>
 class GeneratorFunctionPrimeCreator : public GeneratorFunction<GeneratorFunctionPrimeCreator<T>, T> {
     private:
-    PrimeTest _t;
-    unsigned long long _NumberOfPrimesToCreate;
+    PrimeTest t_;
+    unsigned long long NumberOfPrimesToCreate_;
 
     public:
     GeneratorFunctionPrimeCreator(size_t NumberOfPrimes);
@@ -28,19 +28,19 @@ class GeneratorFunctionPrimeCreator : public GeneratorFunction<GeneratorFunction
 
 
 template <class T>
-GeneratorFunctionPrimeCreator<T>::GeneratorFunctionPrimeCreator(size_t NumberOfPrimes) :_t(65), _NumberOfPrimesToCreate{NumberOfPrimes} 
+GeneratorFunctionPrimeCreator<T>::GeneratorFunctionPrimeCreator(size_t NumberOfPrimes) : t_(65), NumberOfPrimesToCreate_{NumberOfPrimes} 
 {   
-    CreatedPrimes.reserve(_NumberOfPrimesToCreate);
+    CreatedPrimes.reserve(NumberOfPrimesToCreate_);
 }
 
 
 template <class T>
 int GeneratorFunctionPrimeCreator<T>::GenFunct(const T & X, const mpz_t & mpz_X) {
     
-    if(_t.IsPrimeBPSW(mpz_X)) {
-        GeneratorFunctionAbstract<T>::_PrimesCnt++;
+    if( t_.IsPrimeBPSW(mpz_X)) {
+        GeneratorFunctionAbstract<T>::PrimesCnt_++;
         CreatedPrimes.push_back(X);
-        if (GeneratorFunctionAbstract<T>::_PrimesCnt == _NumberOfPrimesToCreate) return 1;
+        if (GeneratorFunctionAbstract<T>::PrimesCnt_ == NumberOfPrimesToCreate_) return 1;
     }                  
     return 0;
 }

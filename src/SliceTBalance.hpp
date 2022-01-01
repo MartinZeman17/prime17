@@ -11,23 +11,23 @@ using std::vector;
 class SliceTBalance {
     private:
      
-    vector<long double> _dCentreOfMass;
-    vector<long double> _dCentreOfMassP;
+    vector<long double> dCentreOfMass_;
+    vector<long double> dCentreOfMassP_;
     
-    vector<long double> _dAvg;
-    vector<long double> _dAvgP;
+    vector<long double> dAvg_;
+    vector<long double> dAvgP_;
 
-    vector<unsigned long long> _lCnt;
-    vector<unsigned long long> _lCntPrimes;
+    vector<unsigned long long> lCnt_;
+    vector<unsigned long long> lCntPrimes_;
 
     const unsigned int C_HistBits = 6;
     const unsigned int C_HistItems= static_cast<uint32_t>(1) << C_HistBits;
   
-    vector<vector<long double>> _HistP;
-    vector<vector<unsigned long long>> _HistCnt;
+    vector<vector<long double>> HistP_;
+    vector<vector<unsigned long long>> HistCnt_;
 
 
-    std::ofstream _myfile;
+    std::ofstream myfile_;
 
     // template <typename T> void VectorToFile(const vector<T> &Vec);
     // void VectorToFile(const std::vector<long double> &Vec);

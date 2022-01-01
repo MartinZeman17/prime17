@@ -8,7 +8,7 @@
 template <class T>
 class GeneratorFunctionLS_D : public GeneratorFunction<GeneratorFunctionLS_D<T>, T> {
     private:
-    PrimeTest _t;
+    PrimeTest t_;
 
     public:
     GeneratorFunctionLS_D() noexcept;
@@ -20,17 +20,17 @@ class GeneratorFunctionLS_D : public GeneratorFunction<GeneratorFunctionLS_D<T>,
 
 
 template <class T>
-GeneratorFunctionLS_D<T>::GeneratorFunctionLS_D() noexcept: _t(65) {}
+GeneratorFunctionLS_D<T>::GeneratorFunctionLS_D() noexcept: t_(65) {}
 
 template <class T>
-GeneratorFunctionLS_D<T>::GeneratorFunctionLS_D(const GeneratorFunctionLS_D<T> & O __attribute__((unused))) noexcept: _t(65) {}
+GeneratorFunctionLS_D<T>::GeneratorFunctionLS_D(const GeneratorFunctionLS_D<T> & O __attribute__((unused))) noexcept: t_(65) {}
 
 template <class T>
 int GeneratorFunctionLS_D<T>::GenFunct(const T & X __attribute__((unused)), const mpz_t & mpz_X) {
     
 
-    if(_t.iLucasSelfridge_D(mpz_X)) {
-        GeneratorFunctionAbstract<T>::_PrimesCnt++;
+    if( t_.iLucasSelfridge_D(mpz_X)) {
+        GeneratorFunctionAbstract<T>::PrimesCnt_++;
     }                  
     return 0;
 }

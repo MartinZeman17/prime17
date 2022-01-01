@@ -19,10 +19,10 @@ using std::cout;
 template <typename T>
 class GeneratorFunctionAbstract{
     protected:
-    unsigned long long _PrimesCnt = 0;
-    unsigned long long _ProbablePrimesCnt = 0;
+    unsigned long long PrimesCnt_ = 0;
+    unsigned long long ProbablePrimesCnt_ = 0;
 
-    std::chrono::time_point<std::chrono::high_resolution_clock> _BeginTime; //  = std::high_resolution_clock::now(); 
+    std::chrono::time_point<std::chrono::high_resolution_clock> BeginTime_; //  = std::high_resolution_clock::now(); 
 
 
     public:
@@ -66,54 +66,54 @@ protected:
 
 template <class T>
 void GeneratorFunctionAbstract<T>::ResetClock() noexcept {
-    _BeginTime = high_resolution_clock::now();
+    BeginTime_ = high_resolution_clock::now();
 }
 
 template <class T>
-GeneratorFunctionAbstract<T>::GeneratorFunctionAbstract() noexcept:  _PrimesCnt{0}, _ProbablePrimesCnt{0}  {
+GeneratorFunctionAbstract<T>::GeneratorFunctionAbstract() noexcept:  PrimesCnt_{0}, ProbablePrimesCnt_{0}  {
     ResetClock();
 }
 
 template <class T>
 GeneratorFunctionAbstract<T>& GeneratorFunctionAbstract<T>::operator+=(const GeneratorFunctionAbstract& rhs) noexcept {
-    _PrimesCnt += rhs._PrimesCnt;
-    _ProbablePrimesCnt += rhs._ProbablePrimesCnt;   
+    PrimesCnt_ += rhs.PrimesCnt_;
+    ProbablePrimesCnt_ += rhs.ProbablePrimesCnt_;   
     return *this;
 }
 
 // GeneratorFunction GeneratorFunction::operator+(const GeneratorFunction& rhs) {
 //     GeneratorFunction result;
-//     result._PrimesCnt = _PrimesCnt + rhs._PrimesCnt;
-//     result._ProbablePrimesCnt = _ProbablePrimesCnt + rhs._ProbablePrimesCnt;
+//     result.PrimesCnt_ = PrimesCnt_ + rhs.PrimesCnt_;
+//     result.ProbablePrimesCnt_ = ProbablePrimesCnt_ + rhs.ProbablePrimesCnt_;
 //     return result;
 // }
 
 template <class T>
 long double GeneratorFunctionAbstract<T>::DurationMinutes() const noexcept {
-    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     return duration.count() / (1000.0l * 60.0l);
 }
 
 template <class T>
 long double GeneratorFunctionAbstract<T>::DurationSeconds() const noexcept {
-    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     return duration.count() / (1000.0l);
 }
 
 
 template <class T>
 unsigned long long GeneratorFunctionAbstract<T>::ProbablePrimesCnt() const noexcept {
-    return _ProbablePrimesCnt;
+    return ProbablePrimesCnt_;
 }
 
 template <class T>
 unsigned long long GeneratorFunctionAbstract<T>::PrimesCnt() const noexcept {
-    return _PrimesCnt;
+    return PrimesCnt_;
 }
 
 template <class T>
 void GeneratorFunctionAbstract<T>::PrintResult() const noexcept {
-    cout << toName() << " Primes Cnt: " << _PrimesCnt << " Probable Primes Cnt: " << _ProbablePrimesCnt << " Duration minutes: " << DurationMinutes() << endl;
+    cout << toName() << " Primes Cnt: " << PrimesCnt_ << " Probable Primes Cnt: " << ProbablePrimesCnt_ << " Duration minutes: " << DurationMinutes() << endl;
 }
 
 

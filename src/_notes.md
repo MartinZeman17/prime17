@@ -1,3 +1,20 @@
+Tests:
+// ToDo odstinit sito od mereni, pocitat v cyklu ??
+// generovat nahodne ulohy a porovnavat casy a vysledky
+// test sita od 0 do 2
+// test sita u 2 na 64
+// test 128 pres 2 na 64 a u konce - new work template
+// print ext progress - vypocet casu dl zpracovane casti vlaknem
+// nacitani threads a prdcasny exit nekterych vlaken, co hodnota 0?
+// lepsi vypocet switch pointu dle aktuální velocity???
+corner case checker 0,0 1,1, 2,2 3,3 0,19, 0, 21, primorial, u 64 na sieve 128
+- test na sieve u konce hranice 2 na 128  a testy overflow
+- test n sieve delky 2
+- test na sieve, kde je end = (k * primorial) -1
+begin > end
+attribut processed ok na delku, overflow?, 
+prejmenovat to process
+performance clang
 
 ToDo Gmp:
 - vlastní překlad gmp s bechmarkem 
@@ -16,9 +33,6 @@ ToDo Cpp:
 - projit ??? a overflow
 - dev param do make
 - optimalizovane testy BPSW ??
-- test na sieve u konce hranice 2 na 128  a testy overflow
-- test n sieve delky 2
-- test na sieve, kde je end = (k * primorial) -1
 - Todo: nefunční web prime17 při startu spadne do registrace. Testy, zda funguje prime17 web a zda je config file naplnený
 - co je nejrychlesji test na oblast 48-52
 - doplnit asseert
@@ -37,7 +51,7 @@ ToDo Cpp:
 - ncurses resize 0 bug - also in Midnight Commander in WSL
 - ncurses - resize cause reading an input key
 - sanitizer screams various ugly errors when resizing via handle_winch is set 
-- sanitizer options must be set in a enviroment variable: LSAN_OPTION=verbosity=1:log_threads=1
+- sanitizer options must be set in a enviroment variable: LSAN_OPTION=verbosity=1:logThreads_=1
 
 
 ToDo Web:

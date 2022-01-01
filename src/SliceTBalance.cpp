@@ -37,41 +37,41 @@ namespace {
 
 
 SliceTBalance::SliceTBalance(){
-    _myfile.open("SliceTBalance.txt");
-    _myfile << "N" << " " << "j" << " " << "CentreOfMassP" << " " << "CentreOfMass" << " " <<  "AvgP" << " " << "Avg";
-    _myfile << " " << "Primes" << " " << "PrimesP"; 
+    myfile_.open("SliceTBalance.txt");
+    myfile_ << "N" << " " << "j" << " " << "CentreOfMassP" << " " << "CentreOfMass" << " " <<  "AvgP" << " " << "Avg";
+    myfile_ << " " << "Primes" << " " << "PrimesP"; 
 
     for (unsigned int j=0; j<C_HistItems; j++){
-        _myfile << " " << "HP" << (signed int) j -  (signed int) (C_HistItems/2);
+        myfile_ << " " << "HP" << (signed int) j -  (signed int) (C_HistItems/2);
     }
-    _myfile << endl; 
-    _myfile.flush();
+    myfile_ << endl; 
+    myfile_.flush();
 }
 
 SliceTBalance::~SliceTBalance(){
-    _myfile.close();
+    myfile_.close();
 }
 
 // N = 2 => interval = <4,5,6,7>, only two lower bits (0 and 1) are required to be checked  
 void SliceTBalance::CompInterval(const unsigned int N){
-    _dAvg.assign(N+1, 0.0);
-    _dAvgP.assign(N+1, 0.0);
+    dAvg_.assign(N+1, 0.0);
+    dAvgP_.assign(N+1, 0.0);
 
-    _dCentreOfMass.assign(N+1, 0.0);
-    _dCentreOfMassP.assign(N+1, 0.0);
-    _lCnt.assign(N+1, 0.0);
+    dCentreOfMass_.assign(N+1, 0.0);
+    dCentreOfMassP_.assign(N+1, 0.0);
+    lCnt_.assign(N+1, 0.0);
     
     // initialize histogram matrix with 0
 
     // free old arrays
-    _HistCnt = vector<vector<unsigned long long>>();   
-    _HistP = vector<vector<long double>>();
+    HistCnt_ = vector<vector<unsigned long long>>();   
+    HistP_ = vector<vector<long double>>();
     for(unsigned int i=0; i<=N; i++) {
-        _HistP.push_back({});
-        _HistCnt.push_back({});
+        HistP_.push_back({});
+        HistCnt_.push_back({});
         for(unsigned int j=0; j<C_HistItems; j++) {
-            _HistP[i].push_back(0.0);
-            _HistCnt[i].push_back(0);
+            HistP_[i].push_back(0.0);
+            HistCnt_[i].push_back(0);
         }
     }
 
@@ -91,36 +91,36 @@ void SliceTBalance::CompInterval(const unsigned int N){
     for(unsigned long long i=0; i<B; ){
         i++; //move to odd number
         unsigned int iSlice = Bits(i, N); //0..N
-        _lCnt[iSlice]++;
+        lCnt_[iSlice]++;
         
         signed long long diff = (signed long long) i - (signed long long) Half;
-        _dAvg[iSlice] +=  (long double) i;
-        _dAvgP[iSlice] +=  (long double) i / MaxLength;
+        dAvg_[iSlice] +=  (long double) i;
+        dAvgP_[iSlice] +=  (long double) i / MaxLength;
         
-        _dCentreOfMass[iSlice] += (long double) diff;
-        _dCentreOfMassP[iSlice] += diff / MaxLength;
+        dCentreOfMass_[iSlice] += (long double) diff;
+        dCentreOfMassP_[iSlice] += diff / MaxLength;
 
         unsigned long long iHist = i >> RShifts;
-        _HistCnt[iSlice][iHist]++;        
+        HistCnt_[iSlice][iHist]++;        
 
         i++; // skip even numbers
     }
 
     // divide by counts
     for (unsigned int i = 1; i<=N; i++){
-        _dCentreOfMass[i]/=_lCnt[i];
-        _dCentreOfMassP[i]/=_lCnt[i];
-        _dAvg[i]/=_lCnt[i];
-        _dAvgP[i]/=_lCnt[i];
+        dCentreOfMass_[i]/=lCnt_[i];
+        dCentreOfMassP_[i]/=lCnt_[i];
+        dAvg_[i]/=lCnt_[i];
+        dAvgP_[i]/=lCnt_[i];
 
         for (unsigned int j=0; j<C_HistItems; j++){
-            _HistP[i][j]= (long double) (100.0 * (long double)_HistCnt[i][j]) / (long double)_lCnt[i];
-            std::cout << _HistCnt[i][j] << " " ;
+            HistP_[i][j]= (long double) (100.0 * (long double)HistCnt_[i][j]) / (long double)lCnt_[i];
+            std::cout << HistCnt_[i][j] << " " ;
         }
         std::cout << "              ";
 
         for (unsigned int j=0; j<C_HistItems; j++){
-            std::cout << _HistP[i][j] << " " ;
+            std::cout << HistP_[i][j] << " " ;
         }
         std::cout << endl;
 
@@ -128,20 +128,20 @@ void SliceTBalance::CompInterval(const unsigned int N){
 
     for (unsigned int i = 0; i<=N; i++){
         // std::cout << i << endl;
-        std::cout << N << " " << i << " " <<_dCentreOfMassP[i] << " " << _dCentreOfMass[i] << " " <<  _dAvgP[i] << " " << _dAvg[i] ;
-        _myfile << N << " " << i << " " <<_dCentreOfMassP[i] << " " << _dCentreOfMass[i] << " " <<  _dAvgP[i] << " " << _dAvg[i] ;
+        std::cout << N << " " << i << " " <<dCentreOfMassP_[i] << " " << dCentreOfMass_[i] << " " <<  dAvgP_[i] << " " << dAvg_[i] ;
+        myfile_ << N << " " << i << " " <<dCentreOfMassP_[i] << " " << dCentreOfMass_[i] << " " <<  dAvgP_[i] << " " << dAvg_[i] ;
 
         for (unsigned int j=0; j<C_HistItems; j++){
-            _myfile << " " << _HistP[i][j];
+            myfile_ << " " << HistP_[i][j];
         }
         std::cout << endl;
-        _myfile << endl;
+        myfile_ << endl;
 
     }
-    _myfile.flush();
+    myfile_.flush();
 
-    // VectorToFile(_dCentreOfMassP);
-    // _myfile << endl;
+    // VectorToFile(dCentreOfMassP_);
+    // myfile_ << endl;
     // std::cout << endl;
 
 }
@@ -157,24 +157,24 @@ void SliceTBalance::CompIntervalJoin(const unsigned int N, const bool  bJoin) {
     mpz_t X;
     mpz_init2(X, 64);
 
-    _dAvg.assign(N+1, 0.0);
-    _dAvgP.assign(N+1, 0.0);
+    dAvg_.assign(N+1, 0.0);
+    dAvgP_.assign(N+1, 0.0);
 
-    _dCentreOfMass.assign(N+1, 0.0);
-    _dCentreOfMassP.assign(N+1, 0.0);
+    dCentreOfMass_.assign(N+1, 0.0);
+    dCentreOfMassP_.assign(N+1, 0.0);
    
-    _lCntPrimes.assign(N+1,0);
-    _lCnt.assign(N+1, 0.0);
+    lCntPrimes_.assign(N+1,0);
+    lCnt_.assign(N+1, 0.0);
     
     // initialize histogram matrix with 0
-    _HistCnt = vector<vector<unsigned long long>>();   
-    _HistP = vector<vector<long double>>();
+    HistCnt_ = vector<vector<unsigned long long>>();   
+    HistP_ = vector<vector<long double>>();
     for(unsigned int i=0; i<=N; i++) {
-        _HistP.push_back({});
-        _HistCnt.push_back({});
+        HistP_.push_back({});
+        HistCnt_.push_back({});
         for(unsigned int j=0; j<C_HistItems; j++) {
-            _HistP[i].push_back(0.0);
-            _HistCnt[i].push_back(0);
+            HistP_[i].push_back(0.0);
+            HistCnt_[i].push_back(0);
         }
     }
 
@@ -221,7 +221,7 @@ void SliceTBalance::CompIntervalJoin(const unsigned int N, const bool  bJoin) {
                 iSlice = N-iSlice+1;
             }
         }
-        _lCnt[iSlice]++;
+        lCnt_[iSlice]++;
 
         // TTN,i=TN,i + TN,N-i+1 pro i=1..N
         // T4,1={17}
@@ -232,45 +232,45 @@ void SliceTBalance::CompIntervalJoin(const unsigned int N, const bool  bJoin) {
         // primality check and if so increase count of primes in a slice        
         utils_mpz::mpz_set_ull(X, B+i);
         if (tests.IsPrimeBPSW(X)){
-            _lCntPrimes[iSlice]++;
+            lCntPrimes_[iSlice]++;
         };
         
         signed long long diff = (signed long long) i - (signed long long) Half;
-        _dAvg[iSlice] +=  (long double) i;
-        _dAvgP[iSlice] +=  (long double) i / MaxLength;
+        dAvg_[iSlice] +=  (long double) i;
+        dAvgP_[iSlice] +=  (long double) i / MaxLength;
         
-        _dCentreOfMass[iSlice] += (long double) diff;
-        _dCentreOfMassP[iSlice] += (long double) diff / (long double) MaxLength;
+        dCentreOfMass_[iSlice] += (long double) diff;
+        dCentreOfMassP_[iSlice] += (long double) diff / (long double) MaxLength;
 
         // compute histogram
         unsigned long long iHist = i >> RShifts;
-        _HistCnt[iSlice][iHist]++;        
+        HistCnt_[iSlice][iHist]++;        
 
         i++; // skip even numbers
     }
 
     // total number of primes in interval as a sum from slices
     unsigned long long PrimesTotal = 0;
-    for (auto i: _lCntPrimes) {
+    for (auto i: lCntPrimes_) {
         PrimesTotal +=i;
     }
 
 
     // divide by counts
     for (unsigned int i = 0; i<=N; i++){
-        _dCentreOfMass[i]/=_lCnt[i];
-        _dCentreOfMassP[i]/=_lCnt[i];
-        _dAvg[i]/=_lCnt[i];
-        _dAvgP[i]/=_lCnt[i];
+        dCentreOfMass_[i]/=lCnt_[i];
+        dCentreOfMassP_[i]/=lCnt_[i];
+        dAvg_[i]/=lCnt_[i];
+        dAvgP_[i]/=lCnt_[i];
         
         for (unsigned int j=0; j<C_HistItems; j++){
-            _HistP[i][j]= (long double) (100.0 * (long double) _HistCnt[i][j]) / (long double)_lCnt[i];
-            std::cout << _HistCnt[i][j] << " " ;
+            HistP_[i][j]= (long double) (100.0 * (long double) HistCnt_[i][j]) / (long double)lCnt_[i];
+            std::cout << HistCnt_[i][j] << " " ;
         }
         std::cout << "              ";
 
         for (unsigned int j=0; j<C_HistItems; j++){
-            std::cout << _HistP[i][j] << " " ;
+            std::cout << HistP_[i][j] << " " ;
         }
         std::cout << endl;
 
@@ -278,25 +278,25 @@ void SliceTBalance::CompIntervalJoin(const unsigned int N, const bool  bJoin) {
 
     for (unsigned int i = 0; i<=N; i++){
         // std::cout << i << endl;
-        std::cout << N << " " << i << " " <<_dCentreOfMassP[i] << " " << _dCentreOfMass[i] << " " <<  _dAvgP[i] << " " << _dAvg[i] ;
-        std::cout << " " << _lCntPrimes[i] << " " << (100.0l) *  (long double) _lCntPrimes[i] / (long double) PrimesTotal; 
+        std::cout << N << " " << i << " " <<dCentreOfMassP_[i] << " " << dCentreOfMass_[i] << " " <<  dAvgP_[i] << " " << dAvg_[i] ;
+        std::cout << " " << lCntPrimes_[i] << " " << (100.0l) *  (long double) lCntPrimes_[i] / (long double) PrimesTotal; 
 
-        _myfile << N << " " << i << " " <<_dCentreOfMassP[i] << " " << _dCentreOfMass[i] << " " <<  _dAvgP[i] << " " << _dAvg[i] ;
-        _myfile << " " << _lCntPrimes[i] << " " << (100.0l) *  (long double) _lCntPrimes[i] / (long double) PrimesTotal; 
+        myfile_ << N << " " << i << " " <<dCentreOfMassP_[i] << " " << dCentreOfMass_[i] << " " <<  dAvgP_[i] << " " << dAvg_[i] ;
+        myfile_ << " " << lCntPrimes_[i] << " " << (100.0l) *  (long double) lCntPrimes_[i] / (long double) PrimesTotal; 
         
         for (unsigned int j=0; j<C_HistItems; j++){
-            _myfile << " " << _HistP[i][j];
+            myfile_ << " " << HistP_[i][j];
         }
         std::cout << endl;
-        _myfile << endl;
+        myfile_ << endl;
 
     }
-    _myfile.flush();
+    myfile_.flush();
 
     mpz_clear(X);
     
-    // VectorToFile(_dCentreOfMassP);
-    // _myfile << endl;
+    // VectorToFile(dCentreOfMassP_);
+    // myfile_ << endl;
     // std::cout << endl;
 
 }
@@ -346,7 +346,7 @@ void  SliceTBalance::CompCorrectionLi(const unsigned int N){
 }
 
 void  SliceTBalance::CompCorrectionLiWorker(const unsigned int N, uint64_t Beg, uint64_t End, std::array<long double, 65> &res){
-    std::chrono::time_point<std::chrono::high_resolution_clock> _BeginTime = high_resolution_clock::now();
+    std::chrono::time_point<std::chrono::high_resolution_clock> BeginTime_ = high_resolution_clock::now();
     
     //Beg must be even
     if (Beg&1) Beg--;
@@ -372,7 +372,7 @@ void  SliceTBalance::CompCorrectionLiWorker(const unsigned int N, uint64_t Beg, 
         i+=2;
     }
 
-    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     Log::out() << "Duration sec: " << duration.count() / (1000.0l ) << "\n";;
 }
 

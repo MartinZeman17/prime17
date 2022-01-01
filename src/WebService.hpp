@@ -11,7 +11,7 @@ class WebService final: public Singleton<WebService>  {
     const std::string C_NoInternet{"Internet connection is not available, however my creator wishes me to be be resilient and versatile. If I'm bothering you, just kill me. Ouch :-(\n"};
     const std::string C_NoDNS{"This is a typicall situation after multiple kills when the web server detects multiple dangling connections and as a safety measure refuses further connections. Fortunately after timeouts connections will expire and communicaton may resume as normal. Let's wait 5 minutes and see..."};
 
-    enum class HTTP_SpecialCommunication 
+    enum class HTTPSpecialCommunication_ 
     {
         NoSpecialSettings,
         UseNativeCA,
@@ -20,9 +20,9 @@ class WebService final: public Singleton<WebService>  {
         Failure
     };
 
-    bool _Initialized = false;
+    bool Initialized_ = false;
 
-    HTTP_SpecialCommunication _SpecialCommunication;
+    HTTPSpecialCommunication_ SpecialCommunication_;
     static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
     
     public:

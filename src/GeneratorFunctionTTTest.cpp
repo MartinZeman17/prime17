@@ -25,7 +25,7 @@ void GFTTest(){
     End +=Begin;
     Begin++;
     
-    PrimeTest _t(65, false, false);
+    PrimeTest t(65, false, false);
 
     GeneratorFunctionTT<uint64_t> GF;
     Sieve.Work(Begin, End, GF);
@@ -47,7 +47,7 @@ void GFTTestMT(){
     End +=Begin;
     Begin++;
     
-    PrimeTest _t(65, false, false);
+    PrimeTest t(65, false, false);
       
     GeneratorFunctionTT<uint64_t> GFTT;
     Sieve.Work(Begin, End, GFTT);

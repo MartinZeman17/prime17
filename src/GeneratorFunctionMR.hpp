@@ -9,7 +9,7 @@
 template <class T>
 class GeneratorFunctionMR : public GeneratorFunction<GeneratorFunctionMR<T>, T> {
     private:
-    PrimeTest _t;
+    PrimeTest t_;
 
     public:
     GeneratorFunctionMR() noexcept;
@@ -33,17 +33,17 @@ class GeneratorFunctionMR : public GeneratorFunction<GeneratorFunctionMR<T>, T> 
 
 
 template <class T>
-GeneratorFunctionMR<T>::GeneratorFunctionMR() noexcept :_t(65) {}
+GeneratorFunctionMR<T>::GeneratorFunctionMR() noexcept : t_(65) {}
 
 template <class T>
-GeneratorFunctionMR<T>::GeneratorFunctionMR(const GeneratorFunctionMR<T> & O __attribute__((unused))) noexcept: _t(65) {}
+GeneratorFunctionMR<T>::GeneratorFunctionMR(const GeneratorFunctionMR<T> & O __attribute__((unused))) noexcept: t_(65) {}
 
 
 template <class T>
 int GeneratorFunctionMR<T>::GenFunct(const T & X __attribute__((unused)), const mpz_t & mpz_X) {
     
-    if(_t.iMillerRabinBase2(mpz_X)) {
-        GeneratorFunctionAbstract<T>::_PrimesCnt++;
+    if( t_.iMillerRabinBase2(mpz_X)) {
+        GeneratorFunctionAbstract<T>::PrimesCnt_++;
     }                  
     return 0;
 }

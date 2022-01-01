@@ -68,12 +68,12 @@ protected:
 
 class Log final: public Singleton<Log> {
     private:
-    struct sigaction _sa;
-    std::ofstream _LogFile;
-    std::string _LogFileName;
-    std::mutex _mutex;
-    int _winCOLS  = 0;
-    int _winLINES = 0;   
+    struct sigaction sa_;
+    std::ofstream LogFile_;
+    std::string LogFileName_;
+    std::mutex mutex_;
+    int winCOLS_  = 0;
+    int winLINES_ = 0;   
  
     
     public:    
@@ -97,7 +97,7 @@ class Log final: public Singleton<Log> {
 
     void Resize(){ 
         {
-            const std::lock_guard<std::mutex> lock(_mutex);
+            const std::lock_guard<std::mutex> lock(mutex_);
         
             endwin();
             // refresh();
@@ -106,8 +106,8 @@ class Log final: public Singleton<Log> {
             // if (win_left!=nullptr) wrefresh(win_left);
             // clear();
             // reinit();      
-            // _winCOLS = COLS;
-            // _winLINES = LINES;
+            // winCOLS_ = COLS;
+            // winLINES_ = LINES;
         }
     }
 
@@ -121,29 +121,29 @@ class Log final: public Singleton<Log> {
 
         // FreeWin();
 
-        _winCOLS = COLS;
-        _winLINES = LINES;
-        if (_winCOLS>0 && _winLINES>0) {
+        winCOLS_ = COLS;
+        winLINES_ = LINES;
+        if (winCOLS_>0 && winLINES_>0) {
 
             // refresh(); //???
 
-            int width_left = (int) ( _winCOLS * (2.0/3.0));
-            int width_right = _winCOLS - ((width_left + 1));
+            int width_left = (int) ( winCOLS_ * (2.0/3.0));
+            int width_right = winCOLS_ - ((width_left + 1));
             if (width_right<=0) {
-                width_left = _winCOLS;
+                width_left = winCOLS_;
                 width_right=0;
             }            
             
-            win_left = newwin(_winLINES, width_left, 0, 0);
+            win_left = newwin(winLINES_, width_left, 0, 0);
             scrollok(win_left, TRUE);
             wrefresh(win_left);
 
             if (width_right != 0) {
-                win_middle = newwin(_winLINES, 1, 0, width_left);
+                win_middle = newwin(winLINES_, 1, 0, width_left);
                 wborder(win_middle, ' ', '|', ' ',' ', ' ', '|', ' ', '|');
                 wrefresh(win_middle);
 
-                win_right = newwin(_winLINES, _winCOLS - (width_left + 1), 0, width_left+1);
+                win_right = newwin(winLINES_, winCOLS_ - (width_left + 1), 0, width_left+1);
                 wborder(win_right, ' ', ' ', ' ',' ', ' ', ' ', ' ', ' ');
                 wrefresh(win_right);
             }
@@ -155,7 +155,7 @@ class Log final: public Singleton<Log> {
 
     void init(bool LogToFile=true) {
         if (win_right!=nullptr){
-            if (COLS==_winCOLS && LINES == _winLINES) return; 
+            if (COLS==winCOLS_ && LINES == winLINES_) return; 
             endwin(); //??? kdy se vola init?       
         }
 
@@ -167,18 +167,18 @@ class Log final: public Singleton<Log> {
         // cbreak();			/* Line buffering disabled, Pass on everything to me 		*/
         nocbreak();
         
-        memset(&_sa, 0, sizeof(struct sigaction));
-        _sa.sa_handler = Log::out().handle_winch;
-        sigaction(SIGWINCH, &_sa, NULL);
+        memset(&sa_, 0, sizeof(struct sigaction));
+        sa_.sa_handler = Log::out().handle_winch;
+        sigaction(SIGWINCH, &sa_, NULL);
         
         reinit();
 
         if (LogToFile) {
-            if (!_LogFile.is_open()) {
+            if (!LogFile_.is_open()) {
                 fs::path p(utils::getConfigDir());
-                if (_LogFileName.empty()) _LogFileName = utils::C_AppName;
-                p /= _LogFileName.append(".log");
-                _LogFile.open( p.string(), std::ios::trunc);     
+                if (LogFileName_.empty()) LogFileName_ = utils::C_AppName;
+                p /= LogFileName_.append(".log");
+                LogFile_.open( p.string(), std::ios::trunc);     
             }   
         }
     }
@@ -188,13 +188,13 @@ class Log final: public Singleton<Log> {
         // char Ending = (char) Msg.get();
         int Ending =  Msg.get();
         if (Ending == '\n' || Ending == '\r') {
-            _LogFile << std::flush;
+            LogFile_ << std::flush;
         } 
     }
     
     public:
     template<typename T> Log& operator<<(const T& Input) {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard<std::mutex> lock(mutex_);
         
         std::stringstream Msg;
         Msg << Input;
@@ -205,7 +205,7 @@ class Log final: public Singleton<Log> {
             wrefresh(win_left);
         }
         // std::cout << Msg.str();
-        _LogFile << Input;
+        LogFile_ << Input;
         SmartFlush(Msg);
         return *this;
     }
@@ -217,7 +217,7 @@ class Log final: public Singleton<Log> {
 
     template <typename T>
     void logRight(const T& Input) {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::stringstream Msg;
         Msg << Input;
         if (win_right != nullptr){
@@ -229,21 +229,21 @@ class Log final: public Singleton<Log> {
             wrefresh(win_right); 
         }
         // std::cout << Msg.str();
-        _LogFile << Input;
+        LogFile_ << Input;
         SmartFlush(Msg);
     }
 
     template <typename T>
     void logToFile(const T& Input) {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard<std::mutex> lock(mutex_);
         std::stringstream Msg;
         Msg << Input;
-        _LogFile << Input;
+        LogFile_ << Input;
         SmartFlush(Msg);
     }
 
     void SetLogFileName(const std::string &FileName){
-        _LogFileName = FileName;
+        LogFileName_ = FileName;
     }
 
     void FreeWin(){
@@ -254,7 +254,7 @@ class Log final: public Singleton<Log> {
     }
     void Free(){
         FreeWin();
-        if (_LogFile.is_open()) _LogFile.close();    
+        if (LogFile_.is_open()) LogFile_.close();    
     }
 
     std::string getlineLeft(){

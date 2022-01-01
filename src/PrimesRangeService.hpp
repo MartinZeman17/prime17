@@ -10,7 +10,7 @@
  class PrimesRangeService {
     private:
     static std::vector<std::weak_ptr<PrimesRange>> p_Obj;
-    static std::mutex p_Obj_mutex;
+    static std::mutex p_Objmutex_;
 
     static std::shared_ptr<PrimesRange> FindExisting(const unsigned long long Begin, 
                                                      const unsigned long long End);

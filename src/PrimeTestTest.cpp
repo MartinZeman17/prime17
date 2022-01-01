@@ -95,57 +95,57 @@ void MethodTestsOnPrime(){
     PrimeTest Tests(65);
     mpz_t mpz_X;
     mpz_init2(mpz_X, 65);
-    auto _BeginTime = high_resolution_clock::now();
-    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    auto BeginTime_ = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
 
 
-    // // _BeginTime = high_resolution_clock::now();
+    // // BeginTime_ = high_resolution_clock::now();
     // // for (auto X : GF_Creator.CreatedPrimes) {
     // //     Tests.iMillerRabinBase2(X);
     // // }
-    // // duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    // // duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     // // cout << "MR 128 on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
 
     // MR
-    _BeginTime = high_resolution_clock::now();
+    BeginTime_ = high_resolution_clock::now();
     for (auto X : GF_Creator.CreatedPrimes) {
         // Utils::UInt128tompz(X, mpz_X);
         utils_mpz::mpz_set_ul128(mpz_X, X);
         Tests.iMillerRabinBase2(mpz_X);
     }
-    duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     cout << "MR mpz on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
     myfile << "MR mpz on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
 
     // LS
-    _BeginTime = high_resolution_clock::now();
+    BeginTime_ = high_resolution_clock::now();
     for (auto X : GF_Creator.CreatedPrimes) {
         // Utils::UInt128tompz(X, mpz_X);
         utils_mpz::mpz_set_ul128(mpz_X, X);
         Tests.iLucasSelfridge(mpz_X);
     }
-    duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     cout << "LS on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
     myfile << "LS on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
 
     // LS D
-    _BeginTime = high_resolution_clock::now();
+    BeginTime_ = high_resolution_clock::now();
     for (auto X : GF_Creator.CreatedPrimes) {
         // Utils::UInt128tompz(X, mpz_X);
         utils_mpz::mpz_set_ul128(mpz_X, X);
         Tests.iLucasSelfridge_D(mpz_X);
     }
-    duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     cout << "LS coef D on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
     myfile << "LS coef D on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
 
     // // LS Histogram
-    // _BeginTime = high_resolution_clock::now();
+    // BeginTime_ = high_resolution_clock::now();
     // for (auto X : GF_Creator.CreatedPrimes) {
     //     Utils::UInt128tompz(X, mpz_X);
     //     Tests.iLucasSelfridge_DHistogram(mpz_X);
     // }
-    // duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    // duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     // cout << "LS coef D Histogram on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
     // myfile << "LS coef D Histogram on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
     // Histogram(Tests.DHist1, myfile);
@@ -162,42 +162,42 @@ void MethodTestsOnPrime(){
     // myfile << endl;
 
 
-    // // // _BeginTime = high_resolution_clock::now();
+    // // // BeginTime_ = high_resolution_clock::now();
     // // // for (auto X : GF_Creator.CreatedPrimes) {
     // // //     Tests.IsPrimeBPSW(X);
     // // // }
-    // // // duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    // // // duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     // // // cout << "BPSW 128 mpz on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
 
     // BPSW
-    _BeginTime = high_resolution_clock::now();
+    BeginTime_ = high_resolution_clock::now();
     for (auto X : GF_Creator.CreatedPrimes) {
         // Utils::UInt128tompz(X, mpz_X);
         utils_mpz::mpz_set_ul128(mpz_X, X);
         Tests.IsPrimeBPSW(mpz_X);
     }
-    duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     cout << "BPSW on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
     myfile << "BPSW on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
 
-    _BeginTime = high_resolution_clock::now();
+    BeginTime_ = high_resolution_clock::now();
     for (auto X : GF_Creator.CreatedPrimes) {
         // Utils::UInt128tompz(X, mpz_X);
         utils_mpz::mpz_set_ul128(mpz_X, X);
         mpz_aprcl(const_cast<mpz_t&>(mpz_X));
     }
-    duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     cout << "APRLCL on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;   
     myfile << "APRLCL on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;   
   
     // BPSW 2
-    _BeginTime = high_resolution_clock::now();
+    BeginTime_ = high_resolution_clock::now();
     for (auto X : GF_Creator.CreatedPrimes) {
         // Utils::UInt128tompz(X, mpz_X);
         utils_mpz::mpz_set_ul128(mpz_X, X);
         mpz_bpsw_prp(const_cast<mpz_t&>(mpz_X));
     }
-    duration = duration_cast<milliseconds>(high_resolution_clock::now() - _BeginTime);
+    duration = duration_cast<milliseconds>(high_resolution_clock::now() - BeginTime_);
     cout << "BPSW2 on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
     myfile << "BPSW2 on Primes [min]:" << duration.count() / (1000.0l * 60.0l)  << endl;
 
@@ -262,16 +262,16 @@ void MethodTests(const uint128_t Begin, const uint128_t End){
     cout << "LS_DHistogram: " << " Duration minutes: " << res.DurationMinutes() << endl << endl;
     myfile << "LS_DHistogram: " << " Duration minutes: " << res.DurationMinutes() << endl << endl;
 
-    Histogram(GF_LS_DHistogram._t.DHist1, myfile);
-    Histogram(GF_LS_DHistogram._t.DHist10, myfile);
-    Histogram(GF_LS_DHistogram._t.DHist100, myfile);
-    Histogram(GF_LS_DHistogram._t.DHist1000, myfile);
+    Histogram(GF_LS_DHistogram.t_.DHist1, myfile);
+    Histogram(GF_LS_DHistogram.t_.DHist10, myfile);
+    Histogram(GF_LS_DHistogram.t_.DHist100, myfile);
+    Histogram(GF_LS_DHistogram.t_.DHist1000, myfile);
     cout << endl;
     myfile << endl;
 
-    cout << "MaxD:" << GF_LS_DHistogram._t.MaxD << endl;
-    myfile << "MaxD:" << GF_LS_DHistogram._t.MaxD << endl;
-    mpz_out_str(stdout, 10, GF_LS_DHistogram._t.NumberWithMaxD);
+    cout << "MaxD:" << GF_LS_DHistogram.t_.MaxD << endl;
+    myfile << "MaxD:" << GF_LS_DHistogram.t_.MaxD << endl;
+    mpz_out_str(stdout, 10, GF_LS_DHistogram.t_.NumberWithMaxD);
     // mpz_out_str(myfile, 10, GF_LS_DHistogram._t.NumberWithMaxD);
     // ToDo How to write mpz_t to file?
     cout << endl;

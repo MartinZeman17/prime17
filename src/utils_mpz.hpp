@@ -26,16 +26,16 @@ namespace utils_mpz {
         mpz_import(rop, 1, 1, sizeof(op), 0, 0, &op);
     }
 
-    // #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    // __ORDER_LITTLE_ENDIAN__
-    // __ORDER_BIG_ENDIAN__
-    // __ORDER_PDP_ENDIAN__
-    // __BYTE_ORDER__ is defined to one of the values __ORDER_LITTLE_ENDIAN__, __ORDER_BIG_ENDIAN__, or __ORDER_PDP_ENDIAN__ 
+    // #if __BYTE_ORDER__ == __ORDER_LITTLEEnd_IAN__
+    // __ORDER_LITTLEEnd_IAN__
+    // __ORDER_BIGEnd_IAN__
+    // __ORDER_PDPEnd_IAN__
+    // __BYTE_ORDER__ is defined to one of the values __ORDER_LITTLEEnd_IAN__, __ORDER_BIGEnd_IAN__, or __ORDER_PDPEnd_IAN__ 
     // to reflect the layout of multi-byte and multi-word quantities in memory. 
-    // If __BYTE_ORDER__ is equal to __ORDER_LITTLE_ENDIAN__ or __ORDER_BIG_ENDIAN__, 
+    // If __BYTE_ORDER__ is equal to __ORDER_LITTLEEnd_IAN__ or __ORDER_BIGEnd_IAN__, 
     // then multi-byte and multi-word quantities are laid out identically: 
     // the byte (word) at the lowest address is the least significant or most significant byte (word) of the quantity, respectively. 
-    // If __BYTE_ORDER__ is equal to __ORDER_PDP_ENDIAN__, then bytes in 16-bit words are laid out in a little-endian fashion, 
+    // If __BYTE_ORDER__ is equal to __ORDER_PDPEnd_IAN__, then bytes in 16-bit words are laid out in a little-endian fashion, 
     // whereas the 16-bit subwords of a 32-bit quantity are laid out in big-endian fashion.
 
 
