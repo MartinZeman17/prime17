@@ -36,11 +36,11 @@ const std::vector<unsigned long long> CTestArray_Sizes({1,2,8,48, 480, 5760, 921
 template <class T> 
 class SieveGenerator {
     private:
-    static unsigned int pMaxPrime_;  // why can not be const??
-    static std::vector<uint32_t> pTestArray_;
-    static unsigned long long pTestArrayCount_;
-    static uint32_t pPrimorial_;  
-    static std::mutex pTestArray_mutex_;
+    static unsigned int MaxPrime_;  // why can not be const??
+    static std::vector<uint32_t> TestArray_;
+    static unsigned long long TestArrayCount_;
+    static uint32_t Primorial_;  
+    static std::mutex TestArray_mutex_;
 
     void Constructor(unsigned int MaxPrime);
     void PrintProgress(const unsigned int &PId, const long double &Percent, const long double &MinTillEnd) const;
@@ -74,9 +74,9 @@ class SieveGenerator {
     // constructor, parameter may be set to C_SieveGeneratorDefaultMaxPrime
     // SieveGenerator(unsigned int MaxPrime = C_SieveGeneratorDefaultMaxPrime); 
     SieveGenerator(unsigned int MaxPrime ); 
-    const unsigned int & MaxPrime = pMaxPrime_;
+    const unsigned int & MaxPrime = MaxPrime_;
     // unsigned long long Primorial() const {return pPrimorial_;};  
-    const uint32_t & Primorial = pPrimorial_;
+    const uint32_t & Primorial = Primorial_;
 
     unsigned int Threads(const unsigned int Percent);
 

@@ -187,7 +187,7 @@ void TimeToTest(unsigned long long ulBegin, unsigned long long ulBigStep, unsign
         }
         auto End = high_resolution_clock::now();
         auto duration = duration_cast<milliseconds>(End - Begin);
-        Dur[0] = duration.count();
+        Dur[0] = (unsigned) duration.count();
         Cnt[0] = PrimesCount;
 
         PrimesCount=0;
@@ -201,7 +201,7 @@ void TimeToTest(unsigned long long ulBegin, unsigned long long ulBigStep, unsign
         }
         End = high_resolution_clock::now();
         duration = duration_cast<milliseconds>(End - Begin);
-        Dur[1] = duration.count();
+        Dur[1] = (unsigned) duration.count();
         Cnt[1] = PrimesCount;
         
 
@@ -216,7 +216,7 @@ void TimeToTest(unsigned long long ulBegin, unsigned long long ulBigStep, unsign
         }
         End = high_resolution_clock::now();
         duration = duration_cast<milliseconds>(End - Begin);
-        Dur[2] = duration.count();
+        Dur[2] = (unsigned) duration.count();
         Cnt[2] = PrimesCount;
 
         
@@ -230,7 +230,7 @@ void TimeToTest(unsigned long long ulBegin, unsigned long long ulBigStep, unsign
         }
         End = high_resolution_clock::now();
         duration = duration_cast<milliseconds>(End - Begin);
-        Dur[3] = duration.count();
+        Dur[3] =(unsigned)  duration.count();
         Cnt[3] = PrimesCount;
 
         PrimesCount=0;
@@ -243,7 +243,7 @@ void TimeToTest(unsigned long long ulBegin, unsigned long long ulBigStep, unsign
         }
         End = high_resolution_clock::now();
         duration = duration_cast<milliseconds>(End - Begin);
-        Dur[4] = duration.count();
+        Dur[4] = (unsigned) duration.count();
         Cnt[4] = PrimesCount;
 
         Dur[5] = 0;
@@ -259,7 +259,7 @@ void TimeToTest(unsigned long long ulBegin, unsigned long long ulBigStep, unsign
         }
         End = high_resolution_clock::now();
         duration = duration_cast<milliseconds>(End - Begin);
-        Dur[6] = duration.count();
+        Dur[6] = (unsigned) duration.count();
         Cnt[6] = PrimesCount;
 
         // update primes count:
@@ -294,9 +294,9 @@ void TimeToTest(unsigned long long ulBegin, unsigned long long ulBigStep, unsign
 
 void SmallStep(unsigned long long Cycles){
     auto Begin = high_resolution_clock::now();
-    auto BeginPr = high_resolution_clock::now();
-    auto EndPr = high_resolution_clock::now();
-    auto durationPr = duration_cast<milliseconds>(EndPr - BeginPr);
+    // auto BeginPr = high_resolution_clock::now();
+    // auto EndPr = high_resolution_clock::now();
+    // auto durationPr = duration_cast<milliseconds>(EndPr - BeginPr);
 
     unsigned long long PrimeCount = 0;
     

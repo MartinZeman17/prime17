@@ -1,4 +1,7 @@
 Tests:
+- git remote ma branch work???
+- oprava newBegin na puvodni nazvy
+- podivat se na db na datovy typ new begin ???
 // ToDo odstinit sito od mereni, pocitat v cyklu ??
 // generovat nahodne ulohy a porovnavat casy a vysledky
 // test sita od 0 do 2

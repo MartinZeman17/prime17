@@ -41,8 +41,8 @@ class clsNewWork {
     public:
     unsigned int task_id=0;
     unsigned long long asking_worker_id=0; 
-    T newBegin_=0;
-    T newEnd_=0;
+    T new_begin=0;
+    T new_end=0;
     unsigned int c_power2=0;
     unsigned long long new_work_id=0;
     bool ParsedOK=false;
@@ -56,12 +56,12 @@ class clsNewWork {
         Log::out() << "Power:          " << c_power2 << "\n";
         assert(c_power2 <= 63);
         
-        Log::out() << "Begin (offset): " << utils_str::FormatUInt(newBegin_) << "\n";
-        Log::out() << "End   (offset): " << utils_str::FormatUInt(newEnd_) << "\n";
+        Log::out() << "Begin (offset): " << utils_str::FormatUInt(new_begin) << "\n";
+        Log::out() << "End   (offset): " << utils_str::FormatUInt(new_end) << "\n";
 
         // unsigned long long Offset = static_cast<unsigned long long>(1) << c_power2;
-        Log::out() << "Begin:         " << utils_str::FormatNumber( ((long double) 100.0 * (long double) newBegin_ ) / (long double) Offset(), 13,9) << "%\n";
-        Log::out() << "End:           " << utils_str::FormatNumber( ((long double) 100.0 * (long double) newEnd_ ) / (long double) Offset(), 13,9) << "%\n";
+        Log::out() << "Begin:         " << utils_str::FormatNumber( ((long double) 100.0 * (long double) new_begin ) / (long double) Offset(), 13,9) << "%\n";
+        Log::out() << "End:           " << utils_str::FormatNumber( ((long double) 100.0 * (long double) new_end ) / (long double) Offset(), 13,9) << "%\n";
     }
 };
 
@@ -96,9 +96,9 @@ std::string WebWork::PrepareWebPostString(clsNewWork<uint64_t> &NewWork, Generat
     post.append(",");
     post.append(std::to_string(NewWork.c_power2));    
     post.append(",");
-    post.append(std::to_string(NewWork.newBegin_));
+    post.append(std::to_string(NewWork.new_begin));
     post.append(",");
-    post.append(std::to_string(NewWork.newEnd_));
+    post.append(std::to_string(NewWork.new_end));
     post.append(BS.WebPost_SerializeCntPrimesWithOneAtPosition_());
     return post;
 }
@@ -113,12 +113,12 @@ clsNewWork<uint64_t> WebWork::ParseJsonNewWork(const std::string &JSON){
         // Json::Reader reader;
         // Json::Value obj;
         // reader.parse(JSON,obj);
-        ret.task_id = (unsigned int)    std::stoul(obj[0]["task_id"].asString(), nullptr);
-        ret.asking_worker_id =          std::stoll(obj[0]["asking_worker_id"].asString(), nullptr);
-        ret.newBegin_ =                 std::stoll(obj[0]["newBegin_"].asString(), nullptr);
-        ret.newEnd_ =                   std::stoll(obj[0]["newEnd_"].asString(), nullptr);
-        ret.c_power2 = (unsigned int)   std::stoul(obj[0]["power2"].asString(), nullptr);
-        ret.new_work_id =               std::stoll(obj[0]["new_work_id"].asString(), nullptr);
+        ret.task_id = (unsigned int)              std::stoul(obj[0]["task_id"].asString(), nullptr);
+        ret.asking_worker_id = (unsigned)         std::stoll(obj[0]["asking_worker_id"].asString(), nullptr);
+        ret.new_begin =        (unsigned)         std::stoll(obj[0]["new_begin"].asString(), nullptr);
+        ret.new_end =          (unsigned)         std::stoll(obj[0]["new_end"].asString(), nullptr);
+        ret.c_power2 = (unsigned int)             std::stoul(obj[0]["power2"].asString(), nullptr);
+        ret.new_work_id =   (unsigned)            std::stoll(obj[0]["new_work_id"].asString(), nullptr);
         ret.ParsedOK = true;
     }  catch (const std::exception& e){
         ret.ParsedOK = false;
@@ -183,7 +183,7 @@ void WebWork::ProcessWebWork(clsNewWork<uint64_t> &NewWork, WorkerStruct &w){
 
         // w.LoadThreads();
         Sieve.Threads(w.ThreadsPct());
-        Sieve.WorkMT(NewWork.Offset() + NewWork.newBegin_, NewWork.Offset() + NewWork.newEnd_, BSMT);
+        Sieve.WorkMT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
         // BSMT.SaveFile(); //It does not make sense to save partial files.
 
 

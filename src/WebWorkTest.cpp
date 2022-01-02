@@ -23,7 +23,7 @@ bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatisti
     bool res;
     // #if NDEBUG
 
-    if ( NewWork.c_power2==50 && NewWork.newBegin_ == 562948879679488 && NewWork.newEnd_ == 562951027163136 ) {        
+    if ( NewWork.c_power2==50 && NewWork.new_begin == 562948879679488 && NewWork.new_end == 562951027163136 ) {        
         res = (    
             BSMT.CntPrimesWithNumOfSetBits(0)==    0 &&
             BSMT.CntPrimesWithNumOfSetBits(1)==    0 &&
@@ -92,7 +92,7 @@ bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatisti
             BSMT.CntPrimesWithNumOfSetBits(64)==    0
             );
     }
-    else if ( NewWork.c_power2==63 && NewWork.newBegin_ == 4611686017353646080 && NewWork.newEnd_ == 4611686019501129728 ) {
+    else if ( NewWork.c_power2==63 && NewWork.new_begin == 4611686017353646080 && NewWork.new_end == 4611686019501129728 ) {
         res = (    
             BSMT.CntPrimesWithNumOfSetBits(0)==    0 &&
             BSMT.CntPrimesWithNumOfSetBits(1)==    0 &&
@@ -191,7 +191,7 @@ GeneratorFunctionBitStatistics<T> RunOld(clsNewWork<T> NewWork){
     // Sieve.Threads(12);
 
     Sieve.ResetClock();
-    Sieve.WorkMT(NewWork.Offset() + NewWork.newBegin_, NewWork.Offset() + NewWork.newEnd_, BSMT);
+    Sieve.WorkMT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
     // Sieve.WorkMT( NewWork.newBegin_,  NewWork.newEnd_, BSMT);
     
     Log::out() << "Duration old [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 10, 1) << "\n";
@@ -208,7 +208,7 @@ GeneratorFunctionBitStatistics<T> RunNew(clsNewWork<T> NewWork){
     GeneratorFunctionBitStatistics<T> BSMT(NewWork.c_power2);
     Sieve.ResetClock();
     BSMT.ResetClock(); //???
-    Sieve.Work2MT(NewWork.Offset() + NewWork.newBegin_, NewWork.Offset() + NewWork.newEnd_, BSMT);
+    Sieve.Work2MT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
     // Sieve.Work2MT( NewWork.newBegin_,  NewWork.newEnd_, BSMT);
     
     Log::out() << "Duration new [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 1, 1) << "\n";
@@ -233,10 +233,10 @@ bool RunCheckComputationNew(){
     clsNewWork<T> NewWork;    
     NewWork.c_power2 = 63;
     // NewWork.c_power2 = 50;    
-    NewWork.newBegin_ = static_cast<unsigned long long>(1) << (NewWork.c_power2-1) ;
+    NewWork.new_begin = static_cast<unsigned long long>(1) << (NewWork.c_power2-1) ;
     // NewWork.newEnd_ =   NewWork.newBegin_ ;
-    NewWork.newEnd_   = NewWork.newBegin_ + C_CheckLength;
-    NewWork.newBegin_ = NewWork.newBegin_ - C_CheckLength;
+    NewWork.new_end   = NewWork.new_begin + C_CheckLength;
+    NewWork.new_begin = NewWork.new_begin - C_CheckLength;
     
     GeneratorFunctionBitStatistics BSMT = RunNew(NewWork);
 
@@ -292,12 +292,12 @@ bool RunCornerCases(){
     // // test the position of a primorial start, similar to 0
     // // check FullyCompleted == 0
     NewWork.c_power2 = 0;
-    NewWork.newBegin_ = 9699690 - NewWork.Offset();
-    NewWork.newEnd_ = NewWork.newBegin_ + 0;
+    NewWork.new_begin = 9699690 - NewWork.Offset();
+    NewWork.new_end = NewWork.new_begin + 0;
 
     NewWork.c_power2 = 0;
-    NewWork.newBegin_ = 9699690 + 10 - NewWork.Offset();
-    NewWork.newEnd_ = NewWork.newBegin_ + 1000000000;
+    NewWork.new_begin = 9699690 + 10 - NewWork.Offset();
+    NewWork.new_end = NewWork.new_begin + 1000000000;
 
 
 

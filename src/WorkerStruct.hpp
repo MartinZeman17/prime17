@@ -29,9 +29,9 @@ class WorkerStruct{
 
     // const int &ThreadsPct = ThreadsPct_;
     
-    const int& ThreadsPct() const { return ThreadsPct_; } 
+    inline unsigned int ThreadsPct() const { return (unsigned int) ThreadsPct_; } 
 
-    void ThreadsPct(const int& in) {
+    void ThreadsPct(const int in) {
         if (in<=0) {
             ThreadsPct_=0;
         } else if (in>100) {
@@ -119,11 +119,11 @@ class WorkerStruct{
     bool LoadThreads() try {
         Json::Value JS = utils::LoadJsonFile(utils::getConfigFileThreads());
         if (JS.isMember(C_JSON_CPUPercentTmp)) {
-            ThreadsPct(JS[C_JSON_CPUPercentTmp].asUInt());
+            ThreadsPct(JS[C_JSON_CPUPercentTmp].asInt());
             JS.removeMember(C_JSON_CPUPercentTmp);
             utils::SaveJson(JS, utils::getConfigFileThreads());
         } else{
-            ThreadsPct(JS[C_JSON_CPUPercent].asUInt());
+            ThreadsPct(JS[C_JSON_CPUPercent].asInt());
         }
 
         return true;

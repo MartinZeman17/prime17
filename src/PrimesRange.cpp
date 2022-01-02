@@ -82,12 +82,12 @@ namespace{
             unsigned long long X=Begin/p;
             StartOverBegin=p*X;
 
-            if (StartOverBegin<Begin){StartOverBegin+=p;}
-            if (StartOverBegin<2*p){StartOverBegin=2*p;}
+            if (StartOverBegin<Begin) { StartOverBegin += p; }
+            if (StartOverBegin<2*p) { StartOverBegin = 2*p; }
 
             for (unsigned long long i = StartOverBegin; i <= Limit; i += p)
             {
-                long long Index = i-Begin;
+                unsigned long long Index = (unsigned long long) i-Begin;
                 EratosArray[Index] = false;
             }
             if (progress == 100){
@@ -167,7 +167,7 @@ namespace{
 
         std::ifstream iprimefile;
         iprimefile.open(FileName, std::ifstream::binary);
-        iprimefile.read((char*) Primes32, PrimesCount32*4);
+        iprimefile.read((char*) Primes32, (std::streamsize) PrimesCount32*4);
         iprimefile.close();
         if (!Primes32[0]) return nullptr;
         return Primes32;
@@ -182,7 +182,7 @@ namespace{
 
         std::ifstream iprimefile;
         iprimefile.open(FileName, std::ifstream::binary);
-        iprimefile.read((char*) Primes64, PrimesCount64*8);
+        iprimefile.read((char*) Primes64, (std::streamsize) PrimesCount64*8);
         iprimefile.close();
         if (!Primes64[0]) return nullptr;
         return Primes64;
@@ -203,7 +203,7 @@ namespace{
 
         std::ofstream oprimefile;
         oprimefile.open(FullFile.string(), std::ifstream::binary);
-        oprimefile.write((char *)Primes32, PrimesCount32*4);
+        oprimefile.write((char *)Primes32, (std::streamsize) PrimesCount32*4);
         oprimefile.close();
     }
 
@@ -222,7 +222,7 @@ namespace{
 
         std::ofstream oprimefile;
         oprimefile.open(FullFile.string(), std::ifstream::binary);
-        oprimefile.write((char *)Primes64, PrimesCount64*8);
+        oprimefile.write((char *)Primes64, (std::streamsize) PrimesCount64*8);
         oprimefile.close();
     }
 

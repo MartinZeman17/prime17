@@ -37,10 +37,6 @@ class PrimesRange{
     const unsigned long long & PrimesCount = p_PrimesCount;
     
 
-    // ToDo: May be there is a better sollution to implement read-only pointer
-    //       Address to pointer is not allowed in C++
-    //       Further study required 
-    // Dirty: implementation in a header
     inline uint32_t * PrimesArray32() const {return p_PrimesArray32;}
     inline uint64_t * PrimesArray64() const {return p_PrimesArray64;}
 

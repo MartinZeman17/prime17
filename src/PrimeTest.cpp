@@ -58,11 +58,18 @@ void PrimeTest::Constructor(unsigned int iBits, bool bLoadPrimes32, bool bLoadPr
 
     if (bLoadPrimes32){
         LoadPrimes32();
+        LimitForDivByPrime = UINT64_MAX;  // 2^32 * 2^32
+        
     }
 
     if (bLoadPrimes64){
         LoadPrimes64();
+        if (bLoadPrimes32) {  // ToDo Test
+            LimitForDivByPrime = (uint128_t) UINT32_MAX + UINT32_MAX / 2;
+            LimitForDivByPrime *= 2;
+        }
     }
+
     
 }
 
@@ -402,7 +409,7 @@ bool PrimeTest::iLucasSelfridge(const mpz_t & mpzN){
     the storage of mpzN, since multiplications of order O(mpzN)*O(mpzN)
     will be performed. */
 
-    ulMaxBits=(unsigned long) (2*mpz_sizeinbase(mpzN, 2) + mp_bits_per_limb);
+    ulMaxBits=(unsigned long) (2*mpz_sizeinbase(mpzN, 2) + (unsigned) mp_bits_per_limb);
     mpz_init2(mpzU, ulMaxBits);
     mpz_init2(mpzV, ulMaxBits);
     mpz_init2(mpzNplus1, ulMaxBits);
@@ -425,7 +432,7 @@ bool PrimeTest::iLucasSelfridge(const mpz_t & mpzN){
     iSign=1;
     while(1)
     {
-    lD=iSign*lDabs;
+    lD = (iSign* (signed)lDabs);
     iSign = -iSign;
     ulGCD=mpz_gcd_ui(nullptr, mpzN, lDabs); //ok, ul type, overflow throws an exception
     /* if 1 < GCD < N then N is composite with factor lDabs, and
@@ -598,7 +605,7 @@ long PrimeTest::iLucasSelfridge_D(const mpz_t & mpzN){
     the storage of mpzN, since multiplications of order O(mpzN)*O(mpzN)
     will be performed. */
 
-    ulMaxBits=(unsigned long) (2*mpz_sizeinbase(mpzN, 2) + mp_bits_per_limb);
+    ulMaxBits=(unsigned long) (2*mpz_sizeinbase(mpzN, 2) + (unsigned) mp_bits_per_limb);
     mpz_init2(mpzU, ulMaxBits);
     mpz_init2(mpzV, ulMaxBits);
     mpz_init2(mpzNplus1, ulMaxBits);
@@ -621,7 +628,7 @@ long PrimeTest::iLucasSelfridge_D(const mpz_t & mpzN){
     iSign=1;
     while(1)
     {
-    lD=iSign*lDabs;
+    lD = (iSign * (signed) lDabs);
     iSign = -iSign;
     ulGCD=mpz_gcd_ui(nullptr, mpzN, lDabs);  //ok, overflow throws an exception
     /* if 1 < GCD < N then N is composite with factor lDabs, and
@@ -726,7 +733,7 @@ bool PrimeTest::IsPrimeDivByPrime(mpz_t x)
         mpz_mod(tmp, x, mpz_Prime64);
         if(mpz_cmp_ui(tmp,0)==0) return false;  //ok
     }
-    if(MaxToTest>Limit64) std::cout << "IsPrimeDivByPrime: Limit exceeded" << endl;    
+    if(MaxToTest>LimitForDivByPrime) std::cout << "IsPrimeDivByPrime: Limit exceeded" << endl;    
     return true;
 }
 

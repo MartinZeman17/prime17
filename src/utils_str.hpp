@@ -30,7 +30,7 @@ namespace utils_str{
   {
     result.clear();
     size_t current;
-    size_t next = -1;
+    size_t next = (size_t) -1;
     do
     {
       if (empties == split::no_empties)
@@ -58,7 +58,7 @@ namespace utils_str{
 
     long long filler = MinStrLen-Aux.tellp();
     if (filler<0) filler = 0;
-    std::string res(filler, ' ');
+    std::string res((unsigned long long) filler, ' ');
     res.append(Aux.str());
     return res;
   }

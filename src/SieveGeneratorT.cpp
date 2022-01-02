@@ -31,11 +31,11 @@ using std::to_string;
 using std::vector;
 
 // static variable must be defined outside of header, beware: declaration is not a definition
-template <class T> unsigned int SieveGenerator<T>::pMaxPrime_=0;
-template <class T> unsigned long long SieveGenerator<T>::pTestArrayCount_ = 0;
-template <class T> std::vector<uint32_t> SieveGenerator<T>::pTestArray_(0);
-template <class T> uint32_t SieveGenerator<T>::pPrimorial_=1;
-template <class T> std::mutex SieveGenerator<T>::pTestArray_mutex_;
+template <class T> unsigned int SieveGenerator<T>::MaxPrime_=0;
+template <class T> unsigned long long SieveGenerator<T>::TestArrayCount_ = 0;
+template <class T> std::vector<uint32_t> SieveGenerator<T>::TestArray_(0);
+template <class T> uint32_t SieveGenerator<T>::Primorial_=1;
+template <class T> std::mutex SieveGenerator<T>::TestArray_mutex_;
 
 
 template <class T>
@@ -59,10 +59,10 @@ template <class T>
 void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
     // ToDo: Test with more threads  ??? is it ok with ordinary object and no smart pointers
     // array may be in process of init from other thread???
-    const std::lock_guard<std::mutex> lock(pTestArray_mutex_); 
+    const std::lock_guard<std::mutex> lock(TestArray_mutex_); 
     ResetClock();
 
-    if (pMaxPrime_==0){
+    if (MaxPrime_==0){
         mpz_t mpz_primor;
         mpz_t mpz_res;
         mpz_init2(mpz_primor,64);
@@ -73,7 +73,7 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
             Log::out() << C_Msg;
             throw(C_Msg); //ToDo Memory leak?? How to throw or exit??
         }
-        pPrimorial_ = (uint32_t) utils_mpz::mpz_get<unsigned long long>(mpz_primor); // fits into 32 bits
+        Primorial_ = (uint32_t) utils_mpz::mpz_get<unsigned long long>(mpz_primor); // fits into 32 bits
 
         
         // load destination array size if known prom previous computations
@@ -84,38 +84,38 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
                 BufferSize = CTestArray_Sizes[i];  
             }
         }
-        if (BufferSize==0) BufferSize = (unsigned long long)  (1.0 + (long double) pPrimorial_ * .15); 
-        pTestArray_.reserve(BufferSize);
+        if (BufferSize==0) BufferSize = (unsigned long long)  (1.0 + (long double) Primorial_ * .15); 
+        TestArray_.reserve(BufferSize);
         
         // fill Test array with coprimes to primorial
         unsigned long long TACount=0;
-        for (uint32_t i = 1; i<pPrimorial_;){
+        for (uint32_t i = 1; i < Primorial_;){
             mpz_gcd_ui(mpz_res, mpz_primor, i); //ok, mpz_primor throw an exception
             if(mpz_cmp_ui(mpz_res,1)==0){   //ok
-                pTestArray_.push_back(i);
+                TestArray_.push_back(i);
                 TACount++;
             }
             i+=2;
         }
 
-        pTestArray_.shrink_to_fit();
+        TestArray_.shrink_to_fit();
         mpz_clear(mpz_primor);
         mpz_clear(mpz_res);
 
-        pTestArrayCount_ = TACount;        
+        TestArrayCount_ = TACount;        
         // pTestArrayCount_=pTestArray_.size();
-        pMaxPrime_ = MaxPrime;
-        long double MeasuredEffectivity = 100.0L * (long double) pTestArrayCount_ / (long double) pPrimorial_;
+        MaxPrime_ = MaxPrime;
+        long double MeasuredEffectivity = 100.0L * (long double) TestArrayCount_ / (long double) Primorial_;
 
         Log::out() << "Sieve Prime: " << MaxPrime << " ";
-        Log::out() << "Primorial: " << utils_str::FormatUInt(pPrimorial_) << "\n";
-        Log::out() << "Coprimes #:  " << utils_str::FormatUInt(pTestArrayCount_) << " ";
+        Log::out() << "Primorial: " << utils_str::FormatUInt(Primorial_) << "\n";
+        Log::out() << "Coprimes #:  " << utils_str::FormatUInt(TestArrayCount_) << " ";
         Log::out() << "Effectivity    : " << MeasuredEffectivity  << "[%]\n"; 
         // TODO sanitizer complains about % sign in printf
 
         Threads(100);        
     }
-    else if (pMaxPrime_!=MaxPrime){
+    else if (MaxPrime_!=MaxPrime){
         throw("SieveGenerator already initialized to a different primorial. Fatal, mission aborted.");
     }
 }
@@ -146,8 +146,8 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
     mpz_init2(mpz_kp, 65);
     mpz_init2(mpz_X, 65);
 
-    T k = Begin/pPrimorial_;
-    T kp = k * pPrimorial_;  // primorial p multiplied by some integer k
+    T k = Begin/Primorial_;
+    T kp = k * Primorial_;  // primorial p multiplied by some integer k
 
     Log::out()  << "Sieve Begin: " << Begin << " ";        
     Log::out()  << "Sieve End:   " << End <<  " ";
@@ -164,22 +164,22 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
     double NewPerc = 0;
 
     T tmp;
-    tmp = pTestArray_[pTestArrayCount_-1] + kp; 
+    tmp = TestArray_[TestArrayCount_-1] + kp; 
     if (tmp < Begin){
         // Begin is very close to the next multiple of Primorial 
         // so whole TestArray would be exhausted and variable i would out be of bounds
         // all numbers between kp + last item of TestArrayand the next multiple of primorial must have common divisor (not primes) 
         // -> go directly to the next primorial and leave i index at 0
-        kp += pPrimorial_;
+        kp += Primorial_;
         k++;
         Log::out() << "Begin after last TestArray item. Wow !!!\n";
     } else {
         // search where to start with testing and set index i
         // for(; pTestArray_[i]+kp < Begin; i++);  // this for cycle works only for 64bit variables
-        tmp = pTestArray_[i]+kp;
+        tmp = TestArray_[i]+kp;
         while (tmp < Begin){
             ++i;
-            tmp = pTestArray_[i]+kp;
+            tmp = TestArray_[i]+kp;
         } 
     }
 
@@ -187,8 +187,8 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
     Log::out() << "Multiple of primorial: " << kp << "\n";
     Log::out() << "... till Begin: " << Begin - kp << "\n";
 
-    if (std::is_same_v<T, unsigned long long>) {
-        utils_mpz::mpz_set_ull(mpz_kp, kp);
+    if (std::is_same_v<T, uint64_t>) {
+        utils_mpz::mpz_set_ull(mpz_kp, (uint64_t) kp);
     } else {
         utils_mpz::mpz_set_ul128(mpz_kp, kp);
     }
@@ -200,13 +200,13 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
     // mpz_out_str(stdout, 10, mpz_kp);
     // Log::out() << endl;
 
-    if (Begin <=pMaxPrime_) {
+    if (Begin <= MaxPrime_) {
         // test all primes from primorial construction between Begin and End as the algorithm does not test them
         for (auto & Prime : CPrimorial_Primes) {
             if (Begin<=Prime) {
-                if (Prime <= End && Prime <=pMaxPrime_) {
+                if (Prime <= End && Prime <= MaxPrime_) {
                     utils_mpz::mpz_set_ull(mpz_X, Prime);
-                    if (GF.GenFunct((uint128_t) Prime, mpz_X)!=0) {
+                    if (GF.GenFunct((T) Prime, mpz_X)!=0) {
                         RETURN(Prime);
                     }
                 } else {
@@ -218,13 +218,13 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
     }
 
 
-    auto TBegin = high_resolution_clock::now();
+    // auto TBegin = high_resolution_clock::now();
     // ResetClock();  //method is const 
     // i is now a valid index within the array bounds
     while(true)
     {
-        T X = kp+pTestArray_[i];
-        mpz_add_ui(mpz_X, mpz_kp, pTestArray_[i]);  //ok
+        T X = kp + TestArray_[i];
+        mpz_add_ui(mpz_X, mpz_kp, TestArray_[i]);  //ok
 
         if(X > End) break;            
 
@@ -240,11 +240,11 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
         };
                   
         i++;
-        if(i==pTestArrayCount_) 
+        if(i == TestArrayCount_) 
         {
             i=0;
-            kp += pPrimorial_;
-            mpz_add_ui(mpz_kp, mpz_kp, pPrimorial_);  //ok, fits in 32 bits
+            kp += Primorial_;
+            mpz_add_ui(mpz_kp, mpz_kp, Primorial_);  //ok, fits in 32 bits
             NewPerc = (100.0*(double)(kp-Begin)/(double)(End-Begin));
             NewPerc = (std::floor(NewPerc*10.0))/10.0;
             if(NewPerc !=OldPerc){
@@ -254,8 +254,8 @@ T SieveGenerator<T>::Work(const T & Begin, const T & End, GeneratorFunctionAbstr
         }
     }
     Log::out()  << "\n";
-    auto TEnd = high_resolution_clock::now();
-    auto duration = duration_cast<milliseconds>(TEnd - TBegin);
+    // auto TEnd = high_resolution_clock::now();
+    // auto duration = duration_cast<milliseconds>(TEnd - TBegin);
     // Log::out() << "Sieve duration: " << duration.count() << endl;
     Log::out() << "Sieve Duration [m]: " << GF.DurationMinutes() << "\n";
     Log::out() << "\n";
@@ -275,29 +275,33 @@ void SieveGenerator<T>::PrintProgress(const unsigned int &PId, const long double
     unsigned int row = rows - (Threads_ - PId);
     row = 0 + PId;
 
-    std::stringstream RowMsg;
-    RowMsg << utils_str::FormatNumber(PId, 2, 0) << ":" ;
-    int C_ProgressBarCnt = cols - 20;
-    unsigned int Chars = (unsigned int) ((Percent * C_ProgressBarCnt) / 100.0);
-    for(unsigned int i = 0; i< Chars; i++){
-        RowMsg << "#";
-    }
-    for(unsigned int i = 0; i< C_ProgressBarCnt - Chars; i++){
-        RowMsg << "_";
-    }
+    constexpr unsigned int C_MinRightWindowLength = 20; 
+    if (cols >= C_MinRightWindowLength) {
+        unsigned int ProgressBarCnt = cols - C_MinRightWindowLength;
 
-    RowMsg << utils_str::FormatNumber(Percent, 4, 1);
-    RowMsg << "% ";
-    if (MinTillEnd>0) {
-        RowMsg << utils_str::FormatNumber(MinTillEnd, 4, 1);
-        RowMsg << "m ";
-    }
+        std::stringstream RowMsg;
+        RowMsg << utils_str::FormatNumber(PId, 2, 0) << ":" ;
+        unsigned int Chars = (unsigned int) ((Percent * ProgressBarCnt) / 100.0);
+        for(unsigned int i = 0; i< Chars; i++){
+            RowMsg << "#";
+        }
+        for(unsigned int i = 0; i < ProgressBarCnt - Chars; i++){
+            RowMsg << "_";
+        }
 
-    {
-        // const std::lock_guard<std::mutex> lock(cout_mutex_);
-        // mvwprintw(Log::out().win_right, row, 0, RowMsg.str().c_str());
-        mvwaddstr(Log::out().win_right, row, 0, RowMsg.str().c_str());
-        wrefresh(Log::out().win_right);
+        RowMsg << utils_str::FormatNumber(Percent, 4, 1);
+        RowMsg << "% ";
+        if (MinTillEnd>0) {
+            RowMsg << utils_str::FormatNumber(MinTillEnd, 4, 1);
+            RowMsg << "m ";
+        }
+
+        {
+            // const std::lock_guard<std::mutex> lock(cout_mutex_);
+            // mvwprintw(Log::out().win_right, row, 0, RowMsg.str().c_str());
+            mvwaddstr(Log::out().win_right, row, 0, RowMsg.str().c_str());
+            wrefresh(Log::out().win_right);
+        }
     }
 }
 
@@ -316,7 +320,7 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
         return(n);            \
     }
 
-    int iPId = std::stoi(PId);
+    unsigned int iPId = (unsigned int) std::stol(PId);
 
     if (iPId == 0) {
         // const std::lock_guard<std::mutex> lock(StartTime_mutex_);
@@ -332,13 +336,13 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
     {
         const std::lock_guard<std::mutex> lock(kp_mutex_);
         T tmp;
-        tmp = pTestArray_[pTestArrayCount_-1] + kp_; 
+        tmp = TestArray_[TestArrayCount_-1] + kp_; 
         if (tmp < Begin){
             // Begin is very close to the next multiple of Primorial 
             // so whole TestArray would be exhausted and variable i would out be of bounds
             // all numbers between kp + last item of TestArray and the next multiple of primorial must have common divisor (not primes) 
             // -> go directly to the next primorial and leave i index at 0
-           kp_ += pPrimorial_;
+           kp_ += Primorial_;
             {
                 const std::lock_guard<std::mutex> lock(cout_mutex_);
                 Log::out() << PId << "> " << "Begin after last TestArray item. Wow !!!" << "\n";
@@ -347,7 +351,7 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
         // local copy
         kp =kp_;
         // preparekp_ for another thread to process 
-       kp_ += pPrimorial_;
+       kp_ += Primorial_;
     }
 
     // {
@@ -366,10 +370,10 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
         // search where to start with testing and set index i
         // for(; pTestArray_[i]+kp < Begin; i++);  // this for cycle works only for 64bit variables
 
-        tmp = pTestArray_[i]+kp;
+        tmp = TestArray_[i]+kp;
         while (tmp < Begin){
             ++i;
-            tmp = pTestArray_[i]+kp;
+            tmp = TestArray_[i]+kp;
         }
 
         auto TTArrayDuration = duration_cast<milliseconds>(high_resolution_clock::now() - TTArrayBegin);
@@ -396,13 +400,13 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
         abort();
     }
     
-    if (Begin <=pMaxPrime_ && iPId == 0) {
+    if (Begin <= MaxPrime_ && iPId == 0) {
         // test all primes from primorial construction between Begin and End as the algorithm does not test them
         for (auto & Prime : CPrimorial_Primes) {
             if (Begin<=Prime) {
-                if (Prime <= End && Prime <=pMaxPrime_) {
+                if (Prime <= End && Prime <= MaxPrime_) {
                     utils_mpz::mpz_set_ull(mpz_X, Prime);
-                    if (GF->GenFunct((uint128_t) Prime, mpz_X)!=0) {
+                    if (GF->GenFunct((T) Prime, mpz_X)!=0) {
                         res = Prime;
                         RETURN(res);
                     }
@@ -421,8 +425,8 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
     // i is now a valid index within the array bounds
     while(true)
     {
-        T X = kp+pTestArray_[i];
-        mpz_add_ui(mpz_X, mpz_kp, pTestArray_[i]); //ok
+        T X = kp + TestArray_[i];
+        mpz_add_ui(mpz_X, mpz_kp, TestArray_[i]); //ok
 
         if(X > End) break;            
         
@@ -432,10 +436,10 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
         };
   
         i++;
-        if(i==pTestArrayCount_) 
+        if(i == TestArrayCount_) 
         {
             // first print progress 
-            long double NewPerc = (100.0L*(long double)((kp+pTestArray_[i-1])-Begin)/(long double)(End-Begin));
+            long double NewPerc = (100.0L*(long double)((kp + TestArray_[i-1])-Begin)/(long double)(End-Begin));
             NewPerc = (std::floor(NewPerc*10.0L))/10.0L;
             {
                 const std::lock_guard<std::mutex> lock(Percent_mutex_);
@@ -463,7 +467,7 @@ T SieveGenerator<T>::WorkMT_Thread(const T & Begin, const T & End, std::unique_p
             {
                 const std::lock_guard<std::mutex> lock( kp_mutex_);
                 kp = kp_;
-               kp_ += pPrimorial_;
+               kp_ += Primorial_;
             }
 
             if (std::is_same_v<T, unsigned long long>) {
@@ -504,8 +508,8 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
 
     ResetClock();
     T res = 0;
-    T k = Begin/pPrimorial_;
-    kp_ = k * pPrimorial_;  // primorial p multiplied by some integer k
+    T k = Begin / Primorial_;
+    kp_ = k * Primorial_;  // primorial p multiplied by some integer k
     Percent_=-1.0;
 
     Log::out()  << "Sieve Begin: " << utils_str::FormatUInt(Begin) << "\n";        
@@ -559,7 +563,7 @@ T SieveGenerator<T>::WorkMT(const T & Begin, const T & End, GeneratorFunctionAbs
         GF+=(*GFClones[i]);
         Log::out() << " = " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     }
-    long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( pTestArrayCount_ / (long double) pPrimorial_) * (End - Begin + 1));
+    long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( TestArrayCount_ / (long double) Primorial_) * (End - Begin + 1));
     Log::out() << "Primes:       " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     Log::out() << "Primes ratio (from interval): " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (End - Begin + 1), 6,3) << "%\n";
     Log::out() << "Primes ratio (after sieve):   " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";

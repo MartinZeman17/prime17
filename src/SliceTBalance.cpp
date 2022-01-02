@@ -85,7 +85,7 @@ void SliceTBalance::CompInterval(const unsigned int N){
     // when shifted it is 1, 3 and its center is 2
     long double MaxLength = Half-1; 
 
-    int RShifts = N-C_HistBits;
+    int RShifts = (signed) (N-C_HistBits);
     if (RShifts<0) RShifts = 0; 
 
     for(unsigned long long i=0; i<B; ){
@@ -186,7 +186,7 @@ void SliceTBalance::CompIntervalJoin(const unsigned int N, const bool  bJoin) {
     // when shifted it is 1, 3 and its center is 2. It is ok to substract 2^N
     long double MaxLength = Half-1; 
 
-    int RShifts = N-C_HistBits;
+    int RShifts = (signed) (N-C_HistBits);
     if (RShifts<0) RShifts = 0; 
 
     for(unsigned long long i=0; i<B; ){

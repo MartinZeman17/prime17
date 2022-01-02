@@ -31,11 +31,10 @@ class PrimeTest{
 
         uint32_t *Primes32=nullptr;
         unsigned long long PrimesCount32 = 0;
-        unsigned long long Limit32 = 0;
 
         uint64_t *Primes64=nullptr;
         unsigned long long PrimesCount64 = 0;
-        unsigned long long Limit64 = 0;
+        unsigned long long LimitForDivByPrime = 0;
 
         void Constructor(unsigned int iBits, bool bLoadPrimes32, bool bLoadPrimes64);
         

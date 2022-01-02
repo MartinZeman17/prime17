@@ -303,28 +303,32 @@ void Sieve2Generator<T>::PrintProgress(const unsigned int &PId, const long doubl
     unsigned int row = rows - (Threads_ - PId);
     row = 0 + PId;
 
-    std::stringstream RowMsg;
-    RowMsg << utils_str::FormatNumber(PId, 2, 0) << ":" ;
-    int C_ProgressBarCnt = cols - 20;
-    unsigned int Chars = (unsigned int) ((Percent * C_ProgressBarCnt) / 100.0);
-    for(unsigned int i = 0; i< Chars; i++){
-        RowMsg << "#";
-    }
-    for(unsigned int i = 0; i< C_ProgressBarCnt - Chars; i++){
-        RowMsg << "_";
-    }
+    constexpr unsigned int C_MinRightWindowLength = 20; 
+    if (cols >= C_MinRightWindowLength) {
+        unsigned int ProgressBarCnt = cols - C_MinRightWindowLength;
 
-    RowMsg << utils_str::FormatNumber(Percent, 4, 1);
-    RowMsg << "% ";
-    if (MinTillEnd>0) {
-        RowMsg << utils_str::FormatNumber(MinTillEnd, 4, 1);
-        RowMsg << "m ";
-    }
+        std::stringstream RowMsg;
+        RowMsg << utils_str::FormatNumber(PId, 2, 0) << ":" ;
+        unsigned int Chars = (unsigned int) ((Percent * ProgressBarCnt) / 100.0);
+        for(unsigned int i = 0; i< Chars; i++){
+            RowMsg << "#";
+        }
+        for(unsigned int i = 0; i < ProgressBarCnt - Chars; i++){
+            RowMsg << "_";
+        }
 
-    {
-        // const std::lock_guard<std::mutex> lock(cout_mutex_); 
-        mvwaddstr(Log::out().win_right, row, 0, RowMsg.str().c_str());
-        wrefresh(Log::out().win_right);
+        RowMsg << utils_str::FormatNumber(Percent, 4, 1);
+        RowMsg << "% ";
+        if (MinTillEnd>0) {
+            RowMsg << utils_str::FormatNumber(MinTillEnd, 4, 1);
+            RowMsg << "m ";
+        }
+
+        {
+            // const std::lock_guard<std::mutex> lock(cout_mutex_); 
+            mvwaddstr(Log::out().win_right, row, 0, RowMsg.str().c_str());
+            wrefresh(Log::out().win_right);
+        }
     }
 }
 
@@ -433,9 +437,10 @@ Update(const unsigned int PId, const long double BPerc, const long double EPerc)
     row = 0 + PId;
     if (row>=rows) return;
 
- 
-    int ProgressBarCnt = cols - 20; //??? todo zkratit
-    if ( ProgressBarCnt>0 ) {
+    constexpr unsigned int C_MinRightWindowLength = 20; 
+    if ( cols >= C_MinRightWindowLength ) {
+        unsigned int ProgressBarCnt = cols - C_MinRightWindowLength;
+
         if ( PrintedProgress_.size() != (size_t) ProgressBarCnt + 1) {
             // window resized or first call
             PrintedProgress_.resize(ProgressBarCnt + 1);
@@ -530,7 +535,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         return(n);            \
     }
 
-    int iPId = std::stoi(PId);
+    unsigned int iPId = (unsigned int) std::stoul(PId);
 
     mpz_init2(mpz_kp, 65);
     mpz_init2(mpz_X, 65);
@@ -699,9 +704,9 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         // set mpz_kp from kp
         // The branch that fails the constexpr condition will not be compiled for the given template instantiation. Or I hope so...
         // But it looks like constexpr is not needed, both binaries are identical.
-        if constexpr(std::is_same<T, uint64_t>::value) { //NOLINT: C++17 extension can be freely used
+        if constexpr(std::is_same<T, uint64_t>::value) { 
             utils_mpz::mpz_set_ull(mpz_kp, kp);
-        } else if constexpr(std::is_same<T, uint128_t>::value){  //NOLINT: C++17 extension can be freely used
+        } else if constexpr(std::is_same<T, uint128_t>::value){
             utils_mpz::mpz_set_ul128(mpz_kp, kp);
         } else {
             assert(false);
@@ -721,7 +726,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
                 if (Untouched<=Prime) {
                     if (Prime <= End && Prime <= MaxPrime) {
                         utils_mpz::mpz_set_ull(mpz_X, Prime);
-                        if (GF->GenFunct((uint128_t) Prime, mpz_X)!=0) {
+                        if (GF->GenFunct((T) Prime, mpz_X)!=0) {
                             res = Prime;
                             RETURN(res);
                         }
@@ -767,9 +772,9 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         const std::lock_guard<std::mutex> lock(cout_mutex_);
         Log::out() << "Progress   :    " << FullyCompleted_ << "\n"; 
         Log::out() << PId << "> Sieve (";
-        if constexpr(std::is_same<T, uint64_t>::value) {  //NOLINT: C++17 extension can be freely used
+        if constexpr(std::is_same<T, uint64_t>::value) {  
             Log::out() << "64";
-        } else if constexpr(std::is_same<T, uint128_t>::value){  //NOLINT: C++17 extension can be freely used
+        } else if constexpr(std::is_same<T, uint128_t>::value){
             Log::out() << "128";
         } else {
             assert(false);
