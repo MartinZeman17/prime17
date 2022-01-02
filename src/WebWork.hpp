@@ -48,13 +48,18 @@ class clsNewWork {
     bool ParsedOK=false;
 
     inline T Offset() const noexcept {
-        return static_cast<unsigned long long>(1) << c_power2;
+        if (std::is_same_v<T, uint64_t>) { 
+            assert(c_power2<=63);
+        } else {
+            assert(c_power2<=127);
+        }
+        return static_cast<T>(1) << c_power2;
     }
 
     void LogHeader() const {
         Log::out() << "Started at:     " << utils::GetCurrentDateTime() << "\n";
         Log::out() << "Power:          " << c_power2 << "\n";
-        assert(c_power2 <= 63);
+        assert(c_power2 <= 127);
         
         Log::out() << "Begin (offset): " << utils_str::FormatUInt(new_begin) << "\n";
         Log::out() << "End   (offset): " << utils_str::FormatUInt(new_end) << "\n";

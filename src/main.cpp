@@ -325,8 +325,8 @@ int main(int argc, char* argv[])
         //override default settings      
         // bRunAsUsusal = false;
         // bRunAsUsusal = true;
-        bCheck = true;
-        // bCornerCases = true;
+        // bCheck = true;
+        bCornerCases = true;
 
         if (bThread || bThreadTmp) {
             ConfigThread(argc, argv, bThread);

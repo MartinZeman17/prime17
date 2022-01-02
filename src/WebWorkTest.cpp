@@ -19,6 +19,47 @@ void WebBitStatistics(WorkerStruct &w){
 }
 
 template <class T>
+class TestCase{
+    public:
+    int Power2 = -1;
+    T BegOffset = 0;
+    T EndOffset = 0;
+    T Primes = 0;
+};
+
+template <class T>
+bool CheckCornesCases(std::vector<TestCase<T>> TC) {
+
+    Sieve2Generator<T> Sieve;
+    Sieve.Threads(100);
+    Sieve.Threads(12);
+
+    for (auto tc :TC ) {
+        clsNewWork<T> NewWork;
+        T Offset;
+        if (tc.Power2 == -1) {
+            NewWork.c_power2 = 0;
+            Offset = 0;
+        } else {
+            NewWork.c_power2 = tc.Power2;
+            Offset = NewWork.Offset(); 
+        }
+        NewWork.new_begin = tc.BegOffset;
+        NewWork.new_end = tc.EndOffset;
+
+        NewWork.LogHeader();
+
+        GeneratorFunctionBitStatistics<T> BSMT(NewWork.c_power2);
+        Sieve.ResetClock();
+        BSMT.ResetClock();
+        Sieve.Work2MT(Offset + NewWork.new_begin, Offset + NewWork.new_end, BSMT);
+
+    }
+
+    return true;
+}
+
+template <class T>
 bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatistics<T> & BSMT){
     bool res;
     // #if NDEBUG
@@ -217,10 +258,15 @@ GeneratorFunctionBitStatistics<T> RunNew(clsNewWork<T> NewWork){
 
 template <class T>
 bool RunCheckComputationNew(){
-    constexpr unsigned int C_TestPower2 = 30;
-    constexpr long double C_StandardCheckDuration = 297.0;  //power 50;
-    // constexpr long double C_StandardCheckDurationDebug = 560.0;
-
+    constexpr unsigned int C_TestPower2 = 30;    
+    constexpr long double C_StandardCheckDuration = 273.6;
+    constexpr long double C_StandardCheckDurationDebug = 283.3;  
+    // clang generates smaller code size
+    // clang    10:     283.3   debug
+    // gcc      11.1:   287.4   debug
+    // gcc      11.1:   276.2   278.8
+    // clang    10      273.6
+    
     #ifdef NDEBUG
     // minimum in order to make 8 cores sweaty
     constexpr uint64_t C_CheckLength = static_cast<unsigned long long>(1) << C_TestPower2;  
@@ -234,7 +280,6 @@ bool RunCheckComputationNew(){
     NewWork.c_power2 = 63;
     // NewWork.c_power2 = 50;    
     NewWork.new_begin = static_cast<unsigned long long>(1) << (NewWork.c_power2-1) ;
-    // NewWork.newEnd_ =   NewWork.newBegin_ ;
     NewWork.new_end   = NewWork.new_begin + C_CheckLength;
     NewWork.new_begin = NewWork.new_begin - C_CheckLength;
     
@@ -244,7 +289,9 @@ bool RunCheckComputationNew(){
     // Sieve.Work2MT(NewWork.Offset() + NewWork.newBegin_, NewWork.Offset() + NewWork.newEnd_, BSMT);
 
     long double duration = BSMT.DurationSeconds();
-    Log::out() << "Duration [s]: " <<  utils_str::FormatNumber(duration, 10, 1) << " \t~" << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDuration, 4,1)  << "% \n";
+    Log::out() << "Duration [s]: " <<  utils_str::FormatNumber(duration, 10, 1);
+    Log::out() << " \t~" << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDuration, 4,1)  << "% (release)";
+    Log::out() << " \t~" << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDurationDebug, 4,1)  << "% (debug)" << "\n";
 
     // log correct expectation to the log file
     // for(unsigned int i=0; i<=64; i++){
@@ -287,17 +334,44 @@ bool RunCheckComputation(){
 }
 
 bool RunCornerCases(){
-    clsNewWork<uint64_t> NewWork;
     
+    std::vector<TestCase<uint64_t>> TC64 = {
+        {-1,0,0,0}, {-1,1,1,0}, {-1,2,2,0}, {-1,3,3,0}, {-1,4,4,0},
+        {-1,1,29,0}, {-1,2,100,0}, 
+        {-1,9699689,9699689,0}, {-1,9699690,9699690,0}, {-1,9699689,9699690,0},
+        {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 10, 0 }, 
+        {32, 0, 10,0}, 
+        // {63, (static_cast<uint64_t>(1) << 63) -1, (static_cast<uint64_t>(1) << 63) + 10, 0 },
+        // {64, 0 , 10, 0 },
+        // {127, 0 , 10, 0 }
+    };
+
+    std::vector<TestCase<uint128_t>> TC128 = {
+        {-1,0,0,0}, {-1,1,1,0}, {-1,2,2,0}, {-1,3,3,0}, {-1,4,4,0},
+        {-1,1,29,0}, {-1,2,100,0}, 
+        {-1,9699689,9699689,0}, {-1,9699690,9699690,0}, {-1,9699689,9699690,0},
+        {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 10, 0 }, 
+        {32, 0, 10,0}, 
+        {63, (static_cast<uint64_t>(1) << 63) -1, (static_cast<uint64_t>(1) << 63) + 10, 0 },
+        {64, 0 , 100, 0 },
+        {127, 0 , 100, 0 }
+    };
+
+    CheckCornesCases<uint64_t>(TC64);
+    CheckCornesCases<uint128_t>(TC128);
+
+    
+    // clsNewWork<uint64_t> NewWork;
+   
     // // test the position of a primorial start, similar to 0
     // // check FullyCompleted == 0
-    NewWork.c_power2 = 0;
-    NewWork.new_begin = 9699690 - NewWork.Offset();
-    NewWork.new_end = NewWork.new_begin + 0;
+    // NewWork.c_power2 = 0;
+    // NewWork.new_begin = 9699690 - NewWork.Offset();
+    // NewWork.new_end = NewWork.new_begin + 0;
 
-    NewWork.c_power2 = 0;
-    NewWork.new_begin = 9699690 + 10 - NewWork.Offset();
-    NewWork.new_end = NewWork.new_begin + 1000000000;
+    // NewWork.c_power2 = 0;
+    // NewWork.new_begin = 9699690 + 10 - NewWork.Offset();
+    // NewWork.new_end = NewWork.new_begin + 1000000000;
 
 
 
@@ -306,8 +380,7 @@ bool RunCornerCases(){
     // NewWork.newEnd_ = NewWork.newBegin_ + 1;
 
 
-    CompareOldNew(NewWork);
-    // RunNew(NewWork);  
+    // CompareOldNew(NewWork);
     return true; //???
 
 }

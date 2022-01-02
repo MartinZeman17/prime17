@@ -50,7 +50,7 @@ class Sieve2Generator {
         private:
         Sieve2Generator & parent_;  
         enum class enPrintProgress : char{
-            Untouched ='-',
+            YetUntouched ='-',
             LeftPart = '<',
             RightPart = '>',
             InProgress = '*',
@@ -444,7 +444,7 @@ Update(const unsigned int PId, const long double BPerc, const long double EPerc)
         if ( PrintedProgress_.size() != (size_t) ProgressBarCnt + 1) {
             // window resized or first call
             PrintedProgress_.resize(ProgressBarCnt + 1);
-            fill(PrintedProgress_.begin(), PrintedProgress_.end()-1, enPrintProgress::Untouched);
+            fill(PrintedProgress_.begin(), PrintedProgress_.end()-1, enPrintProgress::YetUntouched);
             PrintedProgress_[ProgressBarCnt] = enPrintProgress::NullTermination;
         }
 
@@ -548,7 +548,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         T OverflowTest1 = std::max(Primorial1_, Primorial2_); 
         T OverflowTest2 = OverflowTest1 + End;
         // prevent overflow in End + 1, End + Primorial_     
-        if (!(OverflowTest2 > End && OverflowTest2 > OverflowTest1 && End + 1 > End)) {
+        if (!(OverflowTest2 > End && OverflowTest2 >= OverflowTest1 && End + 1 > End)) {
             {
                 const std::lock_guard<std::mutex> lock(cout_mutex_);
                 Log::out() << "Input parameters would lead to an overflow in a sieve algorithm. Use template with bigger data type if possible (e.g. uint128_t). Mission aborted.\n";
@@ -560,7 +560,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
     if (Begin> End) {
         {
             const std::lock_guard<std::mutex> lock(cout_mutex_);
-            Log::out() << "Begin greater than End. Mission aborted.\n";
+            Log::out() << "Begin greater than End. Some integer overflow suspected. Mission aborted.\n";
             abort();
         }
     }
@@ -863,7 +863,7 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
     SetSwitchPoint(Begin, End, Threads_);
 
     Untouched_ = Begin;
-
+    FullyCompleted_ = 0;
 
     // T k = Begin/Primorial1_;
     // Tkp_ = k * Primorial1_;  // primorial p multiplied by some integer k
@@ -929,7 +929,7 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
     Log::out() << "Primes ratio (after sieve)  : " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";
 
 
-    Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() <<  " [s]: " << GF.DurationSeconds() <<"\n";
+    Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() <<  " [s]: " << GF.DurationSeconds() <<"\n\n";
  
     if (res!=0) return res; 
     return 0;

@@ -35,3 +35,5 @@ src/LiCorrectionNew_*.txt
 src/SliceTBalance.txt
 bin/prime17-19
 bin/prime17-23
+bin/prime17clang
+bin/prime17gcc

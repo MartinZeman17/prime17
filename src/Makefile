@@ -2,7 +2,7 @@
 #linking was not working due to bad order of parameters for g++
 
 # release version
-# CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3
+CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3
 # CPPFLAGS := -DNDEBUG -Wall -Wextra -pedantic -Wconversion -Wdeprecated-declarations -O3 -fsanitize=address
 
 # debug version
@@ -16,7 +16,6 @@ prefix = /usr/local
 BINDIR := ../bin/
 # output binary 
 BIN := $(BINDIR)prime17
-# BIN := $(BINDIR)prime17
 
 # source files
 SRCS := \
@@ -62,16 +61,16 @@ CC := gcc
 # CC := clang
 # C++ compiler
 CXX := g++
-# CXX := clang
+# CXX := clang++
 # linker
 LD := g++
-# LD := clang
+# LD := clang++
 # tar
 TAR := tar
 
 # C flags
 # ToDo these flags are applied to a c file
-CFLAGS := -std=c18
+CFLAGS := -std=c17
 
 # C++ flags
 CXXFLAGS := -std=c++17
@@ -80,7 +79,7 @@ CXXFLAGS := -std=c++17
 # C/C++ flags
 
 # linker libs
-LDLIBS := -lgmp -lgmpxx -lstdc++fs -lpthread -lcurl -ljsoncpp -lncursesw 
+LDLIBS := -lgmp -lgmpxx -lstdc++fs -lpthread -lcurl -ljsoncpp -lncursesw
 
 # linker flags
 # static linking improves performance of Miller-Rabin test by ~2%

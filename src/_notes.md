@@ -1,6 +1,5 @@
 Tests:
 - git remote ma branch work???
-- oprava newBegin na puvodni nazvy
 - podivat se na db na datovy typ new begin ???
 // ToDo odstinit sito od mereni, pocitat v cyklu ??
 // generovat nahodne ulohy a porovnavat casy a vysledky
@@ -10,14 +9,11 @@ Tests:
 // print ext progress - vypocet casu dl zpracovane casti vlaknem
 // nacitani threads a prdcasny exit nekterych vlaken, co hodnota 0?
 // lepsi vypocet switch pointu dle aktuální velocity???
-corner case checker 0,0 1,1, 2,2 3,3 0,19, 0, 21, primorial, u 64 na sieve 128
+- corner case checker 0,0 1,1, 2,2 3,3 0,19, 0, 21, primorial, u 64 na sieve 128
 - test na sieve u konce hranice 2 na 128  a testy overflow
 - test n sieve delky 2
 - test na sieve, kde je end = (k * primorial) -1
-begin > end
-attribut processed ok na delku, overflow?, 
-prejmenovat to process
-performance clang
+- attribut processed ok na delku, overflow?, 
 
 ToDo Gmp:
 - vlastní překlad gmp s bechmarkem 
@@ -30,20 +26,14 @@ ToDo Gmp:
 - zjistit, v cem je leppsi mpfr knihovna a zda neobsahuje lepsi kody
 
 ToDo Cpp: 
-- CLang warnings a performance
-- test kde beg > end
 - kontrola bits 64 65 128
 - projit ??? a overflow
-- dev param do make
 - optimalizovane testy BPSW ??
 - Todo: nefunční web prime17 při startu spadne do registrace. Testy, zda funguje prime17 web a zda je config file naplnený
-- co je nejrychlesji test na oblast 48-52
-- doplnit asseert
 - doplnit const
 - Podívat se na virtuální destruktory a rule of the three or five
 - vylepšit try catch
-- cmake, autoconf?
-- versioning
+- cmake
 - PrimeStorage  - použít config dir
 - prejít na c++20? a nové threads se zastavováním a moduly
 - use cpp wrapper for ncurses? https://stackoverflow.com/questions/53857540/using-native-c-wrappers-for-ncurses-how-can-i-create-a-menu-submenu-system
