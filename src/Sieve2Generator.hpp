@@ -258,7 +258,7 @@ uint32_t * Sieve2Generator<T>::SieveInit(const unsigned int SieveMaxPrime, uint3
     Log::out() << "Sieve Prime:    " << MaxPrime << "\n";
     Log::out() << "Primorial:      " << utils_str::FormatUInt(Primorial) << "\n";
     Log::out() << "Coprimes #:     " << utils_str::FormatUInt(TACount) << "\n";
-    Log::out() << "Effectivity:    " << MeasuredEffectivity  << "%\n"; 
+    Log::out() << "Effectivity:    " << utils_str::FormatNumber(MeasuredEffectivity, 1, 2) << " %\n"; 
 
     return DestArr;
 }
@@ -770,17 +770,17 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
     //if (duration.count()!=0)
     {
         const std::lock_guard<std::mutex> lock(cout_mutex_);
-        Log::out() << "Progress   :    " << FullyCompleted_ << "\n"; 
+        Log::out() << "Progress:       " << FullyCompleted_ << "\n"; 
         Log::out() << PId << "> Sieve (";
         if constexpr(std::is_same<T, uint64_t>::value) {  
-            Log::out() << "64";
+            Log::out() << "64): ";
         } else if constexpr(std::is_same<T, uint128_t>::value){
-            Log::out() << "128";
+            Log::out() << "128):";
         } else {
             assert(false);
             abort();
         }
-        Log::out() << "-bit) duration: " << duration.count() << " s = " << utils_str::FormatNumber( (float) duration.count() / 60.0f, 1,1) << " m" << "\n";
+        Log::out() << " " << utils_str::FormatNumber( (float) duration.count(), 1, 1) << " s =~ " << utils_str::FormatNumber( (float) duration.count() / 60.0f, 1,1) << " m" << "\n";
     }
 
     RETURN(0);
@@ -833,7 +833,7 @@ T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned in
             // long double SmallPrimorials = ((((End - (SPOffset + Begin) + 1)) / (long double) Primorial1_) ) /  (long double) threads; 
             long double SmallPrimorials = ((  (long double) ((End - (SPOffset + Begin) + 1)) / (long double) Primorial1_) ) /  (long double) threads; 
             // Log::out() << "Each core is supposed to process " << Cnt2perCPU << " large primorial(s) and ~" << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorials.\n";
-            Log::out() << "Each core:      " << Cnt2perCPU << " large + ~" << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorial(s)\n";
+            Log::out() << "Each core:      " << Cnt2perCPU << " large + ~ " << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorial(s)\n";
 
 
             SwitchPointOffset_ = SPOffset; 
@@ -857,7 +857,7 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
     // if (Threads_ > 1) Log::out() << "s";
     // Log::out() << " out of " << processor_count << " available logical CPUs.\n";
     
-    Log::out() << "Cores usage:    " << Threads_ << " / " << processor_count << " = " << (unsigned int) (100 * Threads_)/processor_count << "% CPU\n";
+    Log::out() << "Cores usage:    " << Threads_ << " / " << processor_count << " =~ " << (unsigned int) (100 * Threads_)/processor_count << " % CPU\n";
 
 
     SetSwitchPoint(Begin, End, Threads_);
@@ -870,8 +870,8 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
     Percent_=-1.0;
 
     Log::out()  << "Sieve Begin:    " << utils_str::FormatUInt(Begin) << "\n";        
-    Log::out()  << "Sieve End  :    " << utils_str::FormatUInt(End) <<  "\n";
-    Log::out()  << "End-Begin  :    " << utils_str::FormatUInt(End - Begin) << "\n";        
+    Log::out()  << "Sieve End:      " << utils_str::FormatUInt(End) <<  "\n";
+    Log::out()  << "Count:          " << utils_str::FormatUInt(End - Begin + 1) << "\n";        
     if ((uint128_t) End / ( (uint128_t) UINT64_MAX+  (uint128_t)1) >1) {
         Log::out() << "A serious warning!!! End looks too big." << "\n";
     }    
@@ -921,16 +921,17 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
         Log::out() << " = " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     }
 
-    // long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( TestArrayCount_ / (long double) Primorial1_) * (End - Begin + 1));
-    long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( (long double) TestArrayCount_ / (long double) Primorial1_) * (long double)(End - Begin + 1));
-    Log::out() << "Primes: " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
+    // long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( (long double) TestArrayCount_ / (long double) Primorial1_) * (long double)(End - Begin + 1));
+    Log::out() << "Primes:         " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     // Log::out() << "Primes ratio (from interval): " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (End - Begin + 1), 6,3) << "%\n";
-    Log::out() << "Primes ratio (from interval): " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (long double)(End - Begin + 1), 6,3) << "%\n";
-    Log::out() << "Primes ratio (after sieve)  : " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";
+    Log::out() << "Primes ratio:   " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (long double)(End - Begin + 1), 1,3) << " %\n";
+    // Log::out() << "Primes ratio (after sieve)  : " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";
 
 
-    Log::out() << "Multithreading Sieve Duration [m]: " << GF.DurationMinutes() <<  " [s]: " << GF.DurationSeconds() <<"\n\n";
- 
+    Log::out() << "Sieve duration: " << utils_str::FormatNumber(GF.DurationSeconds(), 1, 1) << " s =~ ";
+    Log::out() << utils_str::FormatNumber(GF.DurationMinutes(),1 ,1) <<" m\n\n";
+    // Log::out() << "-bit) duration: " << duration.count() << " s = " << utils_str::FormatNumber( (float) duration.count() / 60.0f, 1,1) << " m" << "\n";   
+
     if (res!=0) return res; 
     return 0;
 }

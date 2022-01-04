@@ -37,22 +37,18 @@ bool CheckCornesCases(std::vector<TestCase<T>> TC) {
     for (auto tc :TC ) {
         clsNewWork<T> NewWork;
         T Offset;
-        if (tc.Power2 == -1) {
-            NewWork.c_power2 = 0;
-            Offset = 0;
-        } else {
-            NewWork.c_power2 = tc.Power2;
-            Offset = NewWork.Offset(); 
-        }
+        NewWork.power2 = tc.Power2;
+        Offset = NewWork.Offset(); 
         NewWork.new_begin = tc.BegOffset;
         NewWork.new_end = tc.EndOffset;
 
         NewWork.LogHeader();
 
-        GeneratorFunctionBitStatistics<T> BSMT(NewWork.c_power2);
+        GeneratorFunctionBitStatistics<T> BSMT(NewWork.power2);
         Sieve.ResetClock();
         BSMT.ResetClock();
         Sieve.Work2MT(Offset + NewWork.new_begin, Offset + NewWork.new_end, BSMT);
+        
 
     }
 
@@ -64,7 +60,7 @@ bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatisti
     bool res;
     // #if NDEBUG
 
-    if ( NewWork.c_power2==50 && NewWork.new_begin == 562948879679488 && NewWork.new_end == 562951027163136 ) {        
+    if ( NewWork.power2==50 && NewWork.new_begin == 562948879679488 && NewWork.new_end == 562951027163136 ) {        
         res = (    
             BSMT.CntPrimesWithNumOfSetBits(0)==    0 &&
             BSMT.CntPrimesWithNumOfSetBits(1)==    0 &&
@@ -133,7 +129,7 @@ bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatisti
             BSMT.CntPrimesWithNumOfSetBits(64)==    0
             );
     }
-    else if ( NewWork.c_power2==63 && NewWork.new_begin == 4611686017353646080 && NewWork.new_end == 4611686019501129728 ) {
+    else if ( NewWork.power2==63 && NewWork.new_begin == 4611686017353646080 && NewWork.new_end == 4611686019501129728 ) {
         res = (    
             BSMT.CntPrimesWithNumOfSetBits(0)==    0 &&
             BSMT.CntPrimesWithNumOfSetBits(1)==    0 &&
@@ -226,7 +222,7 @@ bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatisti
 
 template <class T>
 GeneratorFunctionBitStatistics<T> RunOld(clsNewWork<T> NewWork){
-    GeneratorFunctionBitStatistics<T> BSMT(NewWork.c_power2);
+    GeneratorFunctionBitStatistics<T> BSMT(NewWork.power2);
     SieveGenerator<uint64_t> Sieve;
     Sieve.Threads(100);
     // Sieve.Threads(12);
@@ -246,7 +242,7 @@ GeneratorFunctionBitStatistics<T> RunNew(clsNewWork<T> NewWork){
     Sieve.Threads(100);
     // Sieve.Threads(12);
 
-    GeneratorFunctionBitStatistics<T> BSMT(NewWork.c_power2);
+    GeneratorFunctionBitStatistics<T> BSMT(NewWork.power2);
     Sieve.ResetClock();
     BSMT.ResetClock(); //???
     Sieve.Work2MT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
@@ -277,9 +273,9 @@ bool RunCheckComputationNew(){
     Log::out() << "Running check computation (better safe than sorry).\n";
         
     clsNewWork<T> NewWork;    
-    NewWork.c_power2 = 63;
-    // NewWork.c_power2 = 50;    
-    NewWork.new_begin = static_cast<unsigned long long>(1) << (NewWork.c_power2-1) ;
+    NewWork.power2 = 63;
+    // NewWork.power2 = 50;    
+    NewWork.new_begin = static_cast<unsigned long long>(1) << (NewWork.power2-1) ;
     NewWork.new_end   = NewWork.new_begin + C_CheckLength;
     NewWork.new_begin = NewWork.new_begin - C_CheckLength;
     
@@ -290,8 +286,8 @@ bool RunCheckComputationNew(){
 
     long double duration = BSMT.DurationSeconds();
     Log::out() << "Duration [s]: " <<  utils_str::FormatNumber(duration, 10, 1);
-    Log::out() << " \t~" << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDuration, 4,1)  << "% (release)";
-    Log::out() << " \t~" << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDurationDebug, 4,1)  << "% (debug)" << "\n";
+    Log::out() << " \t~" << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDuration, 4,1)  << " % (release)";
+    Log::out() << " \t~" << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDurationDebug, 4,1)  << " % (debug)" << "\n";
 
     // log correct expectation to the log file
     // for(unsigned int i=0; i<=64; i++){
@@ -319,11 +315,11 @@ void CompareOldNew(clsNewWork<T> NewWork){
 bool RunCheckComputation(){
     return RunCheckComputationNew<uint64_t>();
     // clsNewWork<uint128_t> NewWork;
-    // NewWork.c_power2=63;
+    // NewWork.power2=63;
     // NewWork.newBegin_ = NewWork.Offset()-1;
     // NewWork.newEnd_ = NewWork.Offset()+100000000;
     
-    // NewWork.c_power2=31;
+    // NewWork.power2=31;
     // NewWork.newBegin_ = 20;
     // NewWork.newEnd_ = 3000000031;
     
@@ -336,25 +332,23 @@ bool RunCheckComputation(){
 bool RunCornerCases(){
     
     std::vector<TestCase<uint64_t>> TC64 = {
-        {-1,0,0,0}, {-1,1,1,0}, {-1,2,2,0}, {-1,3,3,0}, {-1,4,4,0},
-        {-1,1,29,0}, {-1,2,100,0}, 
+        {-1,0,0,0}, {-1,1,1,0}, 
+        {-1,2,2,1}, {-1,3,3,1}, {-1,4,4,0},
+        {-1,1,29,9}, {-1,2,100,12}, 
         {-1,9699689,9699689,0}, {-1,9699690,9699690,0}, {-1,9699689,9699690,0},
-        {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 10, 0 }, 
-        {32, 0, 10,0}, 
-        // {63, (static_cast<uint64_t>(1) << 63) -1, (static_cast<uint64_t>(1) << 63) + 10, 0 },
-        // {64, 0 , 10, 0 },
-        // {127, 0 , 10, 0 }
+        {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 15, 1 }, 
+        {32, 0, 15, 1}, 
     };
 
     std::vector<TestCase<uint128_t>> TC128 = {
         {-1,0,0,0}, {-1,1,1,0}, {-1,2,2,0}, {-1,3,3,0}, {-1,4,4,0},
         {-1,1,29,0}, {-1,2,100,0}, 
         {-1,9699689,9699689,0}, {-1,9699690,9699690,0}, {-1,9699689,9699690,0},
-        {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 10, 0 }, 
+        {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 10, 0}, 
         {32, 0, 10,0}, 
-        {63, (static_cast<uint64_t>(1) << 63) -1, (static_cast<uint64_t>(1) << 63) + 10, 0 },
-        {64, 0 , 100, 0 },
-        {127, 0 , 100, 0 }
+        {63, (static_cast<uint64_t>(1) << 63) -1, (static_cast<uint64_t>(1) << 63) + 10, 0},
+        {64, 0 , 100, 0},
+        {127, 0 , 100, 0}
     };
 
     CheckCornesCases<uint64_t>(TC64);
@@ -365,17 +359,17 @@ bool RunCornerCases(){
    
     // // test the position of a primorial start, similar to 0
     // // check FullyCompleted == 0
-    // NewWork.c_power2 = 0;
+    // NewWork.power2 = 0;
     // NewWork.new_begin = 9699690 - NewWork.Offset();
     // NewWork.new_end = NewWork.new_begin + 0;
 
-    // NewWork.c_power2 = 0;
+    // NewWork.power2 = 0;
     // NewWork.new_begin = 9699690 + 10 - NewWork.Offset();
     // NewWork.new_end = NewWork.new_begin + 1000000000;
 
 
 
-    // NewWork.c_power2=0;
+    // NewWork.power2=0;
     // NewWork.newBegin_ = 9699690 - 1 - NewWork.Offset();
     // NewWork.newEnd_ = NewWork.newBegin_ + 1;
 

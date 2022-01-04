@@ -43,30 +43,43 @@ class clsNewWork {
     unsigned long long asking_worker_id=0; 
     T new_begin=0;
     T new_end=0;
-    unsigned int c_power2=0;
+    int power2=-1;
     unsigned long long new_work_id=0;
     bool ParsedOK=false;
 
     inline T Offset() const noexcept {
+        assert(power2>=-1);
         if (std::is_same_v<T, uint64_t>) { 
-            assert(c_power2<=63);
+            assert(power2<=63);
         } else {
-            assert(c_power2<=127);
+            assert(power2<=127);
         }
-        return static_cast<T>(1) << c_power2;
+        if (power2 == -1) {
+            return 0;
+        } else {
+            return static_cast<T>(1) << power2;
+        }
     }
 
     void LogHeader() const {
         Log::out() << "Started at:     " << utils::GetCurrentDateTime() << "\n";
-        Log::out() << "Power:          " << c_power2 << "\n";
-        assert(c_power2 <= 127);
+        Log::out() << "Power:          ";
+        if (power2 >= 0) {
+            Log::out() << power2;
+        }
+        Log::out() << "\n";
+        assert(power2 <= 127);
         
-        Log::out() << "Begin (offset): " << utils_str::FormatUInt(new_begin) << "\n";
-        Log::out() << "End   (offset): " << utils_str::FormatUInt(new_end) << "\n";
+        if (power2 >= 0) {
+            Log::out() << "Begin (offset): " << utils_str::FormatUInt(new_begin) << "\n";
+            Log::out() << "End   (offset): " << utils_str::FormatUInt(new_end) << "\n";
 
-        // unsigned long long Offset = static_cast<unsigned long long>(1) << c_power2;
-        Log::out() << "Begin:         " << utils_str::FormatNumber( ((long double) 100.0 * (long double) new_begin ) / (long double) Offset(), 13,9) << "%\n";
-        Log::out() << "End:           " << utils_str::FormatNumber( ((long double) 100.0 * (long double) new_end ) / (long double) Offset(), 13,9) << "%\n";
+            Log::out() << "Begin:          " << utils_str::FormatNumber( ((long double) 100.0 * (long double) new_begin ) / (long double) Offset(), 13,9) << "%\n";
+            Log::out() << "End:            " << utils_str::FormatNumber( ((long double) 100.0 * (long double) new_end ) / (long double) Offset(), 13,9) << "%\n";
+        } else {
+            Log::out() << "Begin:          " << utils_str::FormatUInt(new_begin) << "\n";
+            Log::out() << "End:            " << utils_str::FormatUInt(new_end) << "\n";
+        }
     }
 };
 
@@ -99,7 +112,7 @@ std::string WebWork::PrepareWebPostString(clsNewWork<uint64_t> &NewWork, Generat
     post.append(",");
     post.append(std::to_string(NewWork.task_id));
     post.append(",");
-    post.append(std::to_string(NewWork.c_power2));    
+    post.append(std::to_string(NewWork.power2));    
     post.append(",");
     post.append(std::to_string(NewWork.new_begin));
     post.append(",");
@@ -122,7 +135,7 @@ clsNewWork<uint64_t> WebWork::ParseJsonNewWork(const std::string &JSON){
         ret.asking_worker_id = (unsigned)         std::stoll(obj[0]["asking_worker_id"].asString(), nullptr);
         ret.new_begin =        (unsigned)         std::stoll(obj[0]["new_begin"].asString(), nullptr);
         ret.new_end =          (unsigned)         std::stoll(obj[0]["new_end"].asString(), nullptr);
-        ret.c_power2 = (unsigned int)             std::stoul(obj[0]["power2"].asString(), nullptr);
+        ret.power2 = (unsigned int)             std::stoul(obj[0]["power2"].asString(), nullptr);
         ret.new_work_id =   (unsigned)            std::stoll(obj[0]["new_work_id"].asString(), nullptr);
         ret.ParsedOK = true;
     }  catch (const std::exception& e){
@@ -132,7 +145,7 @@ clsNewWork<uint64_t> WebWork::ParseJsonNewWork(const std::string &JSON){
         return ret;
     }
     return ret;
-    // [{"task_id":"1","asking_worker_id":"1","newBegin_":"0","newEnd_":"3","c_power2":"2","new_work_id":"62"}]   
+    // [{"task_id":"1","asking_worker_id":"1","newBegin_":"0","newEnd_":"3","power2":"2","new_work_id":"62"}]   
 }
 
 // template <class T>
@@ -182,8 +195,8 @@ clsNewWork<uint64_t> WebWork::GetWebWork(WorkerStruct &w){
 void WebWork::ProcessWebWork(clsNewWork<uint64_t> &NewWork, WorkerStruct &w){
     NewWork.LogHeader();
 
-    if (NewWork.c_power2 <= 63) {        
-        GeneratorFunctionBitStatistics<uint64_t> BSMT(NewWork.c_power2);
+    if (NewWork.power2 <= 63) {        
+        GeneratorFunctionBitStatistics<uint64_t> BSMT(NewWork.power2);
         SieveGenerator<uint64_t> Sieve(C_SieveGeneratorDefaultMaxPrime);
 
         // w.LoadThreads();
@@ -212,7 +225,7 @@ void WebWork::ProcessWebWork(clsNewWork<uint64_t> &NewWork, WorkerStruct &w){
 
     } else {
         Log::out() << "128 bit integers not ready yet, but it is supposed to be quite an easy task ..." << "\n";
-        // GeneratorFunctionBitStatistics BSMT(NewWork.c_power2);
+        // GeneratorFunctionBitStatistics BSMT(NewWork.power2);
         // SieveGenerator<uint128_t> Sieve(C_SieveGeneratorDefaultMaxPrime);
     }
 }
