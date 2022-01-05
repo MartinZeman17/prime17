@@ -32,7 +32,7 @@ bool CheckCornesCases(std::vector<TestCase<T>> TC) {
 
     Sieve2Generator<T> Sieve;
     Sieve.Threads(100);
-    Sieve.Threads(12);
+    // Sieve.Threads(12);
 
     for (auto tc :TC ) {
         clsNewWork<T> NewWork;
@@ -48,6 +48,11 @@ bool CheckCornesCases(std::vector<TestCase<T>> TC) {
         Sieve.ResetClock();
         BSMT.ResetClock();
         Sieve.Work2MT(Offset + NewWork.new_begin, Offset + NewWork.new_end, BSMT);
+
+        if (BSMT.PrimesCnt() != tc.Primes ) {
+            Log::out() << "Check of the sieve failed! There is something wrong in the world today, something deeply troubling. Mission aborted." << BSMT.PrimesCnt() << "\t" << tc.Primes << "\n";
+            abort();
+        };
         
 
     }
@@ -314,19 +319,6 @@ void CompareOldNew(clsNewWork<T> NewWork){
 
 bool RunCheckComputation(){
     return RunCheckComputationNew<uint64_t>();
-    // clsNewWork<uint128_t> NewWork;
-    // NewWork.power2=63;
-    // NewWork.newBegin_ = NewWork.Offset()-1;
-    // NewWork.newEnd_ = NewWork.Offset()+100000000;
-    
-    // NewWork.power2=31;
-    // NewWork.newBegin_ = 20;
-    // NewWork.newEnd_ = 3000000031;
-    
-    // CompareOldNew(NewWork);
-    // RunNew(NewWork);  
-    // return true; //???
-
 }
 
 bool RunCornerCases(){
@@ -337,44 +329,28 @@ bool RunCornerCases(){
         {-1,1,29,9}, {-1,2,100,12}, 
         {-1,9699689,9699689,0}, {-1,9699690,9699690,0}, {-1,9699689,9699690,0},
         {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 15, 1 }, 
-        {32, 0, 15, 1}, 
+        {32, 0, 15, 1} 
     };
 
     std::vector<TestCase<uint128_t>> TC128 = {
-        {-1,0,0,0}, {-1,1,1,0}, {-1,2,2,0}, {-1,3,3,0}, {-1,4,4,0},
-        {-1,1,29,0}, {-1,2,100,0}, 
+        {-1,0,0,0}, {-1,1,1,0}, 
+        {-1,2,2,1}, {-1,3,3,1}, {-1,4,4,0},
+        {-1,1,29,9}, {-1,2,100,12}, 
         {-1,9699689,9699689,0}, {-1,9699690,9699690,0}, {-1,9699689,9699690,0},
-        {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 10, 0}, 
-        {32, 0, 10,0}, 
-        {63, (static_cast<uint64_t>(1) << 63) -1, (static_cast<uint64_t>(1) << 63) + 10, 0},
-        {64, 0 , 100, 0},
-        {127, 0 , 100, 0}
+        {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 15, 1 }, 
+        {32, 0, 15, 1},
+        {63, (static_cast<uint64_t>(1) << 63) -1, (static_cast<uint64_t>(1) << 63) + 0, 0},
+        {63, (static_cast<uint64_t>(1) << 63) -1, (static_cast<uint64_t>(1) << 63) + 10, 0}, 
+        {64, 0, 0, 0},
+        {64, 0 , 1, 0},
+        {64, 0 , 13, 1},
+        {64, 13 , 13, 1},
+        {64, 0 , 100, 5},
+        {127, 0 , 100, 3}
     };
 
     CheckCornesCases<uint64_t>(TC64);
     CheckCornesCases<uint128_t>(TC128);
 
-    
-    // clsNewWork<uint64_t> NewWork;
-   
-    // // test the position of a primorial start, similar to 0
-    // // check FullyCompleted == 0
-    // NewWork.power2 = 0;
-    // NewWork.new_begin = 9699690 - NewWork.Offset();
-    // NewWork.new_end = NewWork.new_begin + 0;
-
-    // NewWork.power2 = 0;
-    // NewWork.new_begin = 9699690 + 10 - NewWork.Offset();
-    // NewWork.new_end = NewWork.new_begin + 1000000000;
-
-
-
-    // NewWork.power2=0;
-    // NewWork.newBegin_ = 9699690 - 1 - NewWork.Offset();
-    // NewWork.newEnd_ = NewWork.newBegin_ + 1;
-
-
-    // CompareOldNew(NewWork);
-    return true; //???
-
+    return true;
 }

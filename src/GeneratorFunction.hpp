@@ -20,8 +20,6 @@ template <typename T>
 class GeneratorFunctionAbstract{
     protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> BeginTime_; //  = std::high_resolution_clock::now(); 
-    
-    public:
     unsigned long long PrimesCnt_ = 0;
     unsigned long long ProbablePrimesCnt_ = 0;
 
