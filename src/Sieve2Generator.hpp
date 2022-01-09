@@ -29,13 +29,12 @@ using namespace primecount;
 // const std::vector <long double> C_Effectivity({0.5, 0.333333, 0.266667, 0.228571, 0.207792,  0.191808, 0.180525, 0.171024, 0.163588, 0.157947, 0.152852});
 
 // use Eratosthenes sieve with the following primorial
-// bigger primorial = better efficiency, however at the end some threads have nothing to do
-const unsigned int C_Sieve2GeneratorPrime1=19;
-const unsigned int C_Sieve2GeneratorPrime2=23;
-
+// bigger primorial = better efficiency, however near the end some threads have nothing to do
 constexpr unsigned int C_Prime1 = 19;
 constexpr unsigned int C_Prime2 = 23;
 
+constexpr size_t CTestArray_Coprimes2 = 1;  // primorial 2
+constexpr size_t CTestArray_Coprimes3 = 2;  // primorial 6
 constexpr size_t CTestArray_Coprimes19 = 1658880;  // primorial   9 699 690;
 constexpr size_t CTestArray_Coprimes23 = 36495360; // primorial 223 092 870;
 
@@ -102,39 +101,28 @@ class Sieve2Generator {
     T SwitchPoint_ = 0;
     T SetSwitchPoint(const T & Begin, const T & End, unsigned int processor_count);
     
-    long double Percent_;
     T FullyCompleted_ = 0;  // how many numbers to process => growing from 0 to End - Begin + 1
     std::mutex FullyCompleted_mutex_;
 
 
     uint32_t * SieveInit(const unsigned int SieveMaxPrime, uint32_t & MaxPrime, uint32_t & Primorial, size_t & CoprimesCount);    
     void PrintProgress(const unsigned int &PId, const long double &Percent, const long double &MinTillEnd) const;
-    // void PrintProgress2(const unsigned int PId, const long double BPerc, const long double EPerc, bool Finished) noexcept;
-    // long double inline ComputePercent(const T Begin, const T End, const T X) const noexcept;
 
     uint32_t* BinarySearch(uint32_t BinarySearchValue, uint32_t * Array, size_t ArrayCount) const noexcept;
 
     T Work2MT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract<T>> & GF, const std::string PId);
     std::chrono::time_point<std::chrono::high_resolution_clock> BeginTime_; //  = std::high_resolution_clock::now(); 
 
-    
-    
     std::mutex cout_mutex_;
-
     std::chrono::time_point<std::chrono::high_resolution_clock> StartTime_;
 
-    // unsigned int Threads_;
 
     public:
-    // enSieveLength GetSieveLength() const noexcept { return SieveLength_; }
     enSieveLength SetSieveLength(const enSieveLength DesiredSieveLength) noexcept;
-    // uint32_t Primorial() const noexcept { return Primorial_; }
 
     Sieve2Generator();
     ~Sieve2Generator();
 
-    // T Work(const T & Begin, const T & End, GeneratorFunctionAbstract & GF) const;
-    // multithreading version
     T Work2MT(const T & Begin, const T & End, GeneratorFunctionAbstract<T> & GF);
 
 
@@ -149,9 +137,6 @@ class Sieve2Generator {
     long double DurationSeconds() const noexcept;
 
 };
-
-// #include "SieveGeneratorT.cpp"
-
 
 // called from constructor and threads where Untouched_mutex_ locks other threads and prevents changes
 // for more complex scenarios consider an independent lock or better  recursivemutex_
@@ -217,7 +202,11 @@ uint32_t * Sieve2Generator<T>::SieveInit(const unsigned int SieveMaxPrime, uint3
         CoprimesCount = CTestArray_Coprimes19;
     } else if ( MaxPrime == 23 ) {
         CoprimesCount = CTestArray_Coprimes23;
-    }
+    } else if (MaxPrime == 2) {
+        CoprimesCount = CTestArray_Coprimes2;
+    } else if (MaxPrime == 3) {
+        CoprimesCount = CTestArray_Coprimes3;        
+    } else abort();
 
     // Allocate one ore position and put 0 just after the end of coprimes array.
     // This memory is not expected to be accessed by standard algorithm (only pointer may point to this memmory).
@@ -247,7 +236,7 @@ uint32_t * Sieve2Generator<T>::SieveInit(const unsigned int SieveMaxPrime, uint3
         }
         i+=2;
     }
-    *(iter) = 0;  // put 0 after the coprimes array as a last item
+    *(iter) = 0;  // put 0 after the coprimes array as the last item (never accessed, but referrenced to)
     assert(TACount==TestArrayCount1_ || TACount==TestArrayCount2_);
 
     mpz_clear(mpz_primor);
@@ -520,7 +509,6 @@ Update(const unsigned int PId, const long double BPerc, const long double EPerc)
 }
 
 
-
 template <class T>
 T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract<T>> & GF, const std::string PId) {
     auto TBegin = high_resolution_clock::now();
@@ -557,13 +545,14 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         }
     }
 
-    if (Begin> End) {
+    if ( Begin > End ) {
         {
             const std::lock_guard<std::mutex> lock(cout_mutex_);
             Log::out() << "Begin greater than End. Some integer overflow suspected. Mission aborted.\n";
             abort();
         }
     }
+
 
     while(true) {
         // local thread copies. Untouched_ is locked, so it is used directly (main purpose is to update Untouched_).  
@@ -574,6 +563,8 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         uint32_t Primorial;
         uint32_t MaxPrime;
 
+        T FullyCompleted; //local copy
+
         // ordinary local variables
         T kp;
         T ToProcess;
@@ -583,7 +574,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
             const std::lock_guard<std::mutex> lock(Untouched_mutex_);
 
             // evaluate break condition first
-            if (Untouched_ > End) break;  // ??? is this needed ???
+            if (Untouched_ > End) break;  // when other thread takes last part, this condition ensures no work for this thread
  
             if (Untouched_ == Begin) StartTime_ = high_resolution_clock::now();
 
@@ -714,16 +705,16 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         }
 
         // test primorial primes
-        // MaxPrime = 2, Primorial = 2, TestArray = [1] -> ??? ToDo test
+        // Corner case: MaxPrime = 2, Primorial = 2, TestArray = [1]
         // Beg = 0, k=0 - should test 0+1, k=1, should test 1*2+1, k=3  
-        assert(Primorial>MaxPrime);
+        assert(Primorial>=MaxPrime);
         // ToDo c++20 constexpr vector
         assert(MaxPrime<=43);
         static const std::vector <unsigned long long> CPrimorial2_Primes({2,3,5,7,11,13,17,19,23,29,31,37,41,43});
         if (Untouched <= MaxPrime) {
             // test all primes from primorial construction between Begin and End as the algorithm does not test them
             for (auto & Prime : CPrimorial2_Primes) {
-                if (Untouched<=Prime) {
+                if (Untouched<=Prime && Prime<=EndForPrint) {
                     if (Prime <= End && Prime <= MaxPrime) {
                         utils_mpz::mpz_set_ull(mpz_X, Prime);
                         if (GF->GenFunct((T) Prime, mpz_X)!=0) {
@@ -758,11 +749,12 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
         {
             const std::lock_guard<std::mutex> lock(FullyCompleted_mutex_);
             FullyCompleted_ += ToProcess;
+            FullyCompleted = FullyCompleted_;
         }
 
-        long double NewPerc = ppb.ComputePercent(Begin, End, Begin + FullyCompleted_ - 1);
+        long double NewPerc = ppb.ComputePercent(Begin, End, Begin + FullyCompleted - 1);
         ppb.UpdateOverallProgress(NewPerc);
-    }
+    }  // end of while
 
     auto TEnd = high_resolution_clock::now();
     auto duration = duration_cast<seconds>(TEnd - TBegin);
@@ -770,7 +762,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
     //if (duration.count()!=0)
     {
         const std::lock_guard<std::mutex> lock(cout_mutex_);
-        Log::out() << "Progress:       " << FullyCompleted_ << "\n"; 
+        // Log::out() << "Progress:       " << FullyCompleted_ << "\n";  // use mutex
         Log::out() << PId << "> Sieve (";
         if constexpr(std::is_same<T, uint64_t>::value) {  
             Log::out() << "64): ";
@@ -787,8 +779,6 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
 
 }
 
-
-
 template <class T>
 T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned int threads){
     
@@ -804,9 +794,8 @@ T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned in
         T Cnt2perCPU;
         T Primorials2 = Begin / Primorial2_;
         if (Primorials2 * Primorial2_ < Begin )  Primorials2++;
-        T BeginOffset2 = Primorials2 * Primorial2_;  // overflow ???
-
-        // overflow, Begin is near TMax barrier
+        T BeginOffset2 = Primorials2 * Primorial2_;  // overflow may happen and is subject to test
+        // overflow check, Begin is near TMax barrier
         if (BeginOffset2 >= Begin) {
             T Len = 0;
             if (BeginOffset2 < End) {
@@ -823,18 +812,15 @@ T Sieve2Generator<T>::SetSwitchPoint(const T & Begin, const T & End, unsigned in
             
             // if BeginOffset2 is too close to Primorial, may be harmful
             // ToDo: fine-tuning for very small BeginOffset2 Compare with ending part
-            // if (SPOffset > 0) SPOffset += BeginOffset2; 
             if (SPOffset>0) {
                 SetSieveLength(Sieve2Generator<T>::enSieveLength::SieveLong);
             } else {
                 SetSieveLength(Sieve2Generator<T>::enSieveLength::SieveShort);
             }
 
-            // long double SmallPrimorials = ((((End - (SPOffset + Begin) + 1)) / (long double) Primorial1_) ) /  (long double) threads; 
             long double SmallPrimorials = ((  (long double) ((End - (SPOffset + Begin) + 1)) / (long double) Primorial1_) ) /  (long double) threads; 
             // Log::out() << "Each core is supposed to process " << Cnt2perCPU << " large primorial(s) and ~" << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorials.\n";
             Log::out() << "Each core:      " << Cnt2perCPU << " large + ~ " << utils_str::trim_copy(utils_str::FormatNumber(SmallPrimorials, 3,1)) << " small primorial(s)\n";
-
 
             SwitchPointOffset_ = SPOffset; 
             SwitchPoint_ =  SPOffset + Begin;
@@ -853,28 +839,27 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
     T res = 0;
 
     const auto processor_count = std::thread::hardware_concurrency();
-    // Log::out() << "Using " << (unsigned int) (100 * Threads_)/processor_count << "% CPU = spawning " << Threads_ << " thread";    
-    // if (Threads_ > 1) Log::out() << "s";
-    // Log::out() << " out of " << processor_count << " available logical CPUs.\n";
-    
     Log::out() << "Cores usage:    " << Threads_ << " / " << processor_count << " =~ " << (unsigned int) (100 * Threads_)/processor_count << " % CPU\n";
-
 
     SetSwitchPoint(Begin, End, Threads_);
 
     Untouched_ = Begin;
     FullyCompleted_ = 0;
 
-    // T k = Begin/Primorial1_;
-    // Tkp_ = k * Primorial1_;  // primorial p multiplied by some integer k
-    Percent_=-1.0;
+    assert(End + 1 > End); // basic overflow check
+    T NumbersToProcess = End - Begin + 1;
 
     Log::out()  << "Sieve Begin:    " << utils_str::FormatUInt(Begin) << "\n";        
     Log::out()  << "Sieve End:      " << utils_str::FormatUInt(End) <<  "\n";
-    Log::out()  << "Count:          " << utils_str::FormatUInt(End - Begin + 1) << "\n";        
-    if ((uint128_t) End / ( (uint128_t) UINT64_MAX+  (uint128_t)1) >1) {
-        Log::out() << "A serious warning!!! End looks too big." << "\n";
+    Log::out()  << "Count:          " << utils_str::FormatUInt(NumbersToProcess); 
+    if (NumbersToProcess > static_cast<uint64_t>(1) << 38 ) {
+        Log::out() << " Be insanely patient!!!";
     }    
+    else if (NumbersToProcess > static_cast<uint64_t>(1) << 33 ) {
+        Log::out() << " Be patient!";
+    }      
+    Log::out()  << "\n";
+
    
     // Log::out() << "Primorials skipped: " << utils_str::FormatUInt(k) <<  "\n";
     // Log::out() << "Multiple of primorial: " << utils_str::FormatUInt(_kp) <<  " ";
@@ -921,10 +906,20 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
         Log::out() << " = " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     }
 
+    // perform checks that the sieve processed whole range
+    if ( Untouched_ <= End ) {
+        Log::out() << "Untouched_ not exceeding End. Mission aborted." << "\n";
+        abort();
+    }
+
+    if ( FullyCompleted_ != NumbersToProcess ) {
+        Log::out() << "FullyCompleted_ is not equal to NumbersToProcess. Mission aborted." << "\n";
+        abort();
+    }
     // long double PrimesRatioAfterSieve =  100.L * GF.PrimesCnt() / (( (long double) TestArrayCount_ / (long double) Primorial1_) * (long double)(End - Begin + 1));
     Log::out() << "Primes:         " << utils_str::FormatUInt(GF.PrimesCnt()) << "\n";
     // Log::out() << "Primes ratio (from interval): " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (End - Begin + 1), 6,3) << "%\n";
-    Log::out() << "Primes ratio:   " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (long double)(End - Begin + 1), 1,3) << " %\n";
+    Log::out() << "Primes ratio:   " << utils_str::FormatNumber(GF.PrimesCnt() * 100.0L / (long double) NumbersToProcess, 1,3) << " %\n";
     // Log::out() << "Primes ratio (after sieve)  : " << utils_str::FormatNumber(PrimesRatioAfterSieve, 6,3) << "%\n";
 
 

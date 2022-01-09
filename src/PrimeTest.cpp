@@ -29,7 +29,7 @@ void PrimeTest::Constructor(unsigned int iBits, bool bLoadPrimes32, bool bLoadPr
     /* Allocate the static variables used in Miller's test. */
     mpz_init(mpzB);  /* Never needs more than one limb */
     //iBits=mp_bits_per_limb*(1 + mpz_size(mpzN));
-    if(iBits < 512)iBits=512;
+    // if(iBits < 512)iBits=512;  // can slow algorithm a bit
     mpz_init2(mpzNm1, iBits);
     mpz_init2(mpzOne, iBits);
     mpz_set_si(mpzOne, 1); //ok

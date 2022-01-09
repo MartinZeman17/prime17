@@ -57,8 +57,6 @@ long double SieveGenerator<T>::DurationSeconds() const noexcept {
 
 template <class T> 
 void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
-    // ToDo: Test with more threads  ??? is it ok with ordinary object and no smart pointers
-    // array may be in process of init from other thread???
     const std::lock_guard<std::mutex> lock(TestArray_mutex_); 
     ResetClock();
 
@@ -71,7 +69,7 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
         if (mpz_cmp_ui(mpz_primor, UINT32_MAX) > 0 ) { //ok
             const std::string C_Msg("SieveGenerator cannot initialize for primorial exceding 32 bits. Fatal, mission aborted.\n");
             Log::out() << C_Msg;
-            throw(C_Msg); //ToDo Memory leak?? How to throw or exit??
+            throw(C_Msg);
         }
         Primorial_ = (uint32_t) utils_mpz::mpz_get<unsigned long long>(mpz_primor); // fits into 32 bits
 
@@ -111,7 +109,6 @@ void SieveGenerator<T>::Constructor(unsigned int MaxPrime) {
         Log::out() << "Primorial: " << utils_str::FormatUInt(Primorial_) << "\n";
         Log::out() << "Coprimes #:  " << utils_str::FormatUInt(TestArrayCount_) << " ";
         Log::out() << "Effectivity    : " << MeasuredEffectivity  << "[%]\n"; 
-        // TODO sanitizer complains about % sign in printf
 
         Threads(100);        
     }

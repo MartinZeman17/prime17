@@ -74,8 +74,8 @@ class clsNewWork {
             Log::out() << "Begin (offset): " << utils_str::FormatUInt(new_begin) << "\n";
             Log::out() << "End   (offset): " << utils_str::FormatUInt(new_end) << "\n";
 
-            Log::out() << "Begin:          " << utils_str::FormatNumber( ((long double) 100.0 * (long double) new_begin ) / (long double) Offset(), 13,9) << "%\n";
-            Log::out() << "End:            " << utils_str::FormatNumber( ((long double) 100.0 * (long double) new_end ) / (long double) Offset(), 13,9) << "%\n";
+            Log::out() << "Begin:          " << utils_str::FormatNumber( ((long double) 100.0 * (long double) new_begin ) / (long double) Offset(), 12,9) << "%\n";
+            Log::out() << "End:            " << utils_str::FormatNumber( ((long double) 100.0 * (long double) new_end ) / (long double) Offset(), 12,9) << "%\n";
         } else {
             Log::out() << "Begin:          " << utils_str::FormatUInt(new_begin) << "\n";
             Log::out() << "End:            " << utils_str::FormatUInt(new_end) << "\n";
@@ -135,7 +135,7 @@ clsNewWork<uint64_t> WebWork::ParseJsonNewWork(const std::string &JSON){
         ret.asking_worker_id = (unsigned)         std::stoll(obj[0]["asking_worker_id"].asString(), nullptr);
         ret.new_begin =        (unsigned)         std::stoll(obj[0]["new_begin"].asString(), nullptr);
         ret.new_end =          (unsigned)         std::stoll(obj[0]["new_end"].asString(), nullptr);
-        ret.power2 = (unsigned int)             std::stoul(obj[0]["power2"].asString(), nullptr);
+        ret.power2 = (unsigned int)               std::stoul(obj[0]["power2"].asString(), nullptr);
         ret.new_work_id =   (unsigned)            std::stoll(obj[0]["new_work_id"].asString(), nullptr);
         ret.ParsedOK = true;
     }  catch (const std::exception& e){

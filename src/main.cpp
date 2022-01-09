@@ -206,12 +206,23 @@ void ShowHelp(){
     std::cout  << "\t-v -ver\t\t\tDisplay Prime17 version, libraries and so on..." << "\n";
     std::cout  << "\t-w -wizard \t\t\tRun wizard - first init or re-register." << "\n";
     std::cout  << "\t-t -thread -cpu \t\tSet number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
-    std::cout  << "\t-t_tmp -thread_tmp -cpu_tmp \tTemporarily set number of threads in percent. Zero value will exit the program (after completion of the running task)." << "\n";
+    std::cout  << "\t-t_tmp -thread_tmp -cpu_tmp \tTemporarily set number of threads in percent. Current thread setting remains preserved for next run. Zero value will exit the program (after completion of the running task)." << "\n";
+    std::cout  << "\n";
     std::cout  << "\t-c -check -ch \tRun testing computation and check results to ensure everything works just fine." << "\n";
+    std::cout  << "\t-check128 -ch128 \tRun testing computation in range exceeding 64 bit integer range and check results to ensure everything works just fine." << "\n";
+    std::cout  << "\t-corner \t\tRun set of small checks in order to test various corner cases. The log is rather long however the test is quick.";
+
     std::cout  << "\n";
     std::cout  << "\tExamples:\n";
     std::cout  << "\tprime17 -t 100 Utilize all available computational power.\n";
     std::cout  << "\tprime17 -t_tmp 0 Finish computation and shut down. Previously set cpu untilization remains unchanged for further executions.\n\n"; 
+    
+    std::cout  << "Progress bar legend:\n";
+    std::cout  << "\t#\t range fully processed\n";
+    std::cout  << "\t*\t range beeing processed\n";
+    std::cout  << "\t<\t only right part of the range should be processed (left part assigned probably to a different thread)\n";
+    std::cout  << "\t>\t only left part of the range should be processed (right part assigned probably to a different thread)\n";
+
 }
 
 void ConfigThread(int argc, char* argv[], bool bThread){
@@ -246,39 +257,13 @@ void RunDefaultWork(){
     }
     
     //check worker and in case of suspicious troubles run wizard
-    //TODO: change of user in config file to nonsensical value goes unnoticed by this check    
+    //ToDo: change of user in config file to nonsensical value goes unnoticed by this check    
     while (!Wizard::CheckWorker(w)) {
         w = Wizard::NewWorker(); 
     }
 
     WebBitStatistics(w);
 }
-
-// bool RunCheckComputationEx() {
-
-//     if (RunCheckComputation()) {
-//         Log::out() << "Checks passed ok. Long and heavy labor ahead :-)\n";
-//         return true;
-//     } else{
-        
-//         constexpr std::string_view C_ChecksFailed = "Checks failed, mission aborted.\n"
-//                         "It is either a nasty bug or a naughty hardware ghost is wreaking havoc among digital ones and zeros.\n"
-//                         "The cause may be related to a compilation for a specific platform (ARM, 32 bit, ...?) - portability is damn difficult!\n"
-//                         "Please contact Martin.Zeman17@gmail.com. Thank you!\n\n"
-//                         "Press any key to abort (Prime17 is deeply sorry).\n";
-                         
-//         Log::out() << C_ChecksFailed;
-//         Log::out().getlineLeft();
-//         abort();
-//         return false;
-//     }        
-// }
-
-
-// bool gPush;
-// std::vector<uint64_t> gT1;
-// std::vector<uint64_t> gT2;
-
 
 int main(int argc, char* argv[])
 {   
@@ -290,6 +275,7 @@ int main(int argc, char* argv[])
     bool bThreadTmp =false;
     bool bVersion = false;
     bool bCheck = false;
+    bool bCheck128 = false;
     bool bCheckPassed = false;
     bool bCornerCases = false;
     if (argc>=2) {
@@ -300,6 +286,7 @@ int main(int argc, char* argv[])
         else if (Arg=="-thread_tmp" || Arg=="-threads_tmp" || Arg=="-Threads_tmp" || Arg=="-t_tmp" || Arg=="-CPU_tmp" || Arg=="-cpu_tmp") bThreadTmp = true;
         else if (Arg=="-v" || Arg=="-ver" || Arg=="-version" || Arg=="-V" || Arg=="-Ver" || Arg=="-Version" ) bVersion = true;
         else if (Arg=="-c" || Arg=="-ch" || Arg=="-check" || Arg=="-Check" || Arg=="-C" || Arg=="-Ch" || Arg=="-Chk" || Arg=="-chk") bCheck = true;
+        else if (Arg=="-c128" || Arg=="-ch128" || Arg=="-check128" || Arg=="-Check128" || Arg=="-C128" || Arg=="-Ch128" || Arg=="-Chk128" || Arg=="-chk128") bCheck128 = true;
         else if (Arg=="-cornercases" || Arg=="-corner-cases" || Arg=="-Corner" || Arg=="-corner" || Arg=="-Cornercases" || Arg=="-Corner-cases") bCornerCases = true;
         else bHelp = true;
     }
@@ -313,7 +300,7 @@ int main(int argc, char* argv[])
         check();
         checkWeb();
 
-        // when debugging  pass standard computation as a safety measure
+        // when debugging, pass standard computation as a safety measure
         #ifdef NDEBUG
         bool bRunAsUsusal = true;
         #else
@@ -325,19 +312,22 @@ int main(int argc, char* argv[])
         //override default settings      
         // bRunAsUsusal = false;
         // bRunAsUsusal = true;
-        // bCheck = true;
-        bCornerCases = true;
+        bCheck = true;
+        // bCornerCases = true;
 
         if (bThread || bThreadTmp) {
             ConfigThread(argc, argv, bThread);
         } else if (bWizard) {
             Wizard::NewWorker();
         } else if (bCheck) {
-            bCheckPassed = RunCheckComputation();
+            bCheckPassed = RunCheckComputation64();
+            Log::out().getlineLeft();
+        } else if (bCheck128) {
+            bCheckPassed = RunCheckComputation128();
             Log::out().getlineLeft();
 
         } else if (bRunAsUsusal) {
-            bCheckPassed = RunCheckComputation();
+            bCheckPassed = RunCheckComputation64();
             // bCheckPassed = true;
             if (bCheckPassed) {
                 RunDefaultWork();

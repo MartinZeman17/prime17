@@ -56,7 +56,6 @@ $(shell mkdir -p $(dir $(DEPS)) >/dev/null)
 $(shell mkdir -p $(dir $(BINDIR)) >/dev/null)
 
 # C compiler
-# ToDo Is this ok? check original configuration on internet
 CC := gcc
 # CC := clang
 # C++ compiler
@@ -69,7 +68,6 @@ LD := g++
 TAR := tar
 
 # C flags
-# ToDo these flags are applied to a c file
 CFLAGS := -std=c17
 
 # C++ flags

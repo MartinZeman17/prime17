@@ -40,7 +40,7 @@ class PrimeTest{
         
     
     public:
-    //??? defaultni parametry construktoru
+        PrimeTest() = delete;  // enforce constructor with parameter
         PrimeTest(unsigned int iBits);
         PrimeTest(unsigned int iBits, bool bLoadPrimes32, bool bLoadPrimes64);
 

@@ -8,6 +8,14 @@
 using namespace std::chrono;
 
 
+constexpr unsigned int C_TestPower2 = 30;    
+#ifdef NDEBUG
+// minimum in order to make 8 cores a bit sweaty
+constexpr uint64_t C_CheckLength = static_cast<unsigned long long>(1) << C_TestPower2;  
+#else
+constexpr uint64_t C_CheckLength = static_cast<unsigned long long>(1) << C_TestPower2;  
+#endif
+
 void WebBitStatistics(WorkerStruct &w){
 
     WebWork WW;
@@ -53,8 +61,6 @@ bool CheckCornesCases(std::vector<TestCase<T>> TC) {
             Log::out() << "Check of the sieve failed! There is something wrong in the world today, something deeply troubling. Mission aborted." << BSMT.PrimesCnt() << "\t" << tc.Primes << "\n";
             abort();
         };
-        
-
     }
 
     return true;
@@ -63,8 +69,9 @@ bool CheckCornesCases(std::vector<TestCase<T>> TC) {
 template <class T>
 bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatistics<T> & BSMT){
     bool res;
-    // #if NDEBUG
 
+    constexpr uint128_t C_Check128CenterOffset =  static_cast<uint128_t>(1) << 126 ;     
+    
     if ( NewWork.power2==50 && NewWork.new_begin == 562948879679488 && NewWork.new_end == 562951027163136 ) {        
         res = (    
             BSMT.CntPrimesWithNumOfSetBits(0)==    0 &&
@@ -202,6 +209,139 @@ bool CheckReferenceResults(clsNewWork<T> & NewWork, GeneratorFunctionBitStatisti
             BSMT.CntPrimesWithNumOfSetBits(63)==    0 &&
             BSMT.CntPrimesWithNumOfSetBits(64)==    0 
         );
+    } else if ( NewWork.power2==127 && NewWork.new_begin == C_Check128CenterOffset - C_CheckLength && NewWork.new_end == C_Check128CenterOffset + C_CheckLength ) {
+        // comparison of 128 bit integers in source code does not compile and variables or constants must be used instead
+        res = (
+            BSMT.CntPrimesWithNumOfSetBits(0)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(1)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(2)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(3)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(4)==    7 &&
+            BSMT.CntPrimesWithNumOfSetBits(5)==    72 &&
+            BSMT.CntPrimesWithNumOfSetBits(6)==    594 &&
+            BSMT.CntPrimesWithNumOfSetBits(7)==    2625 &&
+            BSMT.CntPrimesWithNumOfSetBits(8)==    11361 &&
+            BSMT.CntPrimesWithNumOfSetBits(9)==    33908 &&
+            BSMT.CntPrimesWithNumOfSetBits(10)==    97959 &&
+            BSMT.CntPrimesWithNumOfSetBits(11)==    223852 &&
+            BSMT.CntPrimesWithNumOfSetBits(12)==    463540 &&
+            BSMT.CntPrimesWithNumOfSetBits(13)==    767887 &&
+            BSMT.CntPrimesWithNumOfSetBits(14)==    1185840 &&
+            BSMT.CntPrimesWithNumOfSetBits(15)==    1525315 &&
+            BSMT.CntPrimesWithNumOfSetBits(16)==    1773125 &&
+            BSMT.CntPrimesWithNumOfSetBits(17)==    1719995 &&
+            BSMT.CntPrimesWithNumOfSetBits(18)==    1559455 &&
+            BSMT.CntPrimesWithNumOfSetBits(19)==    1163493 &&
+            BSMT.CntPrimesWithNumOfSetBits(20)==    792828 &&
+            BSMT.CntPrimesWithNumOfSetBits(21)==    442006 &&
+            BSMT.CntPrimesWithNumOfSetBits(22)==    231483 &&
+            BSMT.CntPrimesWithNumOfSetBits(23)==    95215 &&
+            BSMT.CntPrimesWithNumOfSetBits(24)==    36077 &&
+            BSMT.CntPrimesWithNumOfSetBits(25)==    9792 &&
+            BSMT.CntPrimesWithNumOfSetBits(26)==    3023 &&
+            BSMT.CntPrimesWithNumOfSetBits(27)==    522 &&
+            BSMT.CntPrimesWithNumOfSetBits(28)==    88 &&
+            BSMT.CntPrimesWithNumOfSetBits(29)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(30)==    1 &&
+            BSMT.CntPrimesWithNumOfSetBits(31)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(32)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(33)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(34)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(35)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(36)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(37)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(38)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(39)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(40)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(41)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(42)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(43)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(44)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(45)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(46)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(47)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(48)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(49)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(50)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(51)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(52)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(53)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(54)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(55)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(56)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(57)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(58)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(59)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(60)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(61)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(62)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(63)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(64)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(65)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(66)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(67)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(68)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(69)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(70)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(71)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(72)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(73)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(74)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(75)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(76)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(77)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(78)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(79)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(80)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(81)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(82)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(83)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(84)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(85)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(86)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(87)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(88)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(89)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(90)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(91)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(92)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(93)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(94)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(95)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(96)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(97)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(98)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(99)==    6 &&
+            BSMT.CntPrimesWithNumOfSetBits(100)==    106 &&
+            BSMT.CntPrimesWithNumOfSetBits(101)==    445 &&
+            BSMT.CntPrimesWithNumOfSetBits(102)==    2858 &&
+            BSMT.CntPrimesWithNumOfSetBits(103)==    10552 &&
+            BSMT.CntPrimesWithNumOfSetBits(104)==    36238 &&
+            BSMT.CntPrimesWithNumOfSetBits(105)==    93115 &&
+            BSMT.CntPrimesWithNumOfSetBits(106)==    231664 &&
+            BSMT.CntPrimesWithNumOfSetBits(107)==    443044 &&
+            BSMT.CntPrimesWithNumOfSetBits(108)==    797962 &&
+            BSMT.CntPrimesWithNumOfSetBits(109)==    1158662 &&
+            BSMT.CntPrimesWithNumOfSetBits(110)==    1547087 &&
+            BSMT.CntPrimesWithNumOfSetBits(111)==    1736280 &&
+            BSMT.CntPrimesWithNumOfSetBits(112)==    1778591 &&
+            BSMT.CntPrimesWithNumOfSetBits(113)==    1505624 &&
+            BSMT.CntPrimesWithNumOfSetBits(114)==    1191879 &&
+            BSMT.CntPrimesWithNumOfSetBits(115)==    776344 &&
+            BSMT.CntPrimesWithNumOfSetBits(116)==    457904 &&
+            BSMT.CntPrimesWithNumOfSetBits(117)==    221488 &&
+            BSMT.CntPrimesWithNumOfSetBits(118)==    99899 &&
+            BSMT.CntPrimesWithNumOfSetBits(119)==    33876 &&
+            BSMT.CntPrimesWithNumOfSetBits(120)==    11236 &&
+            BSMT.CntPrimesWithNumOfSetBits(121)==    2584 &&
+            BSMT.CntPrimesWithNumOfSetBits(122)==    589 &&
+            BSMT.CntPrimesWithNumOfSetBits(123)==    99 &&
+            BSMT.CntPrimesWithNumOfSetBits(124)==    9 &&
+            BSMT.CntPrimesWithNumOfSetBits(125)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(126)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(127)==    0 &&
+            BSMT.CntPrimesWithNumOfSetBits(128)==    0
+        );
     }
     else {
         Log::out() << "Missing reference results for comparison. I am sorry. Something is being tested? \n";
@@ -234,8 +374,6 @@ GeneratorFunctionBitStatistics<T> RunOld(clsNewWork<T> NewWork){
 
     Sieve.ResetClock();
     Sieve.WorkMT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
-    // Sieve.WorkMT( NewWork.newBegin_,  NewWork.newEnd_, BSMT);
-    
     Log::out() << "Duration old [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 10, 1) << "\n";
     return BSMT;
 }
@@ -249,17 +387,14 @@ GeneratorFunctionBitStatistics<T> RunNew(clsNewWork<T> NewWork){
 
     GeneratorFunctionBitStatistics<T> BSMT(NewWork.power2);
     Sieve.ResetClock();
-    BSMT.ResetClock(); //???
+    BSMT.ResetClock();
     Sieve.Work2MT(NewWork.Offset() + NewWork.new_begin, NewWork.Offset() + NewWork.new_end, BSMT);
-    // Sieve.Work2MT( NewWork.newBegin_,  NewWork.newEnd_, BSMT);
-    
-    Log::out() << "Duration new [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 1, 1) << "\n";
+    // Log::out() << "Duration new [s]: " <<  utils_str::FormatNumber(Sieve.DurationSeconds(), 1, 1) << "\n";
     return BSMT;
 }
 
 template <class T>
 bool RunCheckComputationNew(){
-    constexpr unsigned int C_TestPower2 = 30;    
     constexpr long double C_StandardCheckDuration = 273.6;
     constexpr long double C_StandardCheckDurationDebug = 283.3;  
     // clang generates smaller code size
@@ -268,34 +403,34 @@ bool RunCheckComputationNew(){
     // gcc      11.1:   276.2   278.8
     // clang    10      273.6
     
-    #ifdef NDEBUG
-    // minimum in order to make 8 cores sweaty
-    constexpr uint64_t C_CheckLength = static_cast<unsigned long long>(1) << C_TestPower2;  
-    #else
-    constexpr uint64_t C_CheckLength = static_cast<unsigned long long>(1) << C_TestPower2;  
-    #endif
 
     Log::out() << "Running check computation (better safe than sorry).\n";
         
-    clsNewWork<T> NewWork;    
-    NewWork.power2 = 63;
-    // NewWork.power2 = 50;    
-    NewWork.new_begin = static_cast<unsigned long long>(1) << (NewWork.power2-1) ;
+    clsNewWork<T> NewWork;
+
+    if constexpr(std::is_same_v<T, uint64_t>) {
+        NewWork.power2 = 63;
+        // NewWork.power2 = 50;    
+    } else if constexpr(std::is_same_v<T, uint128_t>) {
+        NewWork.power2 = 127;
+    } else {
+        Log::out() << "Unknown data type.\n";
+        abort();
+    }
+    // compute middle of interval, Offset shift will be applied in RunNew    
+    NewWork.new_begin = static_cast<T>(1) << (NewWork.power2-1) ;     
     NewWork.new_end   = NewWork.new_begin + C_CheckLength;
     NewWork.new_begin = NewWork.new_begin - C_CheckLength;
     
-    GeneratorFunctionBitStatistics BSMT = RunNew(NewWork);
-
-    // Sieve.WorkMT(NewWork.Offset() + NewWork.newBegin_, NewWork.Offset() + NewWork.newEnd_, BSMT);
-    // Sieve.Work2MT(NewWork.Offset() + NewWork.newBegin_, NewWork.Offset() + NewWork.newEnd_, BSMT);
+    GeneratorFunctionBitStatistics<T> BSMT = RunNew(NewWork);
 
     long double duration = BSMT.DurationSeconds();
-    Log::out() << "Duration [s]: " <<  utils_str::FormatNumber(duration, 10, 1);
-    Log::out() << " \t~" << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDuration, 4,1)  << " % (release)";
-    Log::out() << " \t~" << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDurationDebug, 4,1)  << " % (debug)" << "\n";
+    Log::out() << "Duration:       " <<  utils_str::FormatNumber(duration, 1, 1) << " s";
+    Log::out() << " =~ " << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDuration, 4,1)  << " % (release)";
+    Log::out() << " =~ " << utils_str::FormatNumber( (100.0L * duration)/C_StandardCheckDurationDebug, 4,1)  << " % (debug)" << "\n";
 
-    // log correct expectation to the log file
-    // for(unsigned int i=0; i<=64; i++){
+    // // log correct expectation to the log file
+    // for(unsigned int i=0; i<= BSMT.Bits; i++){
     //     Log::out() << "BSMT.CntPrimesWithNumOfSetBits(" << i << ")==    " << BSMT.CntPrimesWithNumOfSetBits(i) << " &&\n";
     // } 
 
@@ -309,36 +444,45 @@ void CompareOldNew(clsNewWork<T> NewWork){
     Log::out() <<"\n";
     auto N = RunNew(NewWork);
 
-    for(unsigned int i=0; i<=64; i++){
+    for(unsigned int i=0; i<=O.Bits; i++){
         if (O.CntPrimesWithNumOfSetBits(i) != N.CntPrimesWithNumOfSetBits(i)) {
             Log::out() << "Difference old new: " << i << " " << O.CntPrimesWithNumOfSetBits(i) << "!=    " << N.CntPrimesWithNumOfSetBits(i) << "\n";
         }
     } 
-
 }
 
-bool RunCheckComputation(){
+
+bool RunCheckComputation64(){
     return RunCheckComputationNew<uint64_t>();
 }
+
+bool RunCheckComputation128(){
+    return RunCheckComputationNew<uint128_t>();
+}
+
 
 bool RunCornerCases(){
     
     std::vector<TestCase<uint64_t>> TC64 = {
-        {-1,0,0,0}, {-1,1,1,0}, 
-        {-1,2,2,1}, {-1,3,3,1}, {-1,4,4,0},
-        {-1,1,29,9}, {-1,2,100,12}, 
-        {-1,9699689,9699689,0}, {-1,9699690,9699690,0}, {-1,9699689,9699690,0},
+        {-1, 0, 0, 0}, {-1, 1, 1, 0}, 
+        {-1, 2, 2, 1}, {-1, 3, 3, 1}, {-1, 4, 4, 0},
+        {-1, 1, 29, 10}, // test primorial primes
+        {-1, 2, 100, 25}, // test primes used in trial by division
+        {-1, 2, 10000, 1229}, // test primes used in trial by division aand a bit more
+        {-1, 9699689, 9699689, 0}, {-1, 9699690, 9699690, 0}, {-1, 9699689, 9699690, 0},
         {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 15, 1 }, 
         {32, 0, 15, 1} 
     };
 
     std::vector<TestCase<uint128_t>> TC128 = {
-        {-1,0,0,0}, {-1,1,1,0}, 
-        {-1,2,2,1}, {-1,3,3,1}, {-1,4,4,0},
-        {-1,1,29,9}, {-1,2,100,12}, 
-        {-1,9699689,9699689,0}, {-1,9699690,9699690,0}, {-1,9699689,9699690,0},
+        {-1, 0, 0, 0}, {-1, 1, 1, 0}, 
+        {-1, 2, 2, 1}, {-1, 3, 3, 1}, {-1, 4, 4, 0},
+        {-1, 1, 29, 10}, // test primorial primes
+        {-1, 2, 100, 25}, // test primes used in trial by division
+        {-1, 2, 10000, 1229}, // test primes used in trial by division aand a bit more
+        {-1, 9699689, 9699689, 0}, {-1, 9699690, 9699690, 0}, {-1, 9699689, 9699690, 0},
         {31, (static_cast<uint64_t>(1) << 31) -1, (static_cast<uint64_t>(1) << 31) + 15, 1 }, 
-        {32, 0, 15, 1},
+        {32, 0, 15, 1}, 
         {63, (static_cast<uint64_t>(1) << 63) -1, (static_cast<uint64_t>(1) << 63) + 0, 0},
         {63, (static_cast<uint64_t>(1) << 63) -1, (static_cast<uint64_t>(1) << 63) + 10, 0}, 
         {64, 0, 0, 0},

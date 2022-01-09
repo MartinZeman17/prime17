@@ -21,25 +21,25 @@ long double BitRange::BitRange2BitCond(const int BitCond1, const int BitCond2, c
   }
 
   // const 1 has to be cast to uint64 bit first
-  unsigned long long maskBC2 = static_cast<uint64_t>(1) << BC2;
-  unsigned long long maskBC1 = static_cast<uint64_t>(1) << BC1;
-  unsigned long long maskEnd = maskBC1;
+  uint64_t maskBC2 = static_cast<uint64_t>(1) << BC2;
+  uint64_t maskBC1 = static_cast<uint64_t>(1) << BC1;
+  uint64_t maskEnd = maskBC1;
   if (maskEnd) maskEnd--;
 
-  unsigned long long MasterEnd = static_cast<uint64_t>(1) << (BitEnd - BC2);
-  for (unsigned long long Master = 0; Master < MasterEnd; Master++)
+  uint64_t MasterEnd = static_cast<uint64_t>(1) << (BitEnd - BC2);
+  for (uint64_t Master = 0; Master < MasterEnd; Master++)
   {
-    unsigned long long MasterOffset = Master << (BC2 + 1);
+    uint64_t MasterOffset = Master << (BC2 + 1);
     MasterOffset = MasterOffset | maskBC2;
     
-    unsigned long long Slave =0;
+    uint64_t Slave =0;
     int SlaveBits = (BC2 - BC1 - 1);
-    unsigned long long SlaveEnd = 0;
+    uint64_t SlaveEnd = 0;
     if (SlaveBits>0) SlaveEnd = static_cast<uint64_t>(1) << SlaveBits;
     do {
-      unsigned long long SlaveOffset = Slave << (BC1 +1);
-      unsigned long long Beg = MasterOffset | SlaveOffset | maskBC1;
-      unsigned long long End = Beg | maskEnd;
+      uint64_t SlaveOffset = Slave << (BC1 +1);
+      uint64_t Beg = MasterOffset | SlaveOffset | maskBC1;
+      uint64_t End = Beg | maskEnd;
 
       ret += funct(Beg, End + 1);
 

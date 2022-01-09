@@ -13,7 +13,7 @@ using std::endl;
 using std::cout;
 
 
-// ToDo: use a service and remove these variables, create a class??
+// ToDo: use a service and remove these variables, create a class?
 uint32_t *Primes32=nullptr;
 unsigned long long PrimesCount32 = 0;
 unsigned long long Limit32 = 0;

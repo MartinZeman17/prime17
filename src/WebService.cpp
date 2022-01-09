@@ -64,7 +64,7 @@ std::string WebService::WebPost(const char url[], std::string &PostString){
 
             // Every std:string must exist until curl_easy_perform call. Othewrise order c_str() pointer to const char may be invalidated!!!
             // There is an option for libcurl to perform deep copy of input post parameters -CURLOPT_COPYPOSTFIELDS?
-            // ToDo so this code is dirty and repeating blocks. How to solve it without malloc? Better not to bother in this case... 
+            // ToDo so this code is dirty and repeats blocks. How to solve it without malloc? Better not to bother in this case... 
             if (!PostString.empty()) curl_easy_setopt(curl, CURLOPT_POSTFIELDS, PostString.c_str());
 
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);

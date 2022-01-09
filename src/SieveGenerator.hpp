@@ -36,7 +36,7 @@ const std::vector<unsigned long long> CTestArray_Sizes({1,2,8,48, 480, 5760, 921
 template <class T> 
 class SieveGenerator {
     private:
-    static unsigned int MaxPrime_;  // why can not be const??
+    static unsigned int MaxPrime_;
     static std::vector<uint32_t> TestArray_;
     static unsigned long long TestArrayCount_;
     static uint32_t Primorial_;  
@@ -63,7 +63,6 @@ class SieveGenerator {
     unsigned int ncursesX_;
 
     public:
-    // ToDo can be static??? Class must be initialized first and work function must be ready for reentrancy. I will let it be for the time being
 
     T Work(const T & Begin, const T & End, GeneratorFunctionAbstract<T> & GF) const;
     // multithreading version

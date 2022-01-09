@@ -157,7 +157,6 @@ void MethodTestsOnPrime(){
     // myfile << "MaxD:" << Tests.MaxD << endl;
     // mpz_out_str(stdout, 10, Tests.NumberWithMaxD);
     // // mpz_out_str(myfile, 10, GF_LS_DHistogram._t.NumberWithMaxD);
-    // // ToDo How to write mpz_t to file?
     // cout << endl;
     // myfile << endl;
 
@@ -273,7 +272,6 @@ void MethodTests(const uint128_t Begin, const uint128_t End){
     myfile << "MaxD:" << GF_LS_DHistogram.t_.MaxD << endl;
     mpz_out_str(stdout, 10, GF_LS_DHistogram.t_.NumberWithMaxD);
     // mpz_out_str(myfile, 10, GF_LS_DHistogram._t.NumberWithMaxD);
-    // ToDo How to write mpz_t to file?
     cout << endl;
     myfile << endl;
    

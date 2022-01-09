@@ -21,19 +21,14 @@ src/internet_test.txt
 bin/prime17
 
 log.txt
-bin/prime17
+bin/prime17*
 debian/.debhelper/
 debian/prime17/
 debian/prime17.debhelper.log
 debian/prime17.substvars
-bin/prime17
 src/.vscode/configurationCache.log
 .gitignore
 src/.vscode/targets.log
 src/.vscode/dryrun.log
 src/LiCorrectionNew_*.txt
 src/SliceTBalance.txt
-bin/prime17-19
-bin/prime17-23
-bin/prime17clang
-bin/prime17gcc

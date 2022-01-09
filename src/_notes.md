@@ -1,34 +1,23 @@
 Tests:
 - git remote ma branch work???
 - podivat se na db na datovy typ new begin ???
-// ToDo odstinit sito od mereni, pocitat v cyklu ??
-// generovat nahodne ulohy a porovnavat casy a vysledky
-// test sita od 0 do 2
-// test sita u 2 na 64
-// test 128 pres 2 na 64 a u konce - new work template
 // print ext progress - vypocet casu dl zpracovane casti vlaknem
 // nacitani threads a prdcasny exit nekterych vlaken, co hodnota 0?
 // lepsi vypocet switch pointu dle aktuální velocity???
-- corner case checker 0,0 1,1, 2,2 3,3 0,19, 0, 21, primorial, u 64 na sieve 128
-- test na sieve u konce hranice 2 na 128  a testy overflow
-- test n sieve delky 2
-- test na sieve, kde je end = (k * primorial) -1
 - attribut processed ok na delku, overflow?, 
 
 ToDo Gmp:
-- vlastní překlad gmp s bechmarkem 
-- optimalizace pro miller rabina a násobky d -- jiný průchod prostorem???
+- vlastní překlad gmp s benchmarkem 
+- optimalizace pro miller rabina a násobky d -- jiný průchod prostorem?
 - zkusit volat millera rabin a selfridge z mpz knihovny a zmerit cas. jak je mozne, ze nepocitaji jacobiho?
-- zapnout v mpz optimalizaci, ze bpsw je spolehliva do 2na64
+- zapnout v mpz optimalizaci, ze bpsw je spolehliva do 2^64
 - podivat se na repetetive square misto powm
 - porovnat implementaci rabina s rabinem v mpz - cast powm a jacobi
 - podivat se na kod posledni verze gmp 6.2 knihovny - optimalizace powm poro base 2
 - zjistit, v cem je leppsi mpfr knihovna a zda neobsahuje lepsi kody
 
 ToDo Cpp: 
-- kontrola bits 64 65 128
-- projit ??? a overflow
-- optimalizovane testy BPSW ??
+- optimalizovane testy BPSW ?
 - Todo: nefunční web prime17 při startu spadne do registrace. Testy, zda funguje prime17 web a zda je config file naplnený
 - doplnit const
 - Podívat se na virtuální destruktory a rule of the three or five
@@ -58,7 +47,7 @@ ToDo DB:
 - vstup jako Json?
 - výpočet super slices
 - work_results_rec  - promazavání
-- formatovat cisla 000 000??
+- formatovat cisla 000 000?
 - time_zones +2 jen v completed
 - FNj pridat desetinna mista
 - smazat workery a usery bez odevzdane prace a meritu, cross check merrit a work
@@ -74,12 +63,9 @@ Tests:
 - libcurl err 6  - vypis, sleepem
 
 Issues:
-- implementace v header?
-- dve instance tridy webs - todo test
 - libcurl global_init není thread safe
 - statický linking gmp a chyba v gcc
 - Libcurl cmd test: curl https://prime17.000webhostapp.com/completed.php -v -o internet_test.txt
-- wizard - nejprve se pta na threads??
 - AWS vykon
 
 Links:

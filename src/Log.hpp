@@ -125,8 +125,6 @@ class Log final: public Singleton<Log> {
         winLINES_ = LINES;
         if (winCOLS_>0 && winLINES_>0) {
 
-            // refresh(); //???
-
             int width_left = (int) ( winCOLS_ * (2.0/3.0));
             int width_right = winCOLS_ - ((width_left + 1));
             if (width_right<=0) {
@@ -156,7 +154,7 @@ class Log final: public Singleton<Log> {
     void init(bool LogToFile=true) {
         if (win_right!=nullptr){
             if (COLS==winCOLS_ && LINES == winLINES_) return; 
-            endwin(); //??? kdy se vola init?       
+            endwin();      
         }
 
         // call to setlocale (from locale.h) must precede initscr()
