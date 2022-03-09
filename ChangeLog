@@ -1,6 +1,37 @@
-2021-03-13 Martin Zeman <martin.zeman17@gmail.com>
-
-	* First Version only for alpha testers
-
-	* Move of the repository from a private git to a public one
-
+- 2022-01-09 : feat:BitStatistics 128 bit
+- 2022-01-05 : feat:corner cases
+- 2022-01-04 : fix: format of log
+- 2022-01-02 : fix: corner cases bugs
+- 2022-01-02 : fix:clang warnings
+- 2022-01-01 : fix:sieve corner cases
+- 2021-12-19 : sieve 128
+- 2021-12-11 : add:sieve in 128 bits - partial
+- 2021-12-04 : fix:Sieve2
+- 2021-12-01 : fix:sieve switch
+- 2021-11-24 : fix:sieve2 first silly bugs
+- 2021-11-22 : feat:Sieve2
+- 2021-11-21 : fix:wsl as test
+- 2021-11-21 : fix:sieve logs
+- 2021-11-21 : fix:wizard
+- 2021-11-19 : feat:CheckComputeEx
+- 2021-10-28 : feta:check comp
+- 2021-10-17 : fix:encoding
+- 2021-10-15 : fix:too small tyerminal
+- 2021-10-14 : feat:resize
+- 2021-10-13 : transfer
+- 2021-10-03 : fix:yoga crash
+- 2021-09-26 : fix:wizard
+- 2021-09-26 : fix:packaging
+- 2021-09-14 : feat:packaging
+- 2021-09-13 : feat:debian
+- 2021-09-12 : fix:mingw, makefile
+- 2021-07-26 : fix: FormatNumber
+- 2021-05-05 : fix:mem leak
+- 2021-04-23 : feat: binomials, web, db
+- 2021-03-21 : fix: completed, expired work
+- 2021-03-18 : fix:deadlocks
+- 2021-03-16 : feat:check_worker
+- 2021-03-16 : fix: ncurses
+- 2021-03-16 : feat: ncurses
+- 2021-03-12 : Public Git
+- 2021-03-11 : Initial commit

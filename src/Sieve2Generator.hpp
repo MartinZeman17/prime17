@@ -42,21 +42,90 @@ constexpr size_t CTestArray_Coprimes23 = 36495360; // primorial 223 092 870;
 template <class T> 
 class Sieve2Generator {
     private:
+    class ThreadProgress {
+        public:
+        unsigned int iPId;
+        T Completed = 0;
+        T Taken = 0;
+        std::chrono::time_point<std::chrono::high_resolution_clock> StartTime = std::chrono::high_resolution_clock::now();
+        std::chrono::time_point<std::chrono::high_resolution_clock> TakenTime;
+        T ThreadVelocity = 0; //per second        
+    };
+
+    class Progress {
+        private:
+        std::mutex mutex_;
+        Sieve2Generator & parent_;  
+        T Begin_;
+        T End_;
+
+        // ToDo substract some second to enfore first immediate Update
+        std::chrono::time_point<std::chrono::high_resolution_clock> LastUpdate = std::chrono::high_resolution_clock::now();
+        // unsigned int Threads_;
+        std::vector<ThreadProgress> vec_;
+        T GlobalVelocity = 0;
+        
+        void Update() noexcept;
+
+
+        public:
+        Progress() = delete;
+        Progress(Sieve2Generator<T> & parent) noexcept : parent_{ parent } {
+            // Init();
+        };
+
+        void InitProgress(T const Begin, T const End ) noexcept  {
+            vec_.resize(parent_.Threads_);
+            Begin_ = Begin; End_ = End;
+        }
+
+        long double inline ComputePercent(const T X) const noexcept;
+        void UpdateThread(unsigned int Thread, T Completed, T Taken);
+        
+    };
+
+
+    private:
     unsigned int Threads_;
+    Progress progress_;
 
     public:
     class PrintProgressBar{
         private:
         Sieve2Generator & parent_;  
-        enum class enPrintProgress : char{
+        enum class enPrintProgress : unsigned char{
             YetUntouched ='-',
             LeftPart = '<',
+            // LeftPart = '┣',
+            // LeftPart = 195,
             RightPart = '>',
             InProgress = '*',
             Done = '#',
             ToBeProcessed = '_',
             NullTermination = '\0'
         };
+/*
+
+done, left, right, full = full, white
+
+
+left 
+full 
+right 
+
+X
+
+taken 
+estimated 
+done 
+
++
+YetUntouched
+ToBeProcessed
+
+*/
+
+
 
         unsigned int iPId_;
         std::vector<enPrintProgress> PrintedProgress_;
@@ -112,9 +181,9 @@ class Sieve2Generator {
 
     T Work2MT_Thread(const T & Begin, const T & End, std::unique_ptr<GeneratorFunctionAbstract<T>> & GF, const std::string PId);
     std::chrono::time_point<std::chrono::high_resolution_clock> BeginTime_; //  = std::high_resolution_clock::now(); 
+    std::chrono::time_point<std::chrono::high_resolution_clock> StartTime_; // ??? rodil od begintime???
 
     std::mutex cout_mutex_;
-    std::chrono::time_point<std::chrono::high_resolution_clock> StartTime_;
 
 
     public:
@@ -137,6 +206,97 @@ class Sieve2Generator {
     long double DurationSeconds() const noexcept;
 
 };
+
+    
+template <class T>
+void Sieve2Generator<T>::Progress::Update() noexcept {
+    auto Now = std::chrono::high_resolution_clock::now();
+
+    T Completed = 0;
+    T Estimated = 0;
+    T Taken = 0;
+    T EstimatedVelocity;
+    std::stringstream LogStr;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        if ( GlobalVelocity == 0 ) {
+            EstimatedVelocity = 0;
+            unsigned int ThreadsWithVelocity = 0;
+            for (auto &p : vec_) {
+                if ( p.Completed > 0 ) {
+                    EstimatedVelocity += p.Completed;
+                    ThreadsWithVelocity++;
+                }
+            }
+            if ( ThreadsWithVelocity != 0 ) {
+                EstimatedVelocity += ((unsigned) (parent_.Threads_ -  ThreadsWithVelocity)) * (T) (0.90L * (EstimatedVelocity / ThreadsWithVelocity ));
+                EstimatedVelocity /= parent_.Threads_;
+                EstimatedVelocity /= duration_cast<milliseconds>(Now - parent_.StartTime_).count();
+                EstimatedVelocity *= 1000;
+            }
+        } else {
+            EstimatedVelocity = GlobalVelocity;
+        }
+
+        for (auto &p : vec_) {
+            if (p.Completed > 0) {
+                Completed += p.Completed;
+                auto duration = (duration_cast<milliseconds>(Now - p.StartTime).count());
+                p.ThreadVelocity = (T) ( 1000 * p.Completed / duration);
+            }
+            LogStr << p.ThreadVelocity << "\t";
+
+            if ( p.Taken > 0 ) {
+                Taken += p.Taken;
+                auto duration = (duration_cast<milliseconds>(Now - p.TakenTime).count());
+                if (duration > 0) {
+                    T Velocity = p.ThreadVelocity;
+                    if ( Velocity == 0 ) Velocity = EstimatedVelocity;
+                    if ( Velocity >0 ) {
+                        T EstimatedThreadProgress = (T) (Velocity * duration) / 1000;
+                        if (EstimatedThreadProgress > 0 ) {
+                            if (EstimatedThreadProgress > 0.95 * p.Taken) EstimatedThreadProgress = 0.95 * p.Taken; 
+                            Estimated += EstimatedThreadProgress;
+                        }
+                    } 
+                }
+            }
+            
+        }        
+    }
+    Log::out() << LogStr.str() << "\n";
+    std::stringstream Msg;
+    Msg << ComputePercent(Completed) << "% " <<  ComputePercent(Completed + Estimated) << "% " << ComputePercent(Completed + Taken) << "%"; 
+    Log::out() << Msg.str() << " EstimatedVelocity: " << EstimatedVelocity <<"\n";
+    {
+        const std::lock_guard<std::mutex> lock(parent_.cout_mutex_);
+        mvwaddstr(Log::out().win_right, parent_.Threads_+1, 0, Msg.str().c_str());
+        wrefresh(Log::out().win_right);
+    }
+}
+
+
+template <class T>
+void Sieve2Generator<T>::Progress::UpdateThread(unsigned int Thread, T Completed, T Taken) {
+    auto Now = std::chrono::high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(Now - vec_[Thread].StartTime );
+    T ThreadVelocity = (T) (1000 * Completed) / duration.count();
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        vec_[Thread].Completed = Completed;
+        vec_[Thread].Taken = Taken;
+        vec_[Thread].ThreadVelocity = ThreadVelocity;   
+        vec_[Thread].TakenTime = Now;     
+    }
+
+    auto SecFromUpdate = duration_cast<seconds>(Now - LastUpdate);
+    if ( duration.count() >= 3 ) {
+        Update();
+        LastUpdate = Now; 
+    }
+
+}
 
 // called from constructor and threads where Untouched_mutex_ locks other threads and prevents changes
 // for more complex scenarios consider an independent lock or better  recursivemutex_
@@ -170,7 +330,7 @@ typename Sieve2Generator<T>::enSieveLength Sieve2Generator<T>::SetSieveLength(co
 };
 
 template <class T>
-Sieve2Generator<T>::Sieve2Generator(){
+Sieve2Generator<T>::Sieve2Generator() : progress_{Progress(*this)} {
     ResetClock();
 
     SieveLength_ = enSieveLength::SieveNotInitialized;
@@ -380,6 +540,28 @@ ComputePercent(const T Begin, const T End, const T X) const noexcept {
 
 
 template <class T>
+long double inline Sieve2Generator<T>::Progress::
+ComputePercent(const T X) const noexcept {
+    // assert(Begin_<=End_); // Begin = End is a valid input 
+    // assert(Begin_<=X);
+    
+    // if (!(Begin<=X)){
+    //     return 0;
+    // }
+    // assert(X<=End_);
+    if (X>End_-Begin_ + 1){
+        int a=0;
+    }
+    // if (Begin == End )  return 0.0L;
+    long double NewPerc = (100.0L*(long double)(X)/(long double)(End_-Begin_ + 1));
+
+    // if (NewPerc > 100.0) NewPerc = 100.0; // break on exceeding End leads to greater value than 100%
+    NewPerc = (std::floor(NewPerc*10.0L)) / 10.0L;  // round to 1 decimal place and return
+    return NewPerc;
+}
+
+
+template <class T>
 void inline Sieve2Generator<T>::PrintProgressBar::
 UpdateOverallProgress(const long double Perc) noexcept {
 
@@ -529,7 +711,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
     mpz_init2(mpz_X, 65);
     T res = 0;
 
-    PrintProgressBar ppb(*this, iPId); 
+    PrintProgressBar ppb(*this, iPId);
 
     // perform an overflow test 
     {
@@ -554,6 +736,7 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
     }
 
 
+    T ProcessedByThisThread = 0;
     while(true) {
         // local thread copies. Untouched_ is locked, so it is used directly (main purpose is to update Untouched_).  
         T Untouched=0;
@@ -690,6 +873,8 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
             long double PercB = ppb.ComputePercent(Begin, End, Untouched);
             long double PercE = ppb.ComputePercent(Begin, End, EndForPrint);
             ppb.Update(iPId, PercB, PercE);
+
+            progress_.UpdateThread( iPId, ProcessedByThisThread, ToProcess  );
         }
 
         // set mpz_kp from kp
@@ -751,10 +936,13 @@ T Sieve2Generator<T>::Work2MT_Thread(const T & Begin, const T & End, std::unique
             FullyCompleted_ += ToProcess;
             FullyCompleted = FullyCompleted_;
         }
+        ProcessedByThisThread += ToProcess;
 
         long double NewPerc = ppb.ComputePercent(Begin, End, Begin + FullyCompleted - 1);
         ppb.UpdateOverallProgress(NewPerc);
     }  // end of while
+
+    progress_.UpdateThread( iPId, ProcessedByThisThread, 0  );
 
     auto TEnd = high_resolution_clock::now();
     auto duration = duration_cast<seconds>(TEnd - TBegin);
@@ -845,6 +1033,7 @@ T Sieve2Generator<T>::Work2MT(const T & Begin, const T & End, GeneratorFunctionA
 
     Untouched_ = Begin;
     FullyCompleted_ = 0;
+    progress_.InitProgress(Begin, End);
 
     assert(End + 1 > End); // basic overflow check
     T NumbersToProcess = End - Begin + 1;
