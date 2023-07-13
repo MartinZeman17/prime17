@@ -1,0 +1,3 @@
+[submodule "src/CUDA/CUDA_Miller_Rabin_library"]
+	path = src/CUDA/CUDA_Miller_Rabin_library
+	url = https://github.com/kzeman10/CUDA_Miller_Rabin_library.git
